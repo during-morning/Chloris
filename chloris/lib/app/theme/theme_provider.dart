@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/persist/kv_settings.dart';
 import '../../services/persist/vault_sync.dart';
 import 'app_theme.dart';
-import 'style_host_stub.dart' if (dart.library.html) 'style_host_web.dart';
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
 
@@ -30,7 +29,6 @@ Future<void> applyThemeFamily(
 
 Future<void> applyUiStyle(WidgetRef ref, AppUiStyle style) async {
   ref.read(uiStyleProvider.notifier).state = style;
-  applyHostUiStyle(style.id);
   final prefs = await KvSettings.ready();
   await prefs.setString('uiStyle', style.id);
   await syncVaultFromPrefs();

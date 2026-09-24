@@ -55,14 +55,28 @@ class ChlorisApp extends ConsumerStatefulWidget {
 
 class _ChlorisAppState extends ConsumerState<ChlorisApp> {
   bool? _accepted;
+  ProviderSubscription<AppUiStyle>? _styleSub;
 
   @override
   void initState() {
     super.initState();
+    // The DOM data-ui-style attribute is a host-side mirror of the provider:
+    // apply it once for the restored value, then on every change — never from
+    // inside build(), which would re-run the JS interop on each rebuild.
+    applyHostUiStyle(ref.read(uiStyleProvider).id);
+    _styleSub = ref.listenManual(uiStyleProvider, (_, next) {
+      applyHostUiStyle(next.id);
+    });
     KvSettings.ready().then((p) {
       if (!mounted) return;
       setState(() => _accepted = p.getBool('welcomeAccepted') ?? false);
     });
+  }
+
+  @override
+  void dispose() {
+    _styleSub?.close();
+    super.dispose();
   }
 
   @override
@@ -85,7 +99,6 @@ class _ChlorisAppState extends ConsumerState<ChlorisApp> {
       highContrast: hc,
     );
     final effectiveMode = style.fixedThemeMode ?? mode;
-    applyHostUiStyle(style.id);
     if (_accepted == true) {
       ref.watch(downloadAutoResumeProvider);
     }

@@ -10,12 +10,30 @@ import '../core/persist/kv_settings.dart';
 ///
 /// [HostEnvironment] is synchronous because a rule script reads these values
 /// inline, while `KvSettings` is asynchronous. The settings are therefore
-/// snapshotted at construction and refreshed on demand — call [refresh] after a
-/// settings screen writes, or the rule surface keeps serving stale values.
+/// snapshotted at construction and refreshed whenever one of the snapshotted
+/// keys is written — the subscription to [KvSettings.changes] means no write
+/// path can leave the rule surface serving stale values.
 class AppHostEnvironment implements HostEnvironment {
   AppHostEnvironment() {
     unawaited(refresh());
+    _sub = KvSettings.changes.listen((key) {
+      if (_watchedKeys.contains(key)) unawaited(refresh());
+    });
   }
+
+  /// Keys this environment snapshots; writes to anything else skip the refresh.
+  static const _watchedKeys = {
+    'userAgent',
+    'themeMode',
+    'themeFamily',
+    'einkTheme',
+    'uiStyle',
+    'readerSettings',
+  };
+
+  late final StreamSubscription<String> _sub;
+
+  void dispose() => unawaited(_sub.cancel());
 
   final HostEnvironment _fallback = const DefaultHostEnvironment();
 
@@ -24,7 +42,8 @@ class AppHostEnvironment implements HostEnvironment {
   Map<String, Object?> _themeConfig = const {};
   int _themeMode = 0;
 
-  /// Re-reads the settings snapshot.
+  /// Re-reads the settings snapshot. Called automatically for keys in
+  /// [_watchedKeys]; other callers may refresh explicitly.
   Future<void> refresh() async {
     try {
       final s = await KvSettings.ready();

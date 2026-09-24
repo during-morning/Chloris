@@ -65,12 +65,13 @@ final cookieStoreProvider = Provider<CookieStore>((ref) {
 final engineFacadeProvider = Provider<EngineFacade>((ref) {
   final http = ref.watch(httpPortProvider);
   final cookies = ref.watch(cookieStoreProvider);
+  final hostEnvironment = AppHostEnvironment();
   final facade = EngineFacade(
     http: http,
     jsRuntime: FlutterJsRuntime(),
     cookieStore: cookies,
     filePort: createFilePort(),
-    hostEnvironment: AppHostEnvironment(),
+    hostEnvironment: hostEnvironment,
     webView: AppWebViewPort(
       http: http,
       cookieStore: cookies,
@@ -78,6 +79,7 @@ final engineFacadeProvider = Provider<EngineFacade>((ref) {
     ),
   );
   ref.onDispose(facade.cancelInFlight);
+  ref.onDispose(hostEnvironment.dispose);
   return facade;
 });
 

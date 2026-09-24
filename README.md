@@ -15,7 +15,7 @@ Chloris 是一个用 Flutter 写的跨平台阅读器（包名 `com.during.chlor
 ## 快速开始
 
 ```bash
-# Web 版（release 构建；项目自带 Flutter SDK）
+# Web 版（release 构建；下面的 reference/flutter-sdk 可换成任意 Flutter 3.x SDK，Dart ≥3.12）
 reference/flutter-sdk/flutter/bin/flutter pub get --directory chloris
 reference/flutter-sdk/flutter/bin/flutter build web --release --no-wasm-dry-run --directory chloris
 cd chloris && ../reference/flutter-sdk/flutter/bin/dart run tool/serve_web.dart
@@ -23,17 +23,18 @@ cd chloris && ../reference/flutter-sdk/flutter/bin/dart run tool/serve_web.dart
 ```
 
 ```bash
-# 引擎测试（432 项）与应用静态分析
+# 引擎测试与应用静态分析
 cd packages/chloris_engine && ../../reference/flutter-sdk/flutter/bin/dart test
 cd ../../chloris && ../reference/flutter-sdk/flutter/bin/flutter analyze
 ```
 
 ## 状态与边界
 
-- 计划与完成度：见 **[plan.md](plan.md)**（唯一计划表，含与 Legado-E 的差异大表）。
+- 引擎八层（analyze / url / JS 桥 / css / jsonpath / xpath / regex / 缓存）已对齐，引擎测试 470 项全绿；与 Legado-E 的差异表、oracle 双侧判题与真源闭环等验收证据在 `artifacts/`。
+- 已实际构建验证：**Web release**。Android / iOS / macOS / Windows / Linux 尚未逐端出包验证——发布说明按实际通过的平台写，不用「跨平台」代替逐平台验证。
 - 书源是社区维护的第三方数据，站点改版会使规则失效——逐源校准是常态，不绕过验证码与访问控制。
-- 复杂 JS 书源、DRM、深度 WebView 依赖在纯 Dart / Web 目标下无法完全等价（详见 plan.md ➖ 项）。
+- 复原边界（物理不等价项）：DRM 不实现；复杂 JS / 深度 WebView 依赖的源在纯 Dart / Web 目标下无法完全等价；unrar / un7z 无纯 Dart 解码器（显式报错）；VM 级 JS 硬中断受 flutter_js 限制（以 deadline 释放调用方兜底）。
 
 ## 许可
 
-参考 Legado-E 代码与行为时遵守 GPL-3.0 及相关许可义务；内置字体均为 OFL 许可。
+本项目以 **GPL-3.0** 许可发布（见 [LICENSE](LICENSE)），与所参考的 Legado-E 保持一致；内置字体均为 OFL 许可。

@@ -1,6 +1,6 @@
 // 复现「换行消失」：典型正文页 + 三种常见正文规则，跑引擎提取 + 应用侧
 // ChapterPipeline 的 htmlToPlain/resegment 等价逻辑，检查段间换行是否存活。
-// 运行：dart run test/content_newline_repro.dart
+// 运行：dart run tool/content_newline_repro.dart
 import 'dart:io';
 
 import 'package:html/parser.dart' as html_parser;

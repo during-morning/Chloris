@@ -1,0 +1,1 @@
+/Volumes/Software/Chloris/reference/legado-E-main/app/src/main/java/io/legado/app/model/analyzeRule/AnalyzeByJSoup.kt

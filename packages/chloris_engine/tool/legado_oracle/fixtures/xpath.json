@@ -1,0 +1,38 @@
+{"kind":"xpath","content":"<div><a>1</a><a>2</a></div>","rule":"//div/a"}
+{"kind":"xpath","content":"<div><span><a>x</a></span></div>","rule":"//a"}
+{"kind":"xpath","content":"<div><a>1</a><a>2</a></div>","rule":"//a/.."}
+{"kind":"xpath","content":"<ul><li>1</li><li>2</li><li>3</li></ul>","rule":"//li[1]/following-sibling::li"}
+{"kind":"xpath","content":"<ul><li>1</li><li>2</li><li>3</li></ul>","rule":"//li[3]/preceding-sibling::li"}
+{"kind":"xpath","content":"<div><a>x</a></div>","rule":"//a/ancestor::div"}
+{"kind":"xpath","content":"<div><a>x</a></div>","rule":"//a/self::a"}
+{"kind":"xpath","content":"<div><a>x</a></div>","rule":"//div/descendant-or-self::a"}
+{"kind":"xpath","content":"<div><a href='/x'>pre<b>mid</b>post</a><a href='/y'>hello</a></div>","rule":"//a/text()"}
+{"kind":"xpath","content":"<div><a href='/x'>hi</a><a href='/y'>yo</a></div>","rule":"//a/@href"}
+{"kind":"xpath","content":"<div><p>one</p><p>two</p></div>","rule":"//div//text()"}
+{"kind":"xpath","content":"<ul><li>one</li><li>two</li></ul>","rule":"//li/text()"}
+{"kind":"xpath","content":"<div><a class='c1'>a</a><a class='c2'>b</a></div>","rule":"//a/@class"}
+{"kind":"xpath","content":"<a href='/x'>a</a><b href='/y'>b</b>","rule":"//a[@href]/@href"}
+{"kind":"xpath","content":"<ul><li>1</li><li>2</li><li>3</li></ul>","rule":"//li[1]"}
+{"kind":"xpath","content":"<ul><li>1</li><li>2</li><li>3</li></ul>","rule":"//li[last()]"}
+{"kind":"xpath","content":"<ul><li>1</li><li>2</li><li>3</li></ul>","rule":"//li[position()=2]"}
+{"kind":"xpath","content":"<ul><li>1</li><li>2</li><li>3</li></ul>","rule":"//li[position()<3]"}
+{"kind":"xpath","content":"<div><a>hi</a><a>yo</a></div>","rule":"//a[2]/text()"}
+{"kind":"xpath","content":"<root><item id='1'>a</item><item id='2'>b</item><item id='3'>c</item></root>","rule":"//item[@id>1]"}
+{"kind":"xpath","content":"<root><item price='5'>a</item><item price='15'>b</item></root>","rule":"//item[@price<=10]"}
+{"kind":"xpath","content":"<root><item id='1'>a</item><item id='2'>b</item></root>","rule":"//item[number(@id)>1]"}
+{"kind":"xpath","content":"<div class='x'><a>hit</a></div><div class='y'><a>miss</a></div>","rule":"//div[@class='x']/a"}
+{"kind":"xpath","content":"<div><a href='/x'>a</a><a href='/y'>b</a></div>","rule":"//a[contains(@href,'x')]"}
+{"kind":"xpath","content":"<div><a href='/x'>a</a><a href='/y'>b</a></div>","rule":"//a[starts-with(@href,'/x')]"}
+{"kind":"xpath","content":"<div><a href='a.html'>a</a><a href='b.css'>b</a></div>","rule":"//a[ends-with(@href,'.html')]"}
+{"kind":"xpath","content":"<div><a class='ABC'>a</a></div>","rule":"//a[translate(@class,'ABC','abc')='abc']"}
+{"kind":"xpath","content":"<span class='x'>a</span><span>b</span>","rule":"//span[not(@class)]"}
+{"kind":"xpath","content":"<div><a href='/x'>a</a><a href='/y'>b</a></div>","rule":"//a[not(contains(@href,'x'))]"}
+{"kind":"xpath","content":"<div><a>关键词内容</a><a>无关</a></div>","rule":"//a[contains(text(),substring('x关键词y',2,3))]"}
+{"kind":"xpath","content":"<div><a id='7'>a</a></div>","rule":"//a[concat(@id,'')=@id]"}
+{"kind":"xpath","content":"<div><a>hello</a></div>","rule":"//a[substring(text(),1,3)='hel']"}
+{"kind":"xpath","content":"<root><item>10</item><item>20</item></root>","rule":"//item[string-length(text())=2]"}
+{"kind":"xpath","content":"<root><item>10</item><item>20</item></root>","rule":"//item[number(text())>15]"}
+{"kind":"xpath","content":"<div><a>x</a><a>y</a></div>","rule":"count(//a)"}
+{"kind":"xpath","content":"<ul><li class='a'>1</li><li class='b'>2</li><li class='a'>3</li></ul>","rule":"//li[position()<3 and contains(@class,'a')]"}
+{"kind":"xpath","content":"<book><title>First</title><title>Second</title></book>","rule":"//title"}
+{"kind":"xpath","content":"<book><t>abc</t><t>de</t></book>","rule":"//t/text()"}

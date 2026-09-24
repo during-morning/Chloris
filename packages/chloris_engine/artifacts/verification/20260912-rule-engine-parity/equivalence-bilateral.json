@@ -1,0 +1,5023 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-09-13T06:55:50.010133Z",
+  "finishedAt": "2026-09-13T06:56:13.147106Z",
+  "durationMicros": 23137045,
+  "oracle": "legado-process",
+  "selfBaseline": false,
+  "metrics": {
+    "totalCases": 134,
+    "passedCases": 121,
+    "failedCases": 13,
+    "passRate": 0.9029850746268657,
+    "fieldsCompared": 402,
+    "mismatchCount": 13,
+    "mismatchRate": 0.03233830845771144,
+    "p50Micros": 160,
+    "p95Micros": 1583,
+    "cacheHits": 0,
+    "cacheMisses": 0,
+    "cacheHitRate": 0.0,
+    "mismatchesByStage": {
+      "rule": 13
+    },
+    "mismatchesByField": {
+      "value": 13
+    },
+    "stages": {
+      "rule": {
+        "stage": "rule",
+        "totalCases": 134,
+        "passedCases": 121,
+        "failedCases": 13,
+        "passRate": 0.9029850746268657,
+        "fieldsCompared": 402,
+        "mismatchCount": 13,
+        "p50Micros": 160,
+        "p95Micros": 1583,
+        "cacheHits": 0,
+        "cacheMisses": 0,
+        "cacheHitRate": 0.0
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "legado/css-001",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 21596,
+      "oracleElapsedMicros": 278442,
+      "input": {
+        "name": "css-001",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a@text",
+        "input": "<div><a>Alpha</a><a>Beta</a><a>Gamma</a></div>",
+        "expect": "提取全部 <a> 文本，按文档顺序返回。",
+        "src": "基础选择器 a@text（广泛见于 ruleSearch.bookList/name）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a@text",
+        "value": "Alpha\nBeta\nGamma"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a@text",
+        "value": "Alpha\nBeta\nGamma"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-002",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 2437,
+      "oracleElapsedMicros": 198014,
+      "input": {
+        "name": "css-002",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a@href",
+        "input": "<div><a href=\"/b/1\">一</a><a href=\"/b/2\">二</a></div>",
+        "expect": "提取 <a> 的 href 属性值。",
+        "src": "a@href（ruleSearch.bookUrl 主流写法）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a@href",
+        "value": "/b/1\n/b/2"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a@href",
+        "value": "/b/1\n/b/2"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-003",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 718,
+      "oracleElapsedMicros": 205709,
+      "input": {
+        "name": "css-003",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "img@src",
+        "input": "<div><img src=\"https://x.co/a.jpg\"></div>",
+        "expect": "提取 <img> 的 src 属性。",
+        "src": "img@src / @src（封面/图片规则）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "img@src",
+        "value": "https://x.co/a.jpg"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "img@src",
+        "value": "https://x.co/a.jpg"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-004",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 1708,
+      "oracleElapsedMicros": 197468,
+      "input": {
+        "name": "css-004",
+        "kind": "css",
+        "fallback": "css",
+        "rule": ".name@text",
+        "input": "<span class=\"name\">秦牧</span>",
+        "expect": "按 class 选择元素并取文本。",
+        "src": ".name@text（ruleBookInfo.name 常见）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": ".name@text",
+        "value": "秦牧"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": ".name@text",
+        "value": "秦牧"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-005",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 1291,
+      "oracleElapsedMicros": 197957,
+      "input": {
+        "name": "css-005",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "#title@text",
+        "input": "<h1 id=\"title\">诡秘之主</h1>",
+        "expect": "按 id 选择并取文本。",
+        "src": "#title@text（详情页标题）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "#title@text",
+        "value": "诡秘之主"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "#title@text",
+        "value": "诡秘之主"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-006",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 1030,
+      "oracleElapsedMicros": 194261,
+      "input": {
+        "name": "css-006",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "p@text",
+        "input": "<p>作者：爱潜水的乌贼</p><p>分类：玄幻</p>",
+        "expect": "按标签取全部段落文本。",
+        "src": "p@text（简介/信息段落）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "p@text",
+        "value": "作者：爱潜水的乌贼\n分类：玄幻"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "p@text",
+        "value": "作者：爱潜水的乌贼\n分类：玄幻"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-007",
+      "stage": "rule",
+      "passed": false,
+      "elapsedMicros": 3163,
+      "oracleElapsedMicros": 199906,
+      "input": {
+        "name": "css-007",
+        "kind": "css",
+        "fallback": "css",
+        "rule": ":contains(作者)@text",
+        "input": "<div><p>作者：爱潜水的乌贼</p><p>简介：一段文字</p></div>",
+        "expect": "伪类 :contains 选择包含『作者』的元素并取文本。",
+        "src": "span:contains(作者：)@text（ruleBookInfo.author 源自真实书源）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": ":contains(作者)@text",
+        "value": "作者：爱潜水的乌贼 简介：一段文字\n作者：爱潜水的乌贼 简介：一段文字\n作者：爱潜水的乌贼"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": ":contains(作者)@text",
+        "value": "作者：爱潜水的乌贼 简介：一段文字\n作者：爱潜水的乌贼 简介：一段文字\n作者：爱潜水的乌贼 简介：一段文字\n作者：爱潜水的乌贼 简介：一段文字\n作者：爱潜水的乌贼"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": [
+        {
+          "caseId": "legado/css-007",
+          "stage": "rule",
+          "field": "value",
+          "kind": "value",
+          "actual": "作者：爱潜水的乌贼 简介：一段文字\n作者：爱潜水的乌贼 简介：一段文字\n作者：爱潜水的乌贼",
+          "expected": "作者：爱潜水的乌贼 简介：一段文字\n作者：爱潜水的乌贼 简介：一段文字\n作者：爱潜水的乌贼 简介：一段文字\n作者：爱潜水的乌贼 简介：一段文字\n作者：爱潜水的乌贼"
+        }
+      ]
+    },
+    {
+      "id": "legado/css-008",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 3632,
+      "oracleElapsedMicros": 201295,
+      "input": {
+        "name": "css-008",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "dd:contains(最新章节：) > a@text",
+        "input": "<dl><dd>最新章节：<a>第1章 开端</a></dd></dl>",
+        "expect": "复合：dd:contains 定位 + 子代 > a 取文本。",
+        "src": "dd:contains(最新章节：) > a@text（真实书源 tocUrl/lastChapter）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "dd:contains(最新章节：) > a@text",
+        "value": "第1章 开端"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "dd:contains(最新章节：) > a@text",
+        "value": "第1章 开端"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-009",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 1079,
+      "oracleElapsedMicros": 185125,
+      "input": {
+        "name": "css-009",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "dt:contains(作者)+dd a@text",
+        "input": "<dl><dt>作者</dt><dd><a>猫腻</a></dd></dl>",
+        "expect": "相邻兄弟 +dd 再取 descendant a 文本。",
+        "src": "dt:contains(作者)+dd a@text（真实书源 author 规则）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "dt:contains(作者)+dd a@text",
+        "value": "猫腻"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "dt:contains(作者)+dd a@text",
+        "value": "猫腻"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-010",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 826,
+      "oracleElapsedMicros": 197756,
+      "input": {
+        "name": "css-010",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "@css:a:contains(下一页)@href",
+        "input": "<div><a href=\"/p/2\">下一页</a><a href=\"/p/1\">上一页</a></div>",
+        "expect": "@css: 前缀走原生 CSS 选择器，:contains 命中『下一页』取 href。",
+        "src": "@css:a:contains(下一页)@href（分页 nextUrl 规则）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "@css:a:contains(下一页)@href",
+        "value": "/p/2"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "@css:a:contains(下一页)@href",
+        "value": "/p/2"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-011",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 842,
+      "oracleElapsedMicros": 199195,
+      "input": {
+        "name": "css-011",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "span:contains(作者：)@text",
+        "input": "<div><span>作者：烽火戏诸侯</span><span>状态：连载</span></div>",
+        "expect": ":contains 命中带冒号文本的元素取文本。",
+        "src": "span:contains(作者：)@text（真实书源）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "span:contains(作者：)@text",
+        "value": "作者：烽火戏诸侯"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "span:contains(作者：)@text",
+        "value": "作者：烽火戏诸侯"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-012",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 1436,
+      "oracleElapsedMicros": 185357,
+      "input": {
+        "name": "css-012",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "tag.a.0@href",
+        "input": "<div><a href=\"/x/0\">零</a><a href=\"/x/1\">一</a><a href=\"/x/2\">二</a></div>",
+        "expect": "tag.a 前缀 + 索引 0 取第一个 <a> 的 href。",
+        "src": "tag.a.0@href（真实书源 bookUrl）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "tag.a.0@href",
+        "value": "/x/0"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "tag.a.0@href",
+        "value": "/x/0"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-013",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 568,
+      "oracleElapsedMicros": 196625,
+      "input": {
+        "name": "css-013",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a.0@text",
+        "input": "<p><a>零</a><a>一</a><a>二</a><a>三</a></p>",
+        "expect": "索引 0 取第一个 <a> 文本。",
+        "src": "a.0@text（索引选择）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a.0@text",
+        "value": "零"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a.0@text",
+        "value": "零"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-014",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 706,
+      "oracleElapsedMicros": 199746,
+      "input": {
+        "name": "css-014",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a.1@text",
+        "input": "<p><a>零</a><a>一</a><a>二</a></p>",
+        "expect": "索引 1 取第二个 <a> 文本。",
+        "src": "a.1@text（索引选择）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a.1@text",
+        "value": "一"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a.1@text",
+        "value": "一"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-015",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 901,
+      "oracleElapsedMicros": 201484,
+      "input": {
+        "name": "css-015",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a.0:2@text",
+        "input": "<p><a>zero</a><a>one</a><a>two</a><a>three</a></p>",
+        "expect": "旧式索引 a.0:2 —— 取索引集合 {0,2} 两个元素（两引擎应一致）。",
+        "src": "a.0:2@text（索引区间，源自审计既有样例）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a.0:2@text",
+        "value": "zero\ntwo"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a.0:2@text",
+        "value": "zero\ntwo"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-016",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 631,
+      "oracleElapsedMicros": 203403,
+      "input": {
+        "name": "css-016",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "span.0:1@text",
+        "input": "<div><span>甲</span><span>乙</span><span>丙</span></div>",
+        "expect": "span.0:1 取索引集合 {0,1}。",
+        "src": "span.0:1@text（真实书源 info 区间）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "span.0:1@text",
+        "value": "甲\n乙"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "span.0:1@text",
+        "value": "甲\n乙"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-017",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 1019,
+      "oracleElapsedMicros": 205061,
+      "input": {
+        "name": "css-017",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a[0:2]@text",
+        "input": "<p><a>zero</a><a>one</a><a>two</a><a>three</a></p>",
+        "expect": "方括号区间 a[0:2] 取 0..2 闭区间（含两端），三个元素。",
+        "src": "tag.div[0:2]（方括号索引写法）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a[0:2]@text",
+        "value": "zero\none\ntwo"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a[0:2]@text",
+        "value": "zero\none\ntwo"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-018",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 724,
+      "oracleElapsedMicros": 200558,
+      "input": {
+        "name": "css-018",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a[-1]@text",
+        "input": "<p><a>zero</a><a>one</a><a>two</a></p>",
+        "expect": "负索引 -1 取最后一个元素。",
+        "src": "a.-1@text（负索引）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a[-1]@text",
+        "value": "two"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a[-1]@text",
+        "value": "two"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-019",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 1140,
+      "oracleElapsedMicros": 201905,
+      "input": {
+        "name": "css-019",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a[!0]@text",
+        "input": "<p><a>zero</a><a>one</a><a>two</a></p>",
+        "expect": "排除式 [!0] 去掉索引 0，保留 1,2。",
+        "src": "a[!0]@text（排除索引，legado 方括号写法）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a[!0]@text",
+        "value": "one\ntwo"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a[!0]@text",
+        "value": "one\ntwo"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-020",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 623,
+      "oracleElapsedMicros": 192078,
+      "input": {
+        "name": "css-020",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a@text||b@text",
+        "input": "<div><b>只有b</b></div>",
+        "expect": "|| 回退：a 无命中则用 b。",
+        "src": "a@text||b@text（ruleSearch.name 常见回退）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a@text||b@text",
+        "value": "只有b"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a@text||b@text",
+        "value": "只有b"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-021",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 856,
+      "oracleElapsedMicros": 202162,
+      "input": {
+        "name": "css-021",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a@text&&b@text",
+        "input": "<div><a>A</a><b>B</b></div>",
+        "expect": "&& 合并两条规则结果。",
+        "src": "a@text&&b@text（信息合并）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a@text&&b@text",
+        "value": "A\nB"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a@text&&b@text",
+        "value": "A\nB"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-022",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 760,
+      "oracleElapsedMicros": 200184,
+      "input": {
+        "name": "css-022",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "p@ownText",
+        "input": "<p>直接文本<em>强调</em>更多</p>",
+        "expect": "ownText 只取元素自身直接文本节点，不含子元素文本。",
+        "src": "class.book_other@ownText（真实书源）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "p@ownText",
+        "value": "直接文本更多"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "p@ownText",
+        "value": "直接文本更多"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-023",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 757,
+      "oracleElapsedMicros": 197282,
+      "input": {
+        "name": "css-023",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "div@textNodes",
+        "input": "<div>甲<em>乙</em>丙</div>",
+        "expect": "textNodes 取文本节点（忽略子元素标签自身）。",
+        "src": "span.0@textNodes（真实书源）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "div@textNodes",
+        "value": "甲\n丙"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "div@textNodes",
+        "value": "甲\n丙"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-024",
+      "stage": "rule",
+      "passed": false,
+      "elapsedMicros": 1583,
+      "oracleElapsedMicros": 196138,
+      "input": {
+        "name": "css-024",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "div@html",
+        "input": "<div><span>内容</span></div>",
+        "expect": "@html 取元素 outerHTML。",
+        "src": "id.jianjie-popup.0@class.content.0@tag.p.0@html（真实书源）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "div@html",
+        "value": "<div><span>内容</span></div>"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "div@html",
+        "value": "<div>\n <span>内容</span>\n</div>"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": [
+        {
+          "caseId": "legado/css-024",
+          "stage": "rule",
+          "field": "value",
+          "kind": "value",
+          "actual": "<div><span>内容</span></div>",
+          "expected": "<div>\n <span>内容</span>\n</div>"
+        }
+      ]
+    },
+    {
+      "id": "legado/css-025",
+      "stage": "rule",
+      "passed": false,
+      "elapsedMicros": 795,
+      "oracleElapsedMicros": 202714,
+      "input": {
+        "name": "css-025",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "div@all",
+        "input": "<div><span>一</span><span>二</span></div>",
+        "expect": "@all 取所有命中元素的 outerHTML 拼接。",
+        "src": "#TextContent@all（真实书源）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "div@all",
+        "value": "<div><span>一</span><span>二</span></div>"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "div@all",
+        "value": "<div>\n <span>一</span><span>二</span>\n</div>"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": [
+        {
+          "caseId": "legado/css-025",
+          "stage": "rule",
+          "field": "value",
+          "kind": "value",
+          "actual": "<div><span>一</span><span>二</span></div>",
+          "expected": "<div>\n <span>一</span><span>二</span>\n</div>"
+        }
+      ]
+    },
+    {
+      "id": "legado/css-026",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 899,
+      "oracleElapsedMicros": 200332,
+      "input": {
+        "name": "css-026",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a@data-url",
+        "input": "<div><a data-url=\"https://x.co/1\">链接</a></div>",
+        "expect": "自定义属性 @data-url 提取。",
+        "src": "a@data-xxx（真实书源自定义属性）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a@data-url",
+        "value": "https://x.co/1"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a@data-url",
+        "value": "https://x.co/1"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-027",
+      "stage": "rule",
+      "passed": false,
+      "elapsedMicros": 1084,
+      "oracleElapsedMicros": 197865,
+      "input": {
+        "name": "css-027",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "ul:has(>a)@text",
+        "input": "<ul><li><a>有链接</a></li></ul><ul><li>无链接</li></ul>",
+        "expect": ":has(>a) 选择含直接子代 a 的 ul。",
+        "src": "*:has(>*:has(>a))（真实书源 toc 规则）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "ul:has(>a)@text",
+        "value": ""
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "ul:has(>a)@text",
+        "value": null
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": [
+        {
+          "caseId": "legado/css-027",
+          "stage": "rule",
+          "field": "value",
+          "kind": "value",
+          "actual": "",
+          "expected": null
+        }
+      ]
+    },
+    {
+      "id": "legado/css-028",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 1063,
+      "oracleElapsedMicros": 197136,
+      "input": {
+        "name": "css-028",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "p:matches(第|章)@text",
+        "input": "<div><p>第1章 开端</p><p>无关段落</p></div>",
+        "expect": ":matches 正则匹配元素文本。",
+        "src": "*:matches(第|章|Chapter)（真实书源）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "p:matches(第|章)@text",
+        "value": "第1章 开端"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "p:matches(第|章)@text",
+        "value": "第1章 开端"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-029",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 827,
+      "oracleElapsedMicros": 227237,
+      "input": {
+        "name": "css-029",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "div:not(:has(p))@text",
+        "input": "<div>无p</div><div><p>有p</p></div>",
+        "expect": ":not(:has(p)) 排除含 p 的元素。",
+        "src": "*:not(:has(div))（真实书源）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "div:not(:has(p))@text",
+        "value": "无p"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "div:not(:has(p))@text",
+        "value": "无p"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-030",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 585,
+      "oracleElapsedMicros": 202214,
+      "input": {
+        "name": "css-030",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "ul li@text",
+        "input": "<ul><li>一</li><li>二</li></ul>",
+        "expect": "后代选择器取全部 li 文本。",
+        "src": "ul.list_ul@li（真实书源 bookList）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "ul li@text",
+        "value": "一\n二"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "ul li@text",
+        "value": "一\n二"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-031",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 926,
+      "oracleElapsedMicros": 188350,
+      "input": {
+        "name": "css-031",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "div.box a.2@href",
+        "input": "<div class=\"box\"><a href=\"1\"></a><a href=\"2\"></a><a href=\"3\"></a></div>",
+        "expect": "复合 class + 索引 2 取第三个 <a> 的 href。",
+        "src": ".box-artic div.2:1@text（真实书源索引）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "div.box a.2@href",
+        "value": "3"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "div.box a.2@href",
+        "value": "3"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-032",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 582,
+      "oracleElapsedMicros": 197605,
+      "input": {
+        "name": "css-032",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "p:contains(状态)@text",
+        "input": "<div><p>状态：连载</p><p>分类：玄幻</p></div>",
+        "expect": ":contains 命中『状态』段落取文本。",
+        "src": "p:contains(状态)@text（真实书源）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "p:contains(状态)@text",
+        "value": "状态：连载"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "p:contains(状态)@text",
+        "value": "状态：连载"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-033",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 1132,
+      "oracleElapsedMicros": 178629,
+      "input": {
+        "name": "css-033",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "class.info@text",
+        "input": "<div class=\"info\">简介内容</div>",
+        "expect": "class 前缀取类元素文本。",
+        "src": "class.info@text（真实书源）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "class.info@text",
+        "value": "简介内容"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "class.info@text",
+        "value": "简介内容"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-034",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 1068,
+      "oracleElapsedMicros": 199194,
+      "input": {
+        "name": "css-034",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a[href]@href",
+        "input": "<div><a href=\"/a\">A</a><a>B</a></div>",
+        "expect": "属性存在选择器 a[href] 取带 href 的链接。",
+        "src": "a[href]（属性选择器）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a[href]@href",
+        "value": "/a"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a[href]@href",
+        "value": "/a"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-035",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 799,
+      "oracleElapsedMicros": 203131,
+      "input": {
+        "name": "css-035",
+        "kind": "css",
+        "fallback": "css",
+        "rule": ".list .item@text",
+        "input": "<div class=\"list\"><span class=\"item\">甲</span><span class=\"item\">乙</span></div>",
+        "expect": "后代复合 class 选择器。",
+        "src": ".list .item（真实书源）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": ".list .item@text",
+        "value": "甲\n乙"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": ".list .item@text",
+        "value": "甲\n乙"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-036",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 660,
+      "oracleElapsedMicros": 186243,
+      "input": {
+        "name": "css-036",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "li:contains(免费)@text",
+        "input": "<ul><li>免费章节</li><li>VIP章节</li></ul>",
+        "expect": ":contains 命中『免费』项。",
+        "src": "li:contains(免费)（真实书源章节过滤）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "li:contains(免费)@text",
+        "value": "免费章节"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "li:contains(免费)@text",
+        "value": "免费章节"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-037",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 572,
+      "oracleElapsedMicros": 200068,
+      "input": {
+        "name": "css-037",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "h2@text",
+        "input": "<section><h2>卷一 风起</h2></section>",
+        "expect": "标签选择器取标题文本。",
+        "src": "h2@text（卷名规则）"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "h2@text",
+        "value": "卷一 风起"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "h2@text",
+        "value": "卷一 风起"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-001",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 1320,
+      "oracleElapsedMicros": 210286,
+      "input": {
+        "name": "json-001",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.name",
+        "input": "{\"name\":\"诡秘之主\",\"author\":\"爱潜水的乌贼\"}",
+        "expect": "取根级字段 name。",
+        "src": "$.name（ruleBookInfo.name）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.name",
+        "value": "诡秘之主"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.name",
+        "value": "诡秘之主"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-002",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 330,
+      "oracleElapsedMicros": 177121,
+      "input": {
+        "name": "json-002",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.data.chapters",
+        "input": "{\"data\":{\"chapters\":[\"第1章\",\"第2章\",\"第3章\"]}}",
+        "expect": "嵌套路径取数组，换行连接。",
+        "src": "$.data.chapters（ruleToc 列表）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.data.chapters",
+        "value": "第1章\n第2章\n第3章"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.data.chapters",
+        "value": "第1章\n第2章\n第3章"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-003",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 625,
+      "oracleElapsedMicros": 174110,
+      "input": {
+        "name": "json-003",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.chapters[*]",
+        "input": "{\"chapters\":[\"ch1\",\"ch2\",\"ch3\"]}",
+        "expect": "通配 [*] 展开数组元素。",
+        "src": "$.chapters（既有样例）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.chapters[*]",
+        "value": "ch1\nch2\nch3"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.chapters[*]",
+        "value": "ch1\nch2\nch3"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-004",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 245,
+      "oracleElapsedMicros": 172652,
+      "input": {
+        "name": "json-004",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.data.list[*].title",
+        "input": "{\"data\":{\"list\":[{\"title\":\"甲\"},{\"title\":\"乙\"}]}}",
+        "expect": "数组内取每个对象的 title 字段。",
+        "src": "$.results.list[*].title（真实书源）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.data.list[*].title",
+        "value": "甲\n乙"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.data.list[*].title",
+        "value": "甲\n乙"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-005",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 300,
+      "oracleElapsedMicros": 176555,
+      "input": {
+        "name": "json-005",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$..title",
+        "input": "{\"book\":{\"title\":\"主标题\"},\"data\":{\"title\":\"副标题\"}}",
+        "expect": "递归下降 $.. 收集所有 title。",
+        "src": "$..title（递归路径）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$..title",
+        "value": "主标题\n副标题"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$..title",
+        "value": "主标题\n副标题"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-006",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 156,
+      "oracleElapsedMicros": 178915,
+      "input": {
+        "name": "json-006",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.data.chapters[0]",
+        "input": "{\"data\":{\"chapters\":[\"第1章\",\"第2章\"]}}",
+        "expect": "数组下标 0 取首个元素。",
+        "src": "$.data.chapters[0]（首章）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.data.chapters[0]",
+        "value": "第1章"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.data.chapters[0]",
+        "value": "第1章"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-007",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 591,
+      "oracleElapsedMicros": 170400,
+      "input": {
+        "name": "json-007",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.data.chapters[1:3]",
+        "input": "{\"data\":{\"chapters\":[\"c0\",\"c1\",\"c2\",\"c3\"]}}",
+        "expect": "切片 [1:3) 取索引 1、2。",
+        "src": "$.data.chapters[1:3]（切片）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.data.chapters[1:3]",
+        "value": "c1\nc2"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.data.chapters[1:3]",
+        "value": "c1\nc2"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-008",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 160,
+      "oracleElapsedMicros": 176961,
+      "input": {
+        "name": "json-008",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.data.chapters[*].name",
+        "input": "{\"data\":{\"chapters\":[{\"name\":\"a\"},{\"name\":\"b\"}]}}",
+        "expect": "[*].name 取每个元素 name。",
+        "src": "$.data.chapters[*].name（真实书源）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.data.chapters[*].name",
+        "value": "a\nb"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.data.chapters[*].name",
+        "value": "a\nb"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-009",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 157,
+      "oracleElapsedMicros": 172970,
+      "input": {
+        "name": "json-009",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.results.list[*]",
+        "input": "{\"results\":{\"list\":[\"x\",\"y\"]}}",
+        "expect": "嵌套 results.list 数组展开。",
+        "src": "$.results.list[*]（真实书源）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.results.list[*]",
+        "value": "x\ny"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.results.list[*]",
+        "value": "x\ny"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-010",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 273,
+      "oracleElapsedMicros": 171354,
+      "input": {
+        "name": "json-010",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$..list[*].list[*]",
+        "input": "{\"list\":[{\"list\":[\"a\",\"b\"]},{\"list\":[\"c\"]}]}",
+        "expect": "递归 + 多重数组展开。",
+        "src": "$..list[*].list[*]（真实书源嵌套）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$..list[*].list[*]",
+        "value": "a\nb\nc"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$..list[*].list[*]",
+        "value": "a\nb\nc"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-011",
+      "stage": "rule",
+      "passed": false,
+      "elapsedMicros": 396,
+      "oracleElapsedMicros": 176624,
+      "input": {
+        "name": "json-011",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.data||$.data.data[*]",
+        "input": "{\"data\":{\"data\":[\"d1\",\"d2\"]}}",
+        "expect": "|| 回退：$.data 命中则用之。",
+        "src": "$.data||$.data.data[*]||$.data[*]（真实书源回退）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.data||$.data.data[*]",
+        "value": "{\"data\":[\"d1\",\"d2\"]}"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.data||$.data.data[*]",
+        "value": "{data=[\"d1\",\"d2\"]}"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": [
+        {
+          "caseId": "legado/json-011",
+          "stage": "rule",
+          "field": "value",
+          "kind": "value",
+          "actual": "{\"data\":[\"d1\",\"d2\"]}",
+          "expected": "{data=[\"d1\",\"d2\"]}"
+        }
+      ]
+    },
+    {
+      "id": "legado/json-012",
+      "stage": "rule",
+      "passed": false,
+      "elapsedMicros": 169,
+      "oracleElapsedMicros": 178635,
+      "input": {
+        "name": "json-012",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.a[*]%%$.b[*]",
+        "input": "{\"a\":[\"a1\",\"a2\"],\"b\":[\"b1\",\"b2\"]}",
+        "expect": "%% 交错：a1 b1 a2 b2。",
+        "src": "$.a[*]%%$.b[*]（交错拼接，真实书源）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.a[*]%%$.b[*]",
+        "value": "a1\nb1\na2\nb2"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.a[*]%%$.b[*]",
+        "value": ""
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": [
+        {
+          "caseId": "legado/json-012",
+          "stage": "rule",
+          "field": "value",
+          "kind": "value",
+          "actual": "a1\nb1\na2\nb2",
+          "expected": ""
+        }
+      ]
+    },
+    {
+      "id": "legado/json-013",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 2307,
+      "oracleElapsedMicros": 173762,
+      "input": {
+        "name": "json-013",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.category&&$..score",
+        "input": "{\"category\":\"玄幻\",\"data\":{\"score\":9.2}}",
+        "expect": "&& 合并 category 与递归 score。",
+        "src": "$.category&&$..score（真实书源组合）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.category&&$..score",
+        "value": "玄幻\n9.2"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.category&&$..score",
+        "value": "玄幻\n9.2"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-014",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 1464,
+      "oracleElapsedMicros": 194526,
+      "input": {
+        "name": "json-014",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$[?(@.type=='book')].name",
+        "input": "{\"items\":[{\"type\":\"book\",\"name\":\"书A\"},{\"type\":\"movie\",\"name\":\"片B\"}]}",
+        "expect": "过滤表达式保留 type==book 的 name。",
+        "src": "$[?(@.type=='book')]（JsonPath 过滤）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$[?(@.type=='book')].name",
+        "value": ""
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$[?(@.type=='book')].name",
+        "value": ""
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-015",
+      "stage": "rule",
+      "passed": false,
+      "elapsedMicros": 571,
+      "oracleElapsedMicros": 195482,
+      "input": {
+        "name": "json-015",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.data.chapters[?(@.vip==true)]",
+        "input": "{\"data\":{\"chapters\":[{\"vip\":true,\"t\":\"v1\"},{\"vip\":false,\"t\":\"v2\"}]}}",
+        "expect": "过滤 vip==true 的章节。",
+        "src": "$.chapters[?(@.vip)]（真实书源 VIP 过滤）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.data.chapters[?(@.vip==true)]",
+        "value": "{\"vip\":true,\"t\":\"v1\"}"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.data.chapters[?(@.vip==true)]",
+        "value": "{vip=true, t=v1}"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": [
+        {
+          "caseId": "legado/json-015",
+          "stage": "rule",
+          "field": "value",
+          "kind": "value",
+          "actual": "{\"vip\":true,\"t\":\"v1\"}",
+          "expected": "{vip=true, t=v1}"
+        }
+      ]
+    },
+    {
+      "id": "legado/json-016",
+      "stage": "rule",
+      "passed": false,
+      "elapsedMicros": 781,
+      "oracleElapsedMicros": 187432,
+      "input": {
+        "name": "json-016",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.books[?(@.price < 10)]",
+        "input": "{\"books\":[{\"price\":8,\"n\":\"a\"},{\"price\":20,\"n\":\"b\"}]}",
+        "expect": "数值比较过滤。",
+        "src": "$.books[?(@.price<10)]（JsonPath 过滤）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.books[?(@.price < 10)]",
+        "value": "{\"price\":8,\"n\":\"a\"}"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.books[?(@.price < 10)]",
+        "value": "{price=8, n=a}"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": [
+        {
+          "caseId": "legado/json-016",
+          "stage": "rule",
+          "field": "value",
+          "kind": "value",
+          "actual": "{\"price\":8,\"n\":\"a\"}",
+          "expected": "{price=8, n=a}"
+        }
+      ]
+    },
+    {
+      "id": "legado/json-017",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 161,
+      "oracleElapsedMicros": 176518,
+      "input": {
+        "name": "json-017",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$..authors[*]",
+        "input": "{\"a\":{\"authors\":[\"张三\",\"李四\"]},\"b\":{\"authors\":[\"王五\"]}}",
+        "expect": "递归收集所有 authors 数组。",
+        "src": "$..authors[*]（递归数组）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$..authors[*]",
+        "value": "张三\n李四\n王五"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$..authors[*]",
+        "value": "张三\n李四\n王五"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-018",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 199,
+      "oracleElapsedMicros": 177442,
+      "input": {
+        "name": "json-018",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.store.book[*].price",
+        "input": "{\"store\":{\"book\":[{\"price\":10},{\"price\":20}]}}",
+        "expect": "嵌套数组字段。",
+        "src": "$.store.book[*].price（标准 JsonPath 示例）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.store.book[*].price",
+        "value": "10\n20"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.store.book[*].price",
+        "value": "10\n20"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-019",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 140,
+      "oracleElapsedMicros": 179756,
+      "input": {
+        "name": "json-019",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.data.images[*]",
+        "input": "{\"data\":{\"images\":[\"i1.jpg\",\"i2.jpg\"]}}",
+        "expect": "图片数组展开。",
+        "src": "$.model.images[*]（真实书源图集）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.data.images[*]",
+        "value": "i1.jpg\ni2.jpg"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.data.images[*]",
+        "value": "i1.jpg\ni2.jpg"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-020",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 131,
+      "oracleElapsedMicros": 173033,
+      "input": {
+        "name": "json-020",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.list[0:2]",
+        "input": "{\"list\":[\"e0\",\"e1\",\"e2\",\"e3\"]}",
+        "expect": "切片 [0:2) 取前两个。",
+        "src": "$.list[0:2]（切片）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.list[0:2]",
+        "value": "e0\ne1"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.list[0:2]",
+        "value": "e0\ne1"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-021",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 225,
+      "oracleElapsedMicros": 177245,
+      "input": {
+        "name": "json-021",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.menu[*].items[*].title",
+        "input": "{\"menu\":[{\"items\":[{\"title\":\"甲\"}]},{\"items\":[{\"title\":\"乙\"}]}]}",
+        "expect": "深嵌套数组字段提取。",
+        "src": "$.menu[*].items[*].title（真实书源）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.menu[*].items[*].title",
+        "value": "甲\n乙"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.menu[*].items[*].title",
+        "value": "甲\n乙"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-022",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 131,
+      "oracleElapsedMicros": 180611,
+      "input": {
+        "name": "json-022",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.a.b.c.d",
+        "input": "{\"a\":{\"b\":{\"c\":{\"d\":\"深值\"}}}}",
+        "expect": "深层路径取值。",
+        "src": "$.a.b.c.d（深层路径）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.a.b.c.d",
+        "value": "深值"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.a.b.c.d",
+        "value": "深值"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-023",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 219,
+      "oracleElapsedMicros": 176255,
+      "input": {
+        "name": "json-023",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$['book name']",
+        "input": "{\"book name\":\"带空格键\",\"other\":1}",
+        "expect": "带空格键需用 [''] 语法。",
+        "src": "$['key with space']（特殊键）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$['book name']",
+        "value": "带空格键"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$['book name']",
+        "value": "带空格键"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-024",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 169,
+      "oracleElapsedMicros": 172170,
+      "input": {
+        "name": "json-024",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.numbers[-1]",
+        "input": "{\"numbers\":[1,2,3,4]}",
+        "expect": "负索引取末位元素。",
+        "src": "$.numbers[-1]（负索引）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.numbers[-1]",
+        "value": "4"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.numbers[-1]",
+        "value": "4"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-025",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 155,
+      "oracleElapsedMicros": 175021,
+      "input": {
+        "name": "json-025",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.users[*].name",
+        "input": "{\"users\":[{\"name\":\"甲\"},{\"name\":\"乙\"}]}",
+        "expect": "用户数组取 name。",
+        "src": "$.users[*].name（真实书源）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.users[*].name",
+        "value": "甲\n乙"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.users[*].name",
+        "value": "甲\n乙"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-026",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 141,
+      "oracleElapsedMicros": 173253,
+      "input": {
+        "name": "json-026",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.data.content",
+        "input": "{\"data\":{\"content\":\"正文内容\"}}",
+        "expect": "取正文内容字段。",
+        "src": "$.data.content（ruleContent）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.data.content",
+        "value": "正文内容"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.data.content",
+        "value": "正文内容"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-027",
+      "stage": "rule",
+      "passed": false,
+      "elapsedMicros": 299,
+      "oracleElapsedMicros": 198053,
+      "input": {
+        "name": "json-027",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.results[?(@.score > 90)]",
+        "input": "{\"results\":[{\"score\":95,\"n\":\"a\"},{\"score\":80,\"n\":\"b\"}]}",
+        "expect": "大于比较过滤。",
+        "src": "$.results[?(@.score>90)]（过滤）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.results[?(@.score > 90)]",
+        "value": "{\"score\":95,\"n\":\"a\"}"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.results[?(@.score > 90)]",
+        "value": "{score=95, n=a}"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": [
+        {
+          "caseId": "legado/json-027",
+          "stage": "rule",
+          "field": "value",
+          "kind": "value",
+          "actual": "{\"score\":95,\"n\":\"a\"}",
+          "expected": "{score=95, n=a}"
+        }
+      ]
+    },
+    {
+      "id": "legado/json-028",
+      "stage": "rule",
+      "passed": false,
+      "elapsedMicros": 246,
+      "oracleElapsedMicros": 179949,
+      "input": {
+        "name": "json-028",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.a[*]%%$.b[*]%%$.c[*]",
+        "input": "{\"a\":[\"a1\"],\"b\":[\"b1\"],\"c\":[\"c1\"]}",
+        "expect": "三路交错拼接。",
+        "src": "$.a[*]%%$.b[*]%%$.c[*]（多路交错）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.a[*]%%$.b[*]%%$.c[*]",
+        "value": "a1\nb1\nc1"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.a[*]%%$.b[*]%%$.c[*]",
+        "value": ""
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": [
+        {
+          "caseId": "legado/json-028",
+          "stage": "rule",
+          "field": "value",
+          "kind": "value",
+          "actual": "a1\nb1\nc1",
+          "expected": ""
+        }
+      ]
+    },
+    {
+      "id": "legado/json-029",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 175,
+      "oracleElapsedMicros": 174097,
+      "input": {
+        "name": "json-029",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.x.y[*].z",
+        "input": "{\"x\":{\"y\":[{\"z\":\"v1\"},{\"z\":\"v2\"}]}}",
+        "expect": "数组内取 z 字段。",
+        "src": "$.x.y[*].z（真实书源）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.x.y[*].z",
+        "value": "v1\nv2"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.x.y[*].z",
+        "value": "v1\nv2"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-030",
+      "stage": "rule",
+      "passed": false,
+      "elapsedMicros": 166,
+      "oracleElapsedMicros": 173301,
+      "input": {
+        "name": "json-030",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$..*",
+        "input": "{\"a\":1,\"b\":{\"c\":2}}",
+        "expect": "递归取所有叶子值。",
+        "src": "$..*（递归全部）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$..*",
+        "value": "1\n{\"c\":2}\n2"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$..*",
+        "value": "1\n{c=2}\n2"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": [
+        {
+          "caseId": "legado/json-030",
+          "stage": "rule",
+          "field": "value",
+          "kind": "value",
+          "actual": "1\n{\"c\":2}\n2",
+          "expected": "1\n{c=2}\n2"
+        }
+      ]
+    },
+    {
+      "id": "legado/json-031",
+      "stage": "rule",
+      "passed": false,
+      "elapsedMicros": 235,
+      "oracleElapsedMicros": 193093,
+      "input": {
+        "name": "json-031",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.data.list[?(@.status=='active')]",
+        "input": "{\"data\":{\"list\":[{\"status\":\"active\",\"v\":\"x\"},{\"status\":\"dead\",\"v\":\"y\"}]}}",
+        "expect": "状态过滤。",
+        "src": "$.data.list[?(@.status=='active')]（真实书源）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.data.list[?(@.status=='active')]",
+        "value": "{\"status\":\"active\",\"v\":\"x\"}"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.data.list[?(@.status=='active')]",
+        "value": "{status=active, v=x}"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": [
+        {
+          "caseId": "legado/json-031",
+          "stage": "rule",
+          "field": "value",
+          "kind": "value",
+          "actual": "{\"status\":\"active\",\"v\":\"x\"}",
+          "expected": "{status=active, v=x}"
+        }
+      ]
+    },
+    {
+      "id": "legado/json-032",
+      "stage": "rule",
+      "passed": false,
+      "elapsedMicros": 281,
+      "oracleElapsedMicros": 193904,
+      "input": {
+        "name": "json-032",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.items[?(@.qty >= 2)]",
+        "input": "{\"items\":[{\"qty\":3,\"n\":\"a\"},{\"qty\":1,\"n\":\"b\"}]}",
+        "expect": "大于等于过滤。",
+        "src": "$.items[?(@.qty>=2)]（过滤）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.items[?(@.qty >= 2)]",
+        "value": "{\"qty\":3,\"n\":\"a\"}"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.items[?(@.qty >= 2)]",
+        "value": "{qty=3, n=a}"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": [
+        {
+          "caseId": "legado/json-032",
+          "stage": "rule",
+          "field": "value",
+          "kind": "value",
+          "actual": "{\"qty\":3,\"n\":\"a\"}",
+          "expected": "{qty=3, n=a}"
+        }
+      ]
+    },
+    {
+      "id": "legado/json-033",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 187,
+      "oracleElapsedMicros": 181846,
+      "input": {
+        "name": "json-033",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.books[*].author",
+        "input": "{\"books\":[{\"author\":\"甲\"},{\"author\":\"乙\"}]}",
+        "expect": "数组对象字段提取。",
+        "src": "$.books[*].author（真实书源）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.books[*].author",
+        "value": "甲\n乙"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.books[*].author",
+        "value": "甲\n乙"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-034",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 956,
+      "oracleElapsedMicros": 185345,
+      "input": {
+        "name": "json-034",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.data.chapters.length()",
+        "input": "{\"data\":{\"chapters\":[\"c1\",\"c2\",\"c3\"]}}",
+        "expect": "length() 函数取数组长度。",
+        "src": "$.x.length()（JsonPath 函数）"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.data.chapters.length()",
+        "value": "3"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.data.chapters.length()",
+        "value": "3"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-001",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 456,
+      "oracleElapsedMicros": 154230,
+      "input": {
+        "name": "regex-001",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "Chapter (\\d+): (.*)",
+        "input": "Chapter 1: The Beginning\nChapter 2: The Middle",
+        "expect": "分组提取：全匹配 + 章节号 + 标题（无 dotAll，仅首行）。",
+        "src": "Chapter (\\d+): (.*)（既有 stage1 样例）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "Chapter (\\d+): (.*)",
+        "value": [
+          "Chapter 1: The Beginning",
+          "1",
+          "The Beginning"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "Chapter (\\d+): (.*)",
+        "value": [
+          "Chapter 1: The Beginning",
+          "1",
+          "The Beginning"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-002",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 86,
+      "oracleElapsedMicros": 147972,
+      "input": {
+        "name": "regex-002",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "line (.*)",
+        "input": "line one\nline two\nline three",
+        "expect": "无标志：. 不匹配换行，仅命中首行 line one（两引擎应一致）。",
+        "src": "line (.*)（既有 multiline 样例）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "line (.*)",
+        "value": [
+          "line one",
+          "one"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "line (.*)",
+        "value": [
+          "line one",
+          "one"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-003",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 101,
+      "oracleElapsedMicros": 149142,
+      "input": {
+        "name": "regex-003",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(https?://\\S+)",
+        "input": "见 https://example.com/book/1 与 http://x.co/2 结尾",
+        "expect": "提取 URL（首个匹配全串 + 分组）。",
+        "src": "(https?://\\S+)（url 提取）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(https?://\\S+)",
+        "value": [
+          "https://example.com/book/1",
+          "https://example.com/book/1"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(https?://\\S+)",
+        "value": [
+          "https://example.com/book/1",
+          "https://example.com/book/1"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-004",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 91,
+      "oracleElapsedMicros": 149938,
+      "input": {
+        "name": "regex-004",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d{4})-(\\d{2})-(\\d{2})",
+        "input": "更新于 2024-09-13 发布",
+        "expect": "日期分组：年/月/日。",
+        "src": "(\\d{4})-(\\d{2})-(\\d{2})（日期解析）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d{4})-(\\d{2})-(\\d{2})",
+        "value": [
+          "2024-09-13",
+          "2024",
+          "09",
+          "13"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d{4})-(\\d{2})-(\\d{2})",
+        "value": [
+          "2024-09-13",
+          "2024",
+          "09",
+          "13"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-005",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 102,
+      "oracleElapsedMicros": 146494,
+      "input": {
+        "name": "regex-005",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "第(\\d+)章",
+        "input": "最新 第1024章 大结局",
+        "expect": "章节号分组。",
+        "src": "第(\\d+)章（章节号）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "第(\\d+)章",
+        "value": [
+          "第1024章",
+          "1024"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "第(\\d+)章",
+        "value": [
+          "第1024章",
+          "1024"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-006",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 130,
+      "oracleElapsedMicros": 153084,
+      "input": {
+        "name": "regex-006",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\w+)@(\\w+)\\.(\\w+)",
+        "input": "联系 mailto:user@example.com 即可",
+        "expect": "邮箱三段分组。",
+        "src": "(\\w+)@(\\w+)\\.(\\w+)（邮箱）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\w+)@(\\w+)\\.(\\w+)",
+        "value": [
+          "user@example.com",
+          "user",
+          "example",
+          "com"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\w+)@(\\w+)\\.(\\w+)",
+        "value": [
+          "user@example.com",
+          "user",
+          "example",
+          "com"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-007",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 620,
+      "oracleElapsedMicros": 147426,
+      "input": {
+        "name": "regex-007",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d+)%%(\\w+)",
+        "input": "id=42 name=alpha",
+        "expect": "%% 链式：第一阶段取数字，拼接后第二阶段取单词。",
+        "src": "(\\d+)%%(\\w+)（链式提取）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d+)%%(\\w+)",
+        "value": [
+          "42",
+          "42"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d+)%%(\\w+)",
+        "value": [
+          "42",
+          "42"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-008",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 83,
+      "oracleElapsedMicros": 145482,
+      "input": {
+        "name": "regex-008",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\w+)%%(\\d+)",
+        "input": "a1b2c3",
+        "expect": "%% 链式：首段单词，次段取其内首个数字。",
+        "src": "(\\w+)%%(\\d+)（链式提取）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\w+)%%(\\d+)",
+        "value": [
+          "1",
+          "1"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\w+)%%(\\d+)",
+        "value": [
+          "1",
+          "1"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-009",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 112,
+      "oracleElapsedMicros": 151258,
+      "input": {
+        "name": "regex-009",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "[\\s\\S]*?\\\"content\\\":\\s*\\\"([^\\\"]+)\\\"",
+        "input": "前缀 {\"content\": \"正文第一段\"} 后缀",
+        "expect": "用 [\\s\\S] 跨行匹配（替代 dotAll）。",
+        "src": "[\\s\\S]*?\"x\":\"([^\"]+)\"（跨行提取）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "[\\s\\S]*?\\\"content\\\":\\s*\\\"([^\\\"]+)\\\"",
+        "value": [
+          "前缀 {\"content\": \"正文第一段\"",
+          "正文第一段"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "[\\s\\S]*?\\\"content\\\":\\s*\\\"([^\\\"]+)\\\"",
+        "value": [
+          "前缀 {\"content\": \"正文第一段\"",
+          "正文第一段"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-010",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 120,
+      "oracleElapsedMicros": 146209,
+      "input": {
+        "name": "regex-010",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "([^|]+)\\|([^|]+)\\|([^|]+)",
+        "input": "甲|乙|丙",
+        "expect": "竖线分隔三段分组。",
+        "src": "([^|]+)\\|([^|]+)\\|([^|]+)（管道分隔）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "([^|]+)\\|([^|]+)\\|([^|]+)",
+        "value": [
+          "甲|乙|丙",
+          "甲",
+          "乙",
+          "丙"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "([^|]+)\\|([^|]+)\\|([^|]+)",
+        "value": [
+          "甲|乙|丙",
+          "甲",
+          "乙",
+          "丙"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-011",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 83,
+      "oracleElapsedMicros": 145844,
+      "input": {
+        "name": "regex-011",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "《([^》]+)》",
+        "input": "推荐《诡秘之主》与《亵渎》两本书",
+        "expect": "书名号内文分组。",
+        "src": "《([^》]+)》（书名提取）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "《([^》]+)》",
+        "value": [
+          "《诡秘之主》",
+          "诡秘之主"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "《([^》]+)》",
+        "value": [
+          "《诡秘之主》",
+          "诡秘之主"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-012",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 95,
+      "oracleElapsedMicros": 159873,
+      "input": {
+        "name": "regex-012",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "【(.+?)】(.+)",
+        "input": "【作者】爱潜水的乌贼",
+        "expect": "方括号内分组 + 余下内容。",
+        "src": "【(.+?)】(.+)（标签提取）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "【(.+?)】(.+)",
+        "value": [
+          "【作者】爱潜水的乌贼",
+          "作者",
+          "爱潜水的乌贼"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "【(.+?)】(.+)",
+        "value": [
+          "【作者】爱潜水的乌贼",
+          "作者",
+          "爱潜水的乌贼"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-013",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 116,
+      "oracleElapsedMicros": 260695,
+      "input": {
+        "name": "regex-013",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "^\\s*([一-龥]+):\\s*(.+)$",
+        "input": "作者: 猫腻",
+        "expect": "多行键值：^ $ 仅整串首尾（无 multiline），仅首行。",
+        "src": "^\\s*([\\u4e00-\\u9fa5]+):\\s*(.+)$（键值）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "^\\s*([一-龥]+):\\s*(.+)$",
+        "value": [
+          "作者: 猫腻",
+          "作者",
+          "猫腻"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "^\\s*([一-龥]+):\\s*(.+)$",
+        "value": [
+          "作者: 猫腻",
+          "作者",
+          "猫腻"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-014",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 308,
+      "oracleElapsedMicros": 172917,
+      "input": {
+        "name": "regex-014",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})",
+        "input": "服务器 192.168.1.1 已启动",
+        "expect": "IP 地址分组。",
+        "src": "(\\d{1,3}\\.){3}\\d{1,3}（IP 提取）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})",
+        "value": [
+          "192.168.1.1",
+          "192.168.1.1"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})",
+        "value": [
+          "192.168.1.1",
+          "192.168.1.1"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-015",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 106,
+      "oracleElapsedMicros": 151829,
+      "input": {
+        "name": "regex-015",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "var\\s+(\\w+)\\s*=\\s*(\\d+)",
+        "input": "var count = 42",
+        "expect": "变量声明分组：名 + 值。",
+        "src": "var\\s+(\\w+)\\s*=\\s*(\\d+)（变量解析）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "var\\s+(\\w+)\\s*=\\s*(\\d+)",
+        "value": [
+          "var count = 42",
+          "count",
+          "42"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "var\\s+(\\w+)\\s*=\\s*(\\d+)",
+        "value": [
+          "var count = 42",
+          "count",
+          "42"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-016",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 85,
+      "oracleElapsedMicros": 147915,
+      "input": {
+        "name": "regex-016",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "<([a-zA-Z]+)>",
+        "input": "文本 <span> 内容 </span> 结束",
+        "expect": "标签名分组。",
+        "src": "<([^>]+)>（标签提取）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "<([a-zA-Z]+)>",
+        "value": [
+          "<span>",
+          "span"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "<([a-zA-Z]+)>",
+        "value": [
+          "<span>",
+          "span"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-017",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 97,
+      "oracleElapsedMicros": 156859,
+      "input": {
+        "name": "regex-017",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d+)\\s*px",
+        "input": "宽度 320px 高度 480px",
+        "expect": "数值 + 单位分组（首个匹配）。",
+        "src": "(\\d+)\\s*px（像素值）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d+)\\s*px",
+        "value": [
+          "320px",
+          "320"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d+)\\s*px",
+        "value": [
+          "320px",
+          "320"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-018",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 101,
+      "oracleElapsedMicros": 149683,
+      "input": {
+        "name": "regex-018",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "([A-Za-z]+)\\d+",
+        "input": "版本 v2 alpha3 beta9",
+        "expect": "字母 + 数字前缀分组。",
+        "src": "([A-Za-z]+)\\d+（版本片段）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "([A-Za-z]+)\\d+",
+        "value": [
+          "v2",
+          "v"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "([A-Za-z]+)\\d+",
+        "value": [
+          "v2",
+          "v"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-019",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 96,
+      "oracleElapsedMicros": 147034,
+      "input": {
+        "name": "regex-019",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "第([零一二三四五六七八九十]+)章",
+        "input": "最新更新 第十章 风云起",
+        "expect": "中文数字章节分组。",
+        "src": "第([零一二三四五六七八九十]+)章（中文章节）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "第([零一二三四五六七八九十]+)章",
+        "value": [
+          "第十章",
+          "十"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "第([零一二三四五六七八九十]+)章",
+        "value": [
+          "第十章",
+          "十"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-020",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 93,
+      "oracleElapsedMicros": 154384,
+      "input": {
+        "name": "regex-020",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\$\\{[^}]+\\})",
+        "input": "模板 ${name} 与 ${title} 占位",
+        "expect": "模板变量 ${...} 分组。",
+        "src": "(\\$\\{[^}]+\\})（模板变量）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\$\\{[^}]+\\})",
+        "value": [
+          "${name}",
+          "${name}"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\$\\{[^}]+\\})",
+        "value": [
+          "${name}",
+          "${name}"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-021",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 109,
+      "oracleElapsedMicros": 149511,
+      "input": {
+        "name": "regex-021",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "a(\\d+)b(\\d+)c",
+        "input": "a12b34c 之后 a56b78c",
+        "expect": "两段数字分组（首个匹配）。",
+        "src": "a(\\d+)b(\\d+)c（成对数字）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "a(\\d+)b(\\d+)c",
+        "value": [
+          "a12b34c",
+          "12",
+          "34"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "a(\\d+)b(\\d+)c",
+        "value": [
+          "a12b34c",
+          "12",
+          "34"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-022",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 88,
+      "oracleElapsedMicros": 151696,
+      "input": {
+        "name": "regex-022",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "/\\*([\\s\\S]*?)\\*/",
+        "input": "代码 /* 注释\n跨行 */ 结束",
+        "expect": "非贪婪块注释，[\\s\\S] 跨行。",
+        "src": "/\\*([\\s\\S]*?)\\*/（块注释）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "/\\*([\\s\\S]*?)\\*/",
+        "value": [
+          "/* 注释\n跨行 */",
+          " 注释\n跨行 "
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "/\\*([\\s\\S]*?)\\*/",
+        "value": [
+          "/* 注释\n跨行 */",
+          " 注释\n跨行 "
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-023",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 128,
+      "oracleElapsedMicros": 142051,
+      "input": {
+        "name": "regex-023",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\w+):\\s*(.+)",
+        "input": "title: 诡秘之主\nsub: 副标题",
+        "expect": "无 multiline：. 不跨行，仅命中首行 title: 诡秘之主。",
+        "src": "(\\w+):\\s*(.+)（无 multiline 首行）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\w+):\\s*(.+)",
+        "value": [
+          "title: 诡秘之主",
+          "title",
+          "诡秘之主"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\w+):\\s*(.+)",
+        "value": [
+          "title: 诡秘之主",
+          "title",
+          "诡秘之主"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-024",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 93,
+      "oracleElapsedMicros": 149058,
+      "input": {
+        "name": "regex-024",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "第(.+?)章",
+        "input": "第1卷第3章 开端",
+        "expect": "非贪婪章节分组。",
+        "src": "第(.+?)章（非贪婪）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "第(.+?)章",
+        "value": [
+          "第1卷第3章",
+          "1卷第3"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "第(.+?)章",
+        "value": [
+          "第1卷第3章",
+          "1卷第3"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-025",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 106,
+      "oracleElapsedMicros": 148792,
+      "input": {
+        "name": "regex-025",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "data-(id|name)=\\\"([^\\\"]+)\\\"",
+        "input": "节点 data-id=\"42\" data-name=\"x\" 属性",
+        "expect": "属性名枚举 + 值分组。",
+        "src": "data-(id|name)=\"([^\"]+)\"（属性提取）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "data-(id|name)=\\\"([^\\\"]+)\\\"",
+        "value": [
+          "data-id=\"42\"",
+          "id",
+          "42"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "data-(id|name)=\\\"([^\\\"]+)\\\"",
+        "value": [
+          "data-id=\"42\"",
+          "id",
+          "42"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-026",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 108,
+      "oracleElapsedMicros": 143777,
+      "input": {
+        "name": "regex-026",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d+)\\s*[×x]\\s*(\\d+)",
+        "input": "画布 1920 × 1080 分辨率",
+        "expect": "乘号分隔两段数字分组。",
+        "src": "(\\d+)\\s*[×x]\\s*(\\d+)（尺寸）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d+)\\s*[×x]\\s*(\\d+)",
+        "value": [
+          "1920 × 1080",
+          "1920",
+          "1080"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d+)\\s*[×x]\\s*(\\d+)",
+        "value": [
+          "1920 × 1080",
+          "1920",
+          "1080"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-027",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 125,
+      "oracleElapsedMicros": 147415,
+      "input": {
+        "name": "regex-027",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "([A-Z]{2,})\\s+([0-9]+)",
+        "input": "编号 ISBN 9787 出版",
+        "expect": "大写字母串 + 数字分组。",
+        "src": "([A-Z]{2,})\\s+([0-9]+)（编号）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "([A-Z]{2,})\\s+([0-9]+)",
+        "value": [
+          "ISBN 9787",
+          "ISBN",
+          "9787"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "([A-Z]{2,})\\s+([0-9]+)",
+        "value": [
+          "ISBN 9787",
+          "ISBN",
+          "9787"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-028",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 203,
+      "oracleElapsedMicros": 146347,
+      "input": {
+        "name": "regex-028",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\w+)%%([a-z]+)",
+        "input": "num7 word=hello",
+        "expect": "%% 链式：首段单词，次段取其内首个小写词。",
+        "src": "(\\w+)%%([a-z]+)（链式）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\w+)%%([a-z]+)",
+        "value": [
+          "num",
+          "num"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\w+)%%([a-z]+)",
+        "value": [
+          "num",
+          "num"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-029",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 107,
+      "oracleElapsedMicros": 150414,
+      "input": {
+        "name": "regex-029",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "\\((\\d{3})\\)\\s*(\\d{3}-\\d{4})",
+        "input": "电话 (021) 123-4567 联系",
+        "expect": "区号 + 号码分组。",
+        "src": "\\((\\d{3})\\)\\s*(\\d{3}-\\d{4})（电话）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "\\((\\d{3})\\)\\s*(\\d{3}-\\d{4})",
+        "value": [
+          "(021) 123-4567",
+          "021",
+          "123-4567"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "\\((\\d{3})\\)\\s*(\\d{3}-\\d{4})",
+        "value": [
+          "(021) 123-4567",
+          "021",
+          "123-4567"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-030",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 101,
+      "oracleElapsedMicros": 150145,
+      "input": {
+        "name": "regex-030",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "([^,]+),([^,]+),([^,]+)",
+        "input": "北京,上海,广州",
+        "expect": "逗号分隔三段分组。",
+        "src": "([^,]+),([^,]+),([^,]+)（逗号分隔）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "([^,]+),([^,]+),([^,]+)",
+        "value": [
+          "北京,上海,广州",
+          "北京",
+          "上海",
+          "广州"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "([^,]+),([^,]+),([^,]+)",
+        "value": [
+          "北京,上海,广州",
+          "北京",
+          "上海",
+          "广州"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-031",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 102,
+      "oracleElapsedMicros": 143627,
+      "input": {
+        "name": "regex-031",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "src=\\\"([^\\\"]+)\\\"",
+        "input": "图片 <img src=\"https://x.co/a.jpg\"> 显示",
+        "expect": "HTML 属性 src 值分组。",
+        "src": "src=\"([^\"]+)\"（src 提取）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "src=\\\"([^\\\"]+)\\\"",
+        "value": [
+          "src=\"https://x.co/a.jpg\"",
+          "https://x.co/a.jpg"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "src=\\\"([^\\\"]+)\\\"",
+        "value": [
+          "src=\"https://x.co/a.jpg\"",
+          "https://x.co/a.jpg"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-032",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 95,
+      "oracleElapsedMicros": 148988,
+      "input": {
+        "name": "regex-032",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "【作话】\\s*(.+)",
+        "input": "【作话】感谢投喂的小天使",
+        "expect": "作话标记后内容分组。",
+        "src": "【作话】\\s*(.+)（作者有话）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "【作话】\\s*(.+)",
+        "value": [
+          "【作话】感谢投喂的小天使",
+          "感谢投喂的小天使"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "【作话】\\s*(.+)",
+        "value": [
+          "【作话】感谢投喂的小天使",
+          "感谢投喂的小天使"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-033",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 92,
+      "oracleElapsedMicros": 146677,
+      "input": {
+        "name": "regex-033",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d{2}:\\d{2})",
+        "input": "更新时间 09:27 已发布",
+        "expect": "时间 HH:MM 分组。",
+        "src": "(\\d{2}:\\d{2})（时间）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d{2}:\\d{2})",
+        "value": [
+          "09:27",
+          "09:27"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d{2}:\\d{2})",
+        "value": [
+          "09:27",
+          "09:27"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-034",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 112,
+      "oracleElapsedMicros": 149256,
+      "input": {
+        "name": "regex-034",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "([一-龥]+)：(.+)",
+        "input": "作者：猫腻 字数：120万",
+        "expect": "全角冒号 + 中文键值分组。",
+        "src": "([一-龥]+)：(.+)（全角冒号键值）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "([一-龥]+)：(.+)",
+        "value": [
+          "作者：猫腻 字数：120万",
+          "作者",
+          "猫腻 字数：120万"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "([一-龥]+)：(.+)",
+        "value": [
+          "作者：猫腻 字数：120万",
+          "作者",
+          "猫腻 字数：120万"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-035",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 138,
+      "oracleElapsedMicros": 144547,
+      "input": {
+        "name": "regex-035",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "\\\"(\\w+)\\\":\\s*\\\"([^\\\"]*)\\\"",
+        "input": "{\"title\": \"诡秘之主\", \"author\": \"乌贼\"}",
+        "expect": "JSON 风格键值分组（无 dotAll，首行）。",
+        "src": "\"(\\w+)\":\\s*\"([^\"]*)\"（json 字段）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "\\\"(\\w+)\\\":\\s*\\\"([^\\\"]*)\\\"",
+        "value": [
+          "\"title\": \"诡秘之主\"",
+          "title",
+          "诡秘之主"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "\\\"(\\w+)\\\":\\s*\\\"([^\\\"]*)\\\"",
+        "value": [
+          "\"title\": \"诡秘之主\"",
+          "title",
+          "诡秘之主"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-036",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 130,
+      "oracleElapsedMicros": 152586,
+      "input": {
+        "name": "regex-036",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "卷(\\d+)",
+        "input": "正文 卷12 风云变幻",
+        "expect": "卷号分组。",
+        "src": "卷(\\d+)（卷号）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "卷(\\d+)",
+        "value": [
+          "卷12",
+          "12"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "卷(\\d+)",
+        "value": [
+          "卷12",
+          "12"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-037",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 103,
+      "oracleElapsedMicros": 144611,
+      "input": {
+        "name": "regex-037",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "\\$(\\d+\\.\\d+)",
+        "input": "售价 $12.99 包月",
+        "expect": "价格分组。",
+        "src": "\\$(\\d+\\.\\d+)（价格）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "\\$(\\d+\\.\\d+)",
+        "value": [
+          "$12.99",
+          "12.99"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "\\$(\\d+\\.\\d+)",
+        "value": [
+          "$12.99",
+          "12.99"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-038",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 91,
+      "oracleElapsedMicros": 148113,
+      "input": {
+        "name": "regex-038",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "#(\\w+)",
+        "input": "话题 #xuanhuan #xiuzhen 热门",
+        "expect": "话题标签分组（首匹配 #xuanhuan）。",
+        "src": "#(\\w+)（标签）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "#(\\w+)",
+        "value": [
+          "#xuanhuan",
+          "xuanhuan"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "#(\\w+)",
+        "value": [
+          "#xuanhuan",
+          "xuanhuan"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-039",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 90,
+      "oracleElapsedMicros": 151748,
+      "input": {
+        "name": "regex-039",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d{3}-\\d{4}-\\d{4})",
+        "input": "手机 138-1234-5678 联系",
+        "expect": "手机号分组。",
+        "src": "(\\d{3}-\\d{4}-\\d{4})（手机）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d{3}-\\d{4}-\\d{4})",
+        "value": [
+          "138-1234-5678",
+          "138-1234-5678"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d{3}-\\d{4}-\\d{4})",
+        "value": [
+          "138-1234-5678",
+          "138-1234-5678"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-040",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 109,
+      "oracleElapsedMicros": 144236,
+      "input": {
+        "name": "regex-040",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "\\[([^\\]]+)\\]",
+        "input": "标签 [玄幻][热血][连载] 列表",
+        "expect": "方括号内分组。",
+        "src": "\\[([^\\]]+)\\]（方括号）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "\\[([^\\]]+)\\]",
+        "value": [
+          "[玄幻]",
+          "玄幻"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "\\[([^\\]]+)\\]",
+        "value": [
+          "[玄幻]",
+          "玄幻"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-041",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 90,
+      "oracleElapsedMicros": 148928,
+      "input": {
+        "name": "regex-041",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d+)年(\\d+)月(\\d+)日",
+        "input": "上架 2024年9月13日 发行",
+        "expect": "中文日期三段分组。",
+        "src": "(\\d+)年(\\d+)月(\\d+)日（中文日期）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d+)年(\\d+)月(\\d+)日",
+        "value": [
+          "2024年9月13日",
+          "2024",
+          "9",
+          "13"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d+)年(\\d+)月(\\d+)日",
+        "value": [
+          "2024年9月13日",
+          "2024",
+          "9",
+          "13"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-042",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 101,
+      "oracleElapsedMicros": 144904,
+      "input": {
+        "name": "regex-042",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})",
+        "input": "反馈请发 user@example.com 或 admin@x.co",
+        "expect": "完整邮箱分组（首匹配）。",
+        "src": "([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})（邮箱）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})",
+        "value": [
+          "user@example.com",
+          "user@example.com"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})",
+        "value": [
+          "user@example.com",
+          "user@example.com"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-043",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 115,
+      "oracleElapsedMicros": 145839,
+      "input": {
+        "name": "regex-043",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "chapter-(\\d+)",
+        "input": "链接 chapter-1024 下一章",
+        "expect": "英文章节号分组。",
+        "src": "chapter-(\\d+)（英文章节）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "chapter-(\\d+)",
+        "value": [
+          "chapter-1024",
+          "1024"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "chapter-(\\d+)",
+        "value": [
+          "chapter-1024",
+          "1024"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-044",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 94,
+      "oracleElapsedMicros": 152626,
+      "input": {
+        "name": "regex-044",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d+)\\.(\\d+)\\.(\\d+)",
+        "input": "版本 v1.2.3 已发布",
+        "expect": "版本号三段分组。",
+        "src": "(\\d+)\\.(\\d+)\\.(\\d+)（版本号）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d+)\\.(\\d+)\\.(\\d+)",
+        "value": [
+          "1.2.3",
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d+)\\.(\\d+)\\.(\\d+)",
+        "value": [
+          "1.2.3",
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-045",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 93,
+      "oracleElapsedMicros": 146582,
+      "input": {
+        "name": "regex-045",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "url=([^\\s&]+)",
+        "input": "跳转 url=https://x.co/a 完成",
+        "expect": "查询参数值分组。",
+        "src": "url=([^\\s&]+)（参数）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "url=([^\\s&]+)",
+        "value": [
+          "url=https://x.co/a",
+          "https://x.co/a"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "url=([^\\s&]+)",
+        "value": [
+          "url=https://x.co/a",
+          "https://x.co/a"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-046",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 101,
+      "oracleElapsedMicros": 148967,
+      "input": {
+        "name": "regex-046",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d+)(px|em|rem)",
+        "input": "字号 16px 行距 1.5em",
+        "expect": "数值 + CSS 单位分组。",
+        "src": "(\\d+)(px|em|rem)（单位）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d+)(px|em|rem)",
+        "value": [
+          "16px",
+          "16",
+          "px"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d+)(px|em|rem)",
+        "value": [
+          "16px",
+          "16",
+          "px"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-047",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 109,
+      "oracleElapsedMicros": 150060,
+      "input": {
+        "name": "regex-047",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "^\\s*-\\s*(.+)",
+        "input": "- 第一项\n- 第二项",
+        "expect": "列表项：无 multiline，仅首行命中。",
+        "src": "^\\s*-\\s*(.+)（列表项）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "^\\s*-\\s*(.+)",
+        "value": [
+          "- 第一项",
+          "第一项"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "^\\s*-\\s*(.+)",
+        "value": [
+          "- 第一项",
+          "第一项"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-048",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 143,
+      "oracleElapsedMicros": 149201,
+      "input": {
+        "name": "regex-048",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "\\b(\\w{5,})\\b",
+        "input": "characterization paragraph document",
+        "expect": "长单词（≥5）分组（首匹配）。",
+        "src": "\\b(\\w{5,})\\b（长单词）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "\\b(\\w{5,})\\b",
+        "value": [
+          "characterization",
+          "characterization"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "\\b(\\w{5,})\\b",
+        "value": [
+          "characterization",
+          "characterization"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-049",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 125,
+      "oracleElapsedMicros": 146930,
+      "input": {
+        "name": "regex-049",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d{2}/\\d{2}/\\d{4})",
+        "input": "日期 13/09/2024 记录",
+        "expect": "斜杠日期分组。",
+        "src": "(\\d{2}/\\d{2}/\\d{4})（斜杠日期）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d{2}/\\d{2}/\\d{4})",
+        "value": [
+          "13/09/2024",
+          "13/09/2024"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d{2}/\\d{2}/\\d{4})",
+        "value": [
+          "13/09/2024",
+          "13/09/2024"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-050",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 117,
+      "oracleElapsedMicros": 147826,
+      "input": {
+        "name": "regex-050",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(TODO|FIXME):(.+)",
+        "input": "TODO: 补充正文清洗逻辑",
+        "expect": "标记 + 内容分组。",
+        "src": "(TODO|FIXME):(.+)（标记）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(TODO|FIXME):(.+)",
+        "value": [
+          "TODO: 补充正文清洗逻辑",
+          "TODO",
+          " 补充正文清洗逻辑"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(TODO|FIXME):(.+)",
+        "value": [
+          "TODO: 补充正文清洗逻辑",
+          "TODO",
+          " 补充正文清洗逻辑"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-051",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 99,
+      "oracleElapsedMicros": 154211,
+      "input": {
+        "name": "regex-051",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "0x([0-9a-fA-F]+)",
+        "input": "颜色 0x1a2b3c 定义",
+        "expect": "十六进制值分组。",
+        "src": "0x([0-9a-fA-F]+)（hex）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "0x([0-9a-fA-F]+)",
+        "value": [
+          "0x1a2b3c",
+          "1a2b3c"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "0x([0-9a-fA-F]+)",
+        "value": [
+          "0x1a2b3c",
+          "1a2b3c"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-052",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 111,
+      "oracleElapsedMicros": 150578,
+      "input": {
+        "name": "regex-052",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d+)\\s*-\\s*(\\d+)",
+        "input": "页数 12 - 34 区间",
+        "expect": "范围两段分组。",
+        "src": "(\\d+)\\s*-\\s*(\\d+)（范围）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d+)\\s*-\\s*(\\d+)",
+        "value": [
+          "12 - 34",
+          "12",
+          "34"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d+)\\s*-\\s*(\\d+)",
+        "value": [
+          "12 - 34",
+          "12",
+          "34"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-053",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 95,
+      "oracleElapsedMicros": 149430,
+      "input": {
+        "name": "regex-053",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "%([a-zA-Z]+)%",
+        "input": "模板 %name% 与 %title% 占位",
+        "expect": "百分号占位符分组。",
+        "src": "%([a-zA-Z]+)%（占位符）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "%([a-zA-Z]+)%",
+        "value": [
+          "%name%",
+          "name"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "%([a-zA-Z]+)%",
+        "value": [
+          "%name%",
+          "name"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-054",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 128,
+      "oracleElapsedMicros": 146634,
+      "input": {
+        "name": "regex-054",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d+)%%(\\d+)",
+        "input": "a7b9 链式",
+        "expect": "%% 链式两组数字。",
+        "src": "(\\d+)%%(\\d+)（链式数字）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d+)%%(\\d+)",
+        "value": [
+          "79",
+          "79"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d+)%%(\\d+)",
+        "value": [
+          "79",
+          "79"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-055",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 97,
+      "oracleElapsedMicros": 147291,
+      "input": {
+        "name": "regex-055",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "<title>([^<]+)</title>",
+        "input": "<title>诡秘之主</title> 结束",
+        "expect": "title 标签内文分组。",
+        "src": "<title>([^<]+)</title>（title）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "<title>([^<]+)</title>",
+        "value": [
+          "<title>诡秘之主</title>",
+          "诡秘之主"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "<title>([^<]+)</title>",
+        "value": [
+          "<title>诡秘之主</title>",
+          "诡秘之主"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-056",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 89,
+      "oracleElapsedMicros": 148441,
+      "input": {
+        "name": "regex-056",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d{1,2}):(\\d{1,2}):(\\d{1,2})",
+        "input": "时长 01:23:45 播放",
+        "expect": "时分秒三段分组。",
+        "src": "(\\d{1,2}):(\\d{1,2}):(\\d{1,2})（时分秒）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d{1,2}):(\\d{1,2}):(\\d{1,2})",
+        "value": [
+          "01:23:45",
+          "01",
+          "23",
+          "45"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d{1,2}):(\\d{1,2}):(\\d{1,2})",
+        "value": [
+          "01:23:45",
+          "01",
+          "23",
+          "45"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-057",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 95,
+      "oracleElapsedMicros": 144313,
+      "input": {
+        "name": "regex-057",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "【(.*?)】",
+        "input": "【类别】玄幻【进度】连载",
+        "expect": "方括号内容分组（首匹配）。",
+        "src": "【(.*?)】（方括号）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "【(.*?)】",
+        "value": [
+          "【类别】",
+          "类别"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "【(.*?)】",
+        "value": [
+          "【类别】",
+          "类别"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-058",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 129,
+      "oracleElapsedMicros": 154213,
+      "input": {
+        "name": "regex-058",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "第\\s*([0-9]+)\\s*卷",
+        "input": "第 3 卷 风起云涌",
+        "expect": "带空白卷号分组。",
+        "src": "第\\s*([0-9]+)\\s*卷（卷号）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "第\\s*([0-9]+)\\s*卷",
+        "value": [
+          "第 3 卷",
+          "3"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "第\\s*([0-9]+)\\s*卷",
+        "value": [
+          "第 3 卷",
+          "3"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-059",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 123,
+      "oracleElapsedMicros": 142382,
+      "input": {
+        "name": "regex-059",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "([a-z]+)_([a-z]+)",
+        "input": "snake_case_name 变量",
+        "expect": "下划线命名两段分组。",
+        "src": "([a-z]+)_([a-z]+)（下划线）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "([a-z]+)_([a-z]+)",
+        "value": [
+          "snake_case",
+          "snake",
+          "case"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "([a-z]+)_([a-z]+)",
+        "value": [
+          "snake_case",
+          "snake",
+          "case"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-060",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 94,
+      "oracleElapsedMicros": 145619,
+      "input": {
+        "name": "regex-060",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\d{4})年",
+        "input": "始于 2024年 连载",
+        "expect": "年份分组。",
+        "src": "(\\d{4})年（年份）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\d{4})年",
+        "value": [
+          "2024年",
+          "2024"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\d{4})年",
+        "value": [
+          "2024年",
+          "2024"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-061",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 96,
+      "oracleElapsedMicros": 143858,
+      "input": {
+        "name": "regex-061",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "\\\"content\\\":\\\"([^\\\"]+)\\\"",
+        "input": "结果 \"content\":\"正文第一段\" 显示",
+        "expect": "JSON content 字段分组。",
+        "src": "\"content\":\"([^\"]+)\"（content）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "\\\"content\\\":\\\"([^\\\"]+)\\\"",
+        "value": [
+          "\"content\":\"正文第一段\"",
+          "正文第一段"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "\\\"content\\\":\\\"([^\\\"]+)\\\"",
+        "value": [
+          "\"content\":\"正文第一段\"",
+          "正文第一段"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-062",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 101,
+      "oracleElapsedMicros": 145437,
+      "input": {
+        "name": "regex-062",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(\\+?\\d{1,3}-?\\d{3,})",
+        "input": "电话 +86-1380000 联系",
+        "expect": "带区号电话分组。",
+        "src": "(\\+?\\d{1,3}-?\\d{3,})（电话）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(\\+?\\d{1,3}-?\\d{3,})",
+        "value": [
+          "+86-1380000",
+          "+86-1380000"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(\\+?\\d{1,3}-?\\d{3,})",
+        "value": [
+          "+86-1380000",
+          "+86-1380000"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-063",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 99,
+      "oracleElapsedMicros": 147049,
+      "input": {
+        "name": "regex-063",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "(https?://[^\\s]+)",
+        "input": "访问 https://example.com/path?q=1 获取",
+        "expect": "完整 URL 分组（首匹配）。",
+        "src": "(https?://[^\\s]+)（url）"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "(https?://[^\\s]+)",
+        "value": [
+          "https://example.com/path?q=1",
+          "https://example.com/path?q=1"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "(https?://[^\\s]+)",
+        "value": [
+          "https://example.com/path?q=1",
+          "https://example.com/path?q=1"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    }
+  ]
+}

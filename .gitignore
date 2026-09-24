@@ -1,0 +1,56 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Backup files
+.backup-*
+*.bak
+*.swp
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Node modules
+node_modules/
+dist/
+build/
+
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+.tmp-*
+
+# Embedded git repositories
+reference/flutter-sdk/
+
+# Temporary and config directories
+.dsh-computer-use/
+.workbuddy/
+.omo/
+.config/
+
+# Reference projects (legado-E)
+reference/
+
+# Trail directory (temporary files)
+trail/
+
+# Build artifacts
+dist/
+build/
+target/
+.gradle/

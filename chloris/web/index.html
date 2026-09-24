@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Chloris reader">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Chloris">
+  <meta name="theme-color" content="#F0EEE6">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <title>Chloris</title>
+  <link rel="manifest" href="manifest.json">
+  <!--
+    No webfont <link> here on purpose.
+
+    This app renders through CanvasKit, which keeps its own font collection
+    and cannot consume DOM `@font-face` rules, so a Google Fonts stylesheet
+    buys nothing for the actual UI text — while being render-blocking, so on
+    a network that cannot reach fonts.googleapis.com it stalls first paint.
+    The UI font stacks live in lib/app/theme/app_theme.dart and resolve
+    against the platform: Source Serif 4 → Georgia (Absolutely display), and
+    IBM Plex Mono → SF Mono / Menlo (terminal).
+  -->
+  <style>
+    :root {
+      --chloris-ease: cubic-bezier(.22, .61, .36, 1);
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #F0EEE6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      transition: background-color 240ms var(--chloris-ease), color 240ms var(--chloris-ease);
+    }
+
+    /* ---- Absolutely: warm editorial paper ---------------------------- */
+    html[data-ui-style="absolutely"], html[data-ui-style="absolutely"] body {
+      background: #F0EEE6;
+      color: #191919;
+      font-family: "SourceSansPro", "Inter", -apple-system, BlinkMacSystemFont,
+                   "SF Pro Text", "Segoe UI", "PingFang SC", "NotoSansSC", sans-serif;
+      letter-spacing: 0.01em;
+    }
+    html[data-ui-style="absolutely"] ::selection {
+      background: rgba(217, 119, 87, .18);
+      color: #191919;
+    }
+    /* Editorial headings use the print serif; the app uses the same stack. */
+    html[data-ui-style="absolutely"] h1,
+    html[data-ui-style="absolutely"] h2,
+    html[data-ui-style="absolutely"] h3 {
+      font-family: "PTSerif", "Source Serif 4", Georgia, "Songti SC",
+                   "Noto Serif SC", "NotoSerifSC", "NotoSansSC", serif;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    /* ---- Terminal: monochrome console ------------------------------- */
+    html[data-ui-style="terminal"], html[data-ui-style="terminal"] body {
+      background: #0a0a0a;
+      color: #f2f2f2;
+      font-family: "IBMPlexMono", "IBM Plex Mono", ui-monospace, "SF Mono",
+                   Menlo, Consolas, "DejaVu Sans Mono", "NotoSansSC", monospace;
+      letter-spacing: 0.02em;
+    }
+    html[data-ui-style="terminal"] ::selection {
+      background: #f2f2f2;
+      color: #000000;
+    }
+    html[data-ui-style="terminal"] { cursor: text; }
+    html[data-ui-style="terminal"] a { color: #ffffff; text-decoration: underline; }
+
+    /* ---- Chrome ------------------------------------------------------ */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    html[data-ui-style="absolutely"] ::-webkit-scrollbar-thumb {
+      background: rgba(25, 25, 25, .16);
+      border-radius: 999px;
+    }
+    html[data-ui-style="absolutely"] ::-webkit-scrollbar-thumb:hover {
+      background: rgba(25, 25, 25, .28);
+    }
+    html[data-ui-style="terminal"] ::-webkit-scrollbar-thumb {
+      background: #2a2a2a;
+    }
+    html[data-ui-style="terminal"] ::-webkit-scrollbar-thumb:hover {
+      background: #4a4a4a;
+    }
+
+    flutter-view,
+    flt-glass-pane,
+    flt-scene-host,
+    flutter-view canvas,
+    flt-glass-pane canvas {
+      image-rendering: auto !important;
+      -ms-interpolation-mode: bicubic;
+    }
+    input, textarea {
+      -webkit-user-drag: none !important;
+      user-drag: none !important;
+    }
+  </style>
+  <script>
+    window.setChlorisUiStyle = function (id) {
+      // Legacy id 'claude' normalizes to 'absolutely'.
+      if (id === 'claude') id = 'absolutely';
+      document.documentElement.setAttribute('data-ui-style', id || 'classic');
+    };
+  </script>
+</head>
+<body>
+  <script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+    _flutter.loader.load({
+      config: {
+        renderer: "canvaskit",
+        canvasKitVariant: "full",
+        // Serve the engine from `canvaskit/` that ships inside this build.
+        // `useLocalCanvasKit` alone still resolves to www.gstatic.com, which
+        // makes the app fail to boot on an offline / restricted network.
+        canvasKitBaseUrl: "canvaskit/",
+        useLocalCanvasKit: true
+      }
+    });
+  </script>
+</body>
+</html>

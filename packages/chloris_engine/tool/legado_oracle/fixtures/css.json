@@ -1,0 +1,298 @@
+[
+  {
+    "id": "css-001",
+    "kind": "css",
+    "rule": "a@text",
+    "content": "<div><a>Alpha</a><a>Beta</a><a>Gamma</a></div>",
+    "expect": "提取全部 <a> 文本，按文档顺序返回。",
+    "src": "基础选择器 a@text（广泛见于 ruleSearch.bookList/name）"
+  },
+  {
+    "id": "css-002",
+    "kind": "css",
+    "rule": "a@href",
+    "content": "<div><a href=\"/b/1\">一</a><a href=\"/b/2\">二</a></div>",
+    "expect": "提取 <a> 的 href 属性值。",
+    "src": "a@href（ruleSearch.bookUrl 主流写法）"
+  },
+  {
+    "id": "css-003",
+    "kind": "css",
+    "rule": "img@src",
+    "content": "<div><img src=\"https://x.co/a.jpg\"></div>",
+    "expect": "提取 <img> 的 src 属性。",
+    "src": "img@src / @src（封面/图片规则）"
+  },
+  {
+    "id": "css-004",
+    "kind": "css",
+    "rule": ".name@text",
+    "content": "<span class=\"name\">秦牧</span>",
+    "expect": "按 class 选择元素并取文本。",
+    "src": ".name@text（ruleBookInfo.name 常见）"
+  },
+  {
+    "id": "css-005",
+    "kind": "css",
+    "rule": "#title@text",
+    "content": "<h1 id=\"title\">诡秘之主</h1>",
+    "expect": "按 id 选择并取文本。",
+    "src": "#title@text（详情页标题）"
+  },
+  {
+    "id": "css-006",
+    "kind": "css",
+    "rule": "p@text",
+    "content": "<p>作者：爱潜水的乌贼</p><p>分类：玄幻</p>",
+    "expect": "按标签取全部段落文本。",
+    "src": "p@text（简介/信息段落）"
+  },
+  {
+    "id": "css-007",
+    "kind": "css",
+    "rule": ":contains(作者)@text",
+    "content": "<div><p>作者：爱潜水的乌贼</p><p>简介：一段文字</p></div>",
+    "expect": "伪类 :contains 选择包含『作者』的元素并取文本。",
+    "src": "span:contains(作者：)@text（ruleBookInfo.author 源自真实书源）"
+  },
+  {
+    "id": "css-008",
+    "kind": "css",
+    "rule": "dd:contains(最新章节：) > a@text",
+    "content": "<dl><dd>最新章节：<a>第1章 开端</a></dd></dl>",
+    "expect": "复合：dd:contains 定位 + 子代 > a 取文本。",
+    "src": "dd:contains(最新章节：) > a@text（真实书源 tocUrl/lastChapter）"
+  },
+  {
+    "id": "css-009",
+    "kind": "css",
+    "rule": "dt:contains(作者)+dd a@text",
+    "content": "<dl><dt>作者</dt><dd><a>猫腻</a></dd></dl>",
+    "expect": "相邻兄弟 +dd 再取 descendant a 文本。",
+    "src": "dt:contains(作者)+dd a@text（真实书源 author 规则）"
+  },
+  {
+    "id": "css-010",
+    "kind": "css",
+    "rule": "@css:a:contains(下一页)@href",
+    "content": "<div><a href=\"/p/2\">下一页</a><a href=\"/p/1\">上一页</a></div>",
+    "expect": "@css: 前缀走原生 CSS 选择器，:contains 命中『下一页』取 href。",
+    "src": "@css:a:contains(下一页)@href（分页 nextUrl 规则）"
+  },
+  {
+    "id": "css-011",
+    "kind": "css",
+    "rule": "span:contains(作者：)@text",
+    "content": "<div><span>作者：烽火戏诸侯</span><span>状态：连载</span></div>",
+    "expect": ":contains 命中带冒号文本的元素取文本。",
+    "src": "span:contains(作者：)@text（真实书源）"
+  },
+  {
+    "id": "css-012",
+    "kind": "css",
+    "rule": "tag.a.0@href",
+    "content": "<div><a href=\"/x/0\">零</a><a href=\"/x/1\">一</a><a href=\"/x/2\">二</a></div>",
+    "expect": "tag.a 前缀 + 索引 0 取第一个 <a> 的 href。",
+    "src": "tag.a.0@href（真实书源 bookUrl）"
+  },
+  {
+    "id": "css-013",
+    "kind": "css",
+    "rule": "a.0@text",
+    "content": "<p><a>零</a><a>一</a><a>二</a><a>三</a></p>",
+    "expect": "索引 0 取第一个 <a> 文本。",
+    "src": "a.0@text（索引选择）"
+  },
+  {
+    "id": "css-014",
+    "kind": "css",
+    "rule": "a.1@text",
+    "content": "<p><a>零</a><a>一</a><a>二</a></p>",
+    "expect": "索引 1 取第二个 <a> 文本。",
+    "src": "a.1@text（索引选择）"
+  },
+  {
+    "id": "css-015",
+    "kind": "css",
+    "rule": "a.0:2@text",
+    "content": "<p><a>zero</a><a>one</a><a>two</a><a>three</a></p>",
+    "expect": "旧式索引 a.0:2 —— 取索引集合 {0,2} 两个元素（两引擎应一致）。",
+    "src": "a.0:2@text（索引区间，源自审计既有样例）"
+  },
+  {
+    "id": "css-016",
+    "kind": "css",
+    "rule": "span.0:1@text",
+    "content": "<div><span>甲</span><span>乙</span><span>丙</span></div>",
+    "expect": "span.0:1 取索引集合 {0,1}。",
+    "src": "span.0:1@text（真实书源 info 区间）"
+  },
+  {
+    "id": "css-017",
+    "kind": "css",
+    "rule": "a[0:2]@text",
+    "content": "<p><a>zero</a><a>one</a><a>two</a><a>three</a></p>",
+    "expect": "方括号区间 a[0:2] 取 0..2 闭区间（含两端），三个元素。",
+    "src": "tag.div[0:2]（方括号索引写法）"
+  },
+  {
+    "id": "css-018",
+    "kind": "css",
+    "rule": "a[-1]@text",
+    "content": "<p><a>zero</a><a>one</a><a>two</a></p>",
+    "expect": "负索引 -1 取最后一个元素。",
+    "src": "a.-1@text（负索引）"
+  },
+  {
+    "id": "css-019",
+    "kind": "css",
+    "rule": "a[!0]@text",
+    "content": "<p><a>zero</a><a>one</a><a>two</a></p>",
+    "expect": "排除式 [!0] 去掉索引 0，保留 1,2。",
+    "src": "a[!0]@text（排除索引，legado 方括号写法）"
+  },
+  {
+    "id": "css-020",
+    "kind": "css",
+    "rule": "a@text||b@text",
+    "content": "<div><b>只有b</b></div>",
+    "expect": "|| 回退：a 无命中则用 b。",
+    "src": "a@text||b@text（ruleSearch.name 常见回退）"
+  },
+  {
+    "id": "css-021",
+    "kind": "css",
+    "rule": "a@text&&b@text",
+    "content": "<div><a>A</a><b>B</b></div>",
+    "expect": "&& 合并两条规则结果。",
+    "src": "a@text&&b@text（信息合并）"
+  },
+  {
+    "id": "css-022",
+    "kind": "css",
+    "rule": "p@ownText",
+    "content": "<p>直接文本<em>强调</em>更多</p>",
+    "expect": "ownText 只取元素自身直接文本节点，不含子元素文本。",
+    "src": "class.book_other@ownText（真实书源）"
+  },
+  {
+    "id": "css-023",
+    "kind": "css",
+    "rule": "div@textNodes",
+    "content": "<div>甲<em>乙</em>丙</div>",
+    "expect": "textNodes 取文本节点（忽略子元素标签自身）。",
+    "src": "span.0@textNodes（真实书源）"
+  },
+  {
+    "id": "css-024",
+    "kind": "css",
+    "rule": "div@html",
+    "content": "<div><span>内容</span></div>",
+    "expect": "@html 取元素 outerHTML。",
+    "src": "id.jianjie-popup.0@class.content.0@tag.p.0@html（真实书源）"
+  },
+  {
+    "id": "css-025",
+    "kind": "css",
+    "rule": "div@all",
+    "content": "<div><span>一</span><span>二</span></div>",
+    "expect": "@all 取所有命中元素的 outerHTML 拼接。",
+    "src": "#TextContent@all（真实书源）"
+  },
+  {
+    "id": "css-026",
+    "kind": "css",
+    "rule": "a@data-url",
+    "content": "<div><a data-url=\"https://x.co/1\">链接</a></div>",
+    "expect": "自定义属性 @data-url 提取。",
+    "src": "a@data-xxx（真实书源自定义属性）"
+  },
+  {
+    "id": "css-027",
+    "kind": "css",
+    "rule": "ul:has(>a)@text",
+    "content": "<ul><li><a>有链接</a></li></ul><ul><li>无链接</li></ul>",
+    "expect": ":has(>a) 选择含直接子代 a 的 ul。",
+    "src": "*:has(>*:has(>a))（真实书源 toc 规则）"
+  },
+  {
+    "id": "css-028",
+    "kind": "css",
+    "rule": "p:matches(第|章)@text",
+    "content": "<div><p>第1章 开端</p><p>无关段落</p></div>",
+    "expect": ":matches 正则匹配元素文本。",
+    "src": "*:matches(第|章|Chapter)（真实书源）"
+  },
+  {
+    "id": "css-029",
+    "kind": "css",
+    "rule": "div:not(:has(p))@text",
+    "content": "<div>无p</div><div><p>有p</p></div>",
+    "expect": ":not(:has(p)) 排除含 p 的元素。",
+    "src": "*:not(:has(div))（真实书源）"
+  },
+  {
+    "id": "css-030",
+    "kind": "css",
+    "rule": "ul li@text",
+    "content": "<ul><li>一</li><li>二</li></ul>",
+    "expect": "后代选择器取全部 li 文本。",
+    "src": "ul.list_ul@li（真实书源 bookList）"
+  },
+  {
+    "id": "css-031",
+    "kind": "css",
+    "rule": "div.box a.2@href",
+    "content": "<div class=\"box\"><a href=\"1\"></a><a href=\"2\"></a><a href=\"3\"></a></div>",
+    "expect": "复合 class + 索引 2 取第三个 <a> 的 href。",
+    "src": ".box-artic div.2:1@text（真实书源索引）"
+  },
+  {
+    "id": "css-032",
+    "kind": "css",
+    "rule": "p:contains(状态)@text",
+    "content": "<div><p>状态：连载</p><p>分类：玄幻</p></div>",
+    "expect": ":contains 命中『状态』段落取文本。",
+    "src": "p:contains(状态)@text（真实书源）"
+  },
+  {
+    "id": "css-033",
+    "kind": "css",
+    "rule": "class.info@text",
+    "content": "<div class=\"info\">简介内容</div>",
+    "expect": "class 前缀取类元素文本。",
+    "src": "class.info@text（真实书源）"
+  },
+  {
+    "id": "css-034",
+    "kind": "css",
+    "rule": "a[href]@href",
+    "content": "<div><a href=\"/a\">A</a><a>B</a></div>",
+    "expect": "属性存在选择器 a[href] 取带 href 的链接。",
+    "src": "a[href]（属性选择器）"
+  },
+  {
+    "id": "css-035",
+    "kind": "css",
+    "rule": ".list .item@text",
+    "content": "<div class=\"list\"><span class=\"item\">甲</span><span class=\"item\">乙</span></div>",
+    "expect": "后代复合 class 选择器。",
+    "src": ".list .item（真实书源）"
+  },
+  {
+    "id": "css-036",
+    "kind": "css",
+    "rule": "li:contains(免费)@text",
+    "content": "<ul><li>免费章节</li><li>VIP章节</li></ul>",
+    "expect": ":contains 命中『免费』项。",
+    "src": "li:contains(免费)（真实书源章节过滤）"
+  },
+  {
+    "id": "css-037",
+    "kind": "css",
+    "rule": "h2@text",
+    "content": "<section><h2>卷一 风起</h2></section>",
+    "expect": "标签选择器取标题文本。",
+    "src": "h2@text（卷名规则）"
+  }
+]

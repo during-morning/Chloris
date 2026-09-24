@@ -1,0 +1,266 @@
+[
+  {
+    "id": "regex-031",
+    "kind": "regex",
+    "rule": "src=\\\"([^\\\"]+)\\\"",
+    "content": "图片 <img src=\"https://x.co/a.jpg\"> 显示",
+    "expect": "HTML 属性 src 值分组。",
+    "src": "src=\"([^\"]+)\"（src 提取）"
+  },
+  {
+    "id": "regex-032",
+    "kind": "regex",
+    "rule": "【作话】\\s*(.+)",
+    "content": "【作话】感谢投喂的小天使",
+    "expect": "作话标记后内容分组。",
+    "src": "【作话】\\s*(.+)（作者有话）"
+  },
+  {
+    "id": "regex-033",
+    "kind": "regex",
+    "rule": "(\\d{2}:\\d{2})",
+    "content": "更新时间 09:27 已发布",
+    "expect": "时间 HH:MM 分组。",
+    "src": "(\\d{2}:\\d{2})（时间）"
+  },
+  {
+    "id": "regex-034",
+    "kind": "regex",
+    "rule": "([一-龥]+)：(.+)",
+    "content": "作者：猫腻 字数：120万",
+    "expect": "全角冒号 + 中文键值分组。",
+    "src": "([一-龥]+)：(.+)（全角冒号键值）"
+  },
+  {
+    "id": "regex-035",
+    "kind": "regex",
+    "rule": "\\\"(\\w+)\\\":\\s*\\\"([^\\\"]*)\\\"",
+    "content": "{\"title\": \"诡秘之主\", \"author\": \"乌贼\"}",
+    "expect": "JSON 风格键值分组（无 dotAll，首行）。",
+    "src": "\"(\\w+)\":\\s*\"([^\"]*)\"（json 字段）"
+  },
+  {
+    "id": "regex-036",
+    "kind": "regex",
+    "rule": "卷(\\d+)",
+    "content": "正文 卷12 风云变幻",
+    "expect": "卷号分组。",
+    "src": "卷(\\d+)（卷号）"
+  },
+  {
+    "id": "regex-037",
+    "kind": "regex",
+    "rule": "\\$(\\d+\\.\\d+)",
+    "content": "售价 $12.99 包月",
+    "expect": "价格分组。",
+    "src": "\\$(\\d+\\.\\d+)（价格）"
+  },
+  {
+    "id": "regex-038",
+    "kind": "regex",
+    "rule": "#(\\w+)",
+    "content": "话题 #xuanhuan #xiuzhen 热门",
+    "expect": "话题标签分组（首匹配 #xuanhuan）。",
+    "src": "#(\\w+)（标签）"
+  },
+  {
+    "id": "regex-039",
+    "kind": "regex",
+    "rule": "(\\d{3}-\\d{4}-\\d{4})",
+    "content": "手机 138-1234-5678 联系",
+    "expect": "手机号分组。",
+    "src": "(\\d{3}-\\d{4}-\\d{4})（手机）"
+  },
+  {
+    "id": "regex-040",
+    "kind": "regex",
+    "rule": "\\[([^\\]]+)\\]",
+    "content": "标签 [玄幻][热血][连载] 列表",
+    "expect": "方括号内分组。",
+    "src": "\\[([^\\]]+)\\]（方括号）"
+  },
+  {
+    "id": "regex-041",
+    "kind": "regex",
+    "rule": "(\\d+)年(\\d+)月(\\d+)日",
+    "content": "上架 2024年9月13日 发行",
+    "expect": "中文日期三段分组。",
+    "src": "(\\d+)年(\\d+)月(\\d+)日（中文日期）"
+  },
+  {
+    "id": "regex-042",
+    "kind": "regex",
+    "rule": "([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})",
+    "content": "反馈请发 user@example.com 或 admin@x.co",
+    "expect": "完整邮箱分组（首匹配）。",
+    "src": "([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})（邮箱）"
+  },
+  {
+    "id": "regex-043",
+    "kind": "regex",
+    "rule": "chapter-(\\d+)",
+    "content": "链接 chapter-1024 下一章",
+    "expect": "英文章节号分组。",
+    "src": "chapter-(\\d+)（英文章节）"
+  },
+  {
+    "id": "regex-044",
+    "kind": "regex",
+    "rule": "(\\d+)\\.(\\d+)\\.(\\d+)",
+    "content": "版本 v1.2.3 已发布",
+    "expect": "版本号三段分组。",
+    "src": "(\\d+)\\.(\\d+)\\.(\\d+)（版本号）"
+  },
+  {
+    "id": "regex-045",
+    "kind": "regex",
+    "rule": "url=([^\\s&]+)",
+    "content": "跳转 url=https://x.co/a 完成",
+    "expect": "查询参数值分组。",
+    "src": "url=([^\\s&]+)（参数）"
+  },
+  {
+    "id": "regex-046",
+    "kind": "regex",
+    "rule": "(\\d+)(px|em|rem)",
+    "content": "字号 16px 行距 1.5em",
+    "expect": "数值 + CSS 单位分组。",
+    "src": "(\\d+)(px|em|rem)（单位）"
+  },
+  {
+    "id": "regex-047",
+    "kind": "regex",
+    "rule": "^\\s*-\\s*(.+)",
+    "content": "- 第一项\n- 第二项",
+    "expect": "列表项：无 multiline，仅首行命中。",
+    "src": "^\\s*-\\s*(.+)（列表项）"
+  },
+  {
+    "id": "regex-048",
+    "kind": "regex",
+    "rule": "\\b(\\w{5,})\\b",
+    "content": "characterization paragraph document",
+    "expect": "长单词（≥5）分组（首匹配）。",
+    "src": "\\b(\\w{5,})\\b（长单词）"
+  },
+  {
+    "id": "regex-049",
+    "kind": "regex",
+    "rule": "(\\d{2}/\\d{2}/\\d{4})",
+    "content": "日期 13/09/2024 记录",
+    "expect": "斜杠日期分组。",
+    "src": "(\\d{2}/\\d{2}/\\d{4})（斜杠日期）"
+  },
+  {
+    "id": "regex-050",
+    "kind": "regex",
+    "rule": "(TODO|FIXME):(.+)",
+    "content": "TODO: 补充正文清洗逻辑",
+    "expect": "标记 + 内容分组。",
+    "src": "(TODO|FIXME):(.+)（标记）"
+  },
+  {
+    "id": "regex-051",
+    "kind": "regex",
+    "rule": "0x([0-9a-fA-F]+)",
+    "content": "颜色 0x1a2b3c 定义",
+    "expect": "十六进制值分组。",
+    "src": "0x([0-9a-fA-F]+)（hex）"
+  },
+  {
+    "id": "regex-052",
+    "kind": "regex",
+    "rule": "(\\d+)\\s*-\\s*(\\d+)",
+    "content": "页数 12 - 34 区间",
+    "expect": "范围两段分组。",
+    "src": "(\\d+)\\s*-\\s*(\\d+)（范围）"
+  },
+  {
+    "id": "regex-053",
+    "kind": "regex",
+    "rule": "%([a-zA-Z]+)%",
+    "content": "模板 %name% 与 %title% 占位",
+    "expect": "百分号占位符分组。",
+    "src": "%([a-zA-Z]+)%（占位符）"
+  },
+  {
+    "id": "regex-054",
+    "kind": "regex",
+    "rule": "(\\d+)%%(\\d+)",
+    "content": "a7b9 链式",
+    "expect": "%% 链式两组数字。",
+    "src": "(\\d+)%%(\\d+)（链式数字）"
+  },
+  {
+    "id": "regex-055",
+    "kind": "regex",
+    "rule": "<title>([^<]+)</title>",
+    "content": "<title>诡秘之主</title> 结束",
+    "expect": "title 标签内文分组。",
+    "src": "<title>([^<]+)</title>（title）"
+  },
+  {
+    "id": "regex-056",
+    "kind": "regex",
+    "rule": "(\\d{1,2}):(\\d{1,2}):(\\d{1,2})",
+    "content": "时长 01:23:45 播放",
+    "expect": "时分秒三段分组。",
+    "src": "(\\d{1,2}):(\\d{1,2}):(\\d{1,2})（时分秒）"
+  },
+  {
+    "id": "regex-057",
+    "kind": "regex",
+    "rule": "【(.*?)】",
+    "content": "【类别】玄幻【进度】连载",
+    "expect": "方括号内容分组（首匹配）。",
+    "src": "【(.*?)】（方括号）"
+  },
+  {
+    "id": "regex-058",
+    "kind": "regex",
+    "rule": "第\\s*([0-9]+)\\s*卷",
+    "content": "第 3 卷 风起云涌",
+    "expect": "带空白卷号分组。",
+    "src": "第\\s*([0-9]+)\\s*卷（卷号）"
+  },
+  {
+    "id": "regex-059",
+    "kind": "regex",
+    "rule": "([a-z]+)_([a-z]+)",
+    "content": "snake_case_name 变量",
+    "expect": "下划线命名两段分组。",
+    "src": "([a-z]+)_([a-z]+)（下划线）"
+  },
+  {
+    "id": "regex-060",
+    "kind": "regex",
+    "rule": "(\\d{4})年",
+    "content": "始于 2024年 连载",
+    "expect": "年份分组。",
+    "src": "(\\d{4})年（年份）"
+  },
+  {
+    "id": "regex-061",
+    "kind": "regex",
+    "rule": "\\\"content\\\":\\\"([^\\\"]+)\\\"",
+    "content": "结果 \"content\":\"正文第一段\" 显示",
+    "expect": "JSON content 字段分组。",
+    "src": "\"content\":\"([^\"]+)\"（content）"
+  },
+  {
+    "id": "regex-062",
+    "kind": "regex",
+    "rule": "(\\+?\\d{1,3}-?\\d{3,})",
+    "content": "电话 +86-1380000 联系",
+    "expect": "带区号电话分组。",
+    "src": "(\\+?\\d{1,3}-?\\d{3,})（电话）"
+  },
+  {
+    "id": "regex-063",
+    "kind": "regex",
+    "rule": "(https?://[^\\s]+)",
+    "content": "访问 https://example.com/path?q=1 获取",
+    "expect": "完整 URL 分组（首匹配）。",
+    "src": "(https?://[^\\s]+)（url）"
+  }
+]

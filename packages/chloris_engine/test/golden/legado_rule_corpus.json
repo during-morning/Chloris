@@ -1,0 +1,7852 @@
+{
+  "baseline": "self-2026-09-12",
+  "generatedAt": "2026-09-12T18:48:18.190606",
+  "generatedBy": "tool/gen_corpus.dart",
+  "note": "本语料为「当前引擎行为快照」(self-baseline)，用于防未来回归，并非规则与 Legado 的等价性证明。每条 ir 字段是 RuleCompiler 编译出的 RuleProgram IR，重跑引擎重新编译后须与存储值一致。",
+  "sourceFiles": [
+    "default_book_sources.json",
+    "default_dict_rules.json",
+    "default_replace_rules.json",
+    "default_rss_sources.json",
+    "default_txt_toc_rules.json",
+    "verified_book_sources.json"
+  ],
+  "scannedRules": 45259,
+  "uniqueRules": 16497,
+  "count": 460,
+  "stageDistribution": {
+    "toc": 86,
+    "content": 14,
+    "detail": 37,
+    "search": 292,
+    "explore": 31
+  },
+  "backendDistribution": {
+    "css": 300,
+    "json": 80,
+    "xpath": 60,
+    "js": 20
+  },
+  "entries": [
+    {
+      "rule": "-",
+      "source": "https://m.lizhi.fm",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "-",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "-"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "0",
+      "source": "https://shoujix.com",
+      "stage": "content",
+      "field": "ruleContent.imageStyle",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "0",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "0"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "w",
+      "source": "https://tkxyk.cc/%E5%96%9C%E9%9D%99",
+      "stage": "detail",
+      "field": "ruleBookInfo.wordCount",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "w",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "w"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "i",
+      "source": "https://m.23ddw.net",
+      "stage": "detail",
+      "field": "ruleBookInfo.intro",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "i",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "i"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "1",
+      "source": "https://m.jjwxc.net/channel",
+      "stage": "detail",
+      "field": "ruleBookInfo.canReName",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "1",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "1"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "僕",
+      "source": "https://kakuyomu.jp",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "僕",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "僕"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "a",
+      "source": "https://api.meiguixsapp.com",
+      "stage": "search",
+      "field": "ruleSearch.name",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "b",
+      "source": "https://api.meiguixsapp.com",
+      "stage": "search",
+      "field": "ruleSearch.author",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "b",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "b"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "f",
+      "source": "https://api.meiguixsapp.com",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "f",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "f"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "c",
+      "source": "https://api.meiguixsapp.com",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "c",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "c"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "e",
+      "source": "https://api.meiguixsapp.com",
+      "stage": "search",
+      "field": "ruleSearch.lastChapter",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "e",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "e"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "h",
+      "source": "https://api.meiguixsapp.com",
+      "stage": "search",
+      "field": "ruleSearch.bookUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "h",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "h"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "g",
+      "source": "https://api.meiguixsapp.com",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "g",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "g"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "d",
+      "source": "https://api.meiguixsapp.com",
+      "stage": "search",
+      "field": "ruleSearch.wordCount",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "d",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "d"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "k",
+      "source": "https://allcp.net",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "k",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "k"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "v",
+      "source": "https://allcp.net",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "v",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "v"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "l",
+      "source": "https://xs7.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.wordCount",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "l",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "l"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "n",
+      "source": "https://tieba.baidu.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "n",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "n"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "m",
+      "source": "https://tieba.baidu.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "m",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "m"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "加",
+      "source": "https://yingyuxiaoshuo.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "加",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "加"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "我",
+      "source": "https://syosetu.org",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "我",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "我"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "V",
+      "source": "https://qidian.com/%E5%A5%B3%E9%A2%91%E6%A0%87%E7%AD%BE",
+      "stage": "toc",
+      "field": "ruleToc.isVip",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "V",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "V"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "N",
+      "source": "https://qidian.com/%E5%A5%B3%E9%A2%91%E6%A0%87%E7%AD%BE",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "N",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "N"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$",
+      "source": "https://haiyue8.com",
+      "stage": "explore",
+      "field": "ruleExplore.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "$",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "$"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "u",
+      "source": "http://wap.aixswx.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "u",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "u"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "t",
+      "source": "http://noveless.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "t",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "t"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".L",
+      "source": "http://zym888.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".L",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".L"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "仙尊",
+      "source": "https://wapk.tvguaa.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "仙尊",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "仙尊"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "11",
+      "source": "https://hgq26.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.canReName",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "11",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "11"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "头狼",
+      "source": "https://m.bqg369.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "头狼",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "头狼"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "攻略",
+      "source": "https://m.4shuwang.net",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "攻略",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "攻略"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "深空",
+      "source": "https://x23us.us",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "深空",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "深空"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "集合",
+      "source": "https://dpyqxs.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "集合",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "集合"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "系统",
+      "source": "https://m.laikan9.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "系统",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "系统"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$5",
+      "source": "https://07dcr.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.name",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "$5",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "$5"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$4",
+      "source": "https://07dcr.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.author",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "$4",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "$4"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$1",
+      "source": "https://07dcr.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.intro",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "$1",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "$1"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$8",
+      "source": "https://07dcr.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.lastChapter",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "$8",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "$8"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "回家",
+      "source": "http://专栏",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "回家",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "回家"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "id",
+      "source": "https://api-bc.wtzw.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "id",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "id"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "青春",
+      "source": "https://75zhongwen.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "青春",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "青春"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "私密",
+      "source": "https://ydan.cc",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "私密",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "私密"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "-a",
+      "source": "https://mmtxt.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "-a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "-a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "vo",
+      "source": "https://m.37yq.com",
+      "stage": "toc",
+      "field": "ruleToc.isVolume",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "vo",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "vo"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "h2",
+      "source": "https://zei8.vip",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "h2",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "h2"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "h1",
+      "source": "https://noveless.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "h1",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "h1"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "洪荒",
+      "source": "http://freexiaoshuo.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "洪荒",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "洪荒"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "淮上",
+      "source": "https://zhenhunxiaoshuo.com/chaxun.html",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "淮上",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "淮上"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "书单",
+      "source": "https://yuque.com/yuqueyonghun8txcr/psb8yc",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "书单",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "书单"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "珍珠",
+      "source": "https://jiuhuaiwenxue.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "珍珠",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "珍珠"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "cp",
+      "source": "http://m.idejian.net",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "cp",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "cp"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "快穿",
+      "source": "https://wap.dmwenku.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "快穿",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "快穿"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "剑来",
+      "source": "https://m.bqg228.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "剑来",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "剑来"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "沙雕",
+      "source": "https://afdian.net",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "沙雕",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "沙雕"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "gl",
+      "source": "https://m.fuwenh.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "gl",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "gl"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "雪中",
+      "source": "http://cwj18.org",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "雪中",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "雪中"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "阅读",
+      "source": "https://api.coolapk.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "阅读",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "阅读"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "寒山",
+      "source": "https://qubook.org",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "寒山",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "寒山"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "斗破",
+      "source": "https://m.dmxso.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "斗破",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "斗破"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "仙者",
+      "source": "https://deqixs.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "仙者",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "仙者"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "##",
+      "source": "https://lingjingxingzhe.com",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "##",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "##"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "高维",
+      "source": "http://bixia99.co",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "高维",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "高维"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "h3",
+      "source": "http://daizhige.org",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "h3",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "h3"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "我的",
+      "source": "http://yetianlian.info",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "我的",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "我的"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "dd",
+      "source": "http://yetianlian.info",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "dd",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "dd"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "模拟",
+      "source": "https://infosxs.pysmei.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "模拟",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "模拟"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "魔王",
+      "source": "https://cupfox7.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "魔王",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "魔王"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "乡村",
+      "source": "https://m.shufahouse.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "乡村",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "乡村"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "读者",
+      "source": "http://new-qk.lifves.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "读者",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "读者"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "千金",
+      "source": "http://downcg.cc",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "千金",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "千金"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "房客",
+      "source": "https://pofans.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "房客",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "房客"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "ts",
+      "source": "https://m.music.migu.cn",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "ts",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "ts"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "孤独",
+      "source": "https://tianyabook.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "孤独",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "孤独"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "辰东",
+      "source": "http://m.qqxcw.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "辰东",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "辰东"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "千年",
+      "source": "https://shucang.cc",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "千年",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "千年"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "测试",
+      "source": "https://pixiv.net/manga",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "测试",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "测试"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "秘密",
+      "source": "https://yeseimg.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "秘密",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "秘密"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$2",
+      "source": "http://gzmeal.com",
+      "stage": "search",
+      "field": "ruleSearch.name",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "$2",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "$2"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "雪莲",
+      "source": "https://m.fx361.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "雪莲",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "雪莲"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "熊子",
+      "source": "https://kuwo.cn",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "熊子",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "熊子"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "封神",
+      "source": "https://api.520diandu.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "封神",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "封神"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "校园",
+      "source": "https://m.mddtxt.net",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "校园",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "校园"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "三千",
+      "source": "https://sypvm.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "三千",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "三千"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "圣墟",
+      "source": "https://qixinge.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "圣墟",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "圣墟"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "li",
+      "source": "https://shibashuwu.net",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "li",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "li"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "催眠",
+      "source": "https://m.posf.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "催眠",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "催眠"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "道观",
+      "source": "https://bookshelf.html5.qq.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "道观",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "道观"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "亮剑",
+      "source": "https://qirebook.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "亮剑",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "亮剑"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "书生",
+      "source": "https://kuaishu5.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "书生",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "书生"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "滕总",
+      "source": "https://m.xiaoshuo520.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "滕总",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "滕总"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "jj",
+      "source": "https://%e7%bb%85%e5%a3%ab%e6%bc%ab%e7%94%bb.luoyacheng.ip-ddns.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.intro",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "jj",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "jj"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "哈利",
+      "source": "http://shubang.net",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "哈利",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "哈利"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "fm",
+      "source": "https://%e7%bb%85%e5%a3%ab%e6%bc%ab%e7%94%bb.luoyacheng.ip-ddns.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.coverUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "fm",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "fm"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "高天",
+      "source": "https://m.xhwx3.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "高天",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "高天"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "炮灰",
+      "source": "https://m.wucuoxs.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "炮灰",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "炮灰"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "旅行",
+      "source": "https://ypppt.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "旅行",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "旅行"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "元尊",
+      "source": "http://qudushu.org",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "元尊",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "元尊"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "dl",
+      "source": "https://xsyueduw.com/@%E9%81%87%E7%9F%A5",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "dl",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "dl"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "姐姐",
+      "source": "https://litu100.xyz",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "姐姐",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "姐姐"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "寄宿",
+      "source": "http://wxzhm.top",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "寄宿",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "寄宿"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "遮天",
+      "source": "https://yanqinggang.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "遮天",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "遮天"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "破处",
+      "source": "https://cf.xbooks.vip",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "破处",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "破处"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "朋友",
+      "source": "https://m.37yq.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "朋友",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "朋友"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "my",
+      "source": "https://bestlightnovel.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "my",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "my"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "处女",
+      "source": "https://..xyz",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "处女",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "处女"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "pp",
+      "source": "https://moetu.club",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "pp",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "pp"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "之上",
+      "source": "http://m.bbiquge8.net",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "之上",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "之上"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "凡人",
+      "source": "https://m.ai9w.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "凡人",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "凡人"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "科技",
+      "source": "https://m.fx361.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "科技",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "科技"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "勇者",
+      "source": "https://esjzone.me",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "勇者",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "勇者"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "飞升",
+      "source": "https://xsyz.cc",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "飞升",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "飞升"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "战魂纪",
+      "source": "http://m.migudm.cn",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "战魂纪",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "战魂纪"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "大小姐",
+      "source": "https://webtoons.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "大小姐",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "大小姐"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "god",
+      "source": "https://manhwatop.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "god",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "god"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "本武神",
+      "source": "https://yuanshuku.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "本武神",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "本武神"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "不科学",
+      "source": "https://biquge345.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "不科学",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "不科学"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "URL",
+      "source": "https://m.agedm.org",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "URL",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "URL"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "非人哉",
+      "source": "https://cn.bzmanga.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "非人哉",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "非人哉"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "重生之",
+      "source": "http://23dushu.net",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "重生之",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "重生之"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "pic",
+      "source": "https://wechat.idejian.com",
+      "stage": "explore",
+      "field": "ruleExplore.coverUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "pic",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "pic"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".m1",
+      "source": "https://1bqg.net",
+      "stage": "explore",
+      "field": "ruleExplore.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".m1",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".m1"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".so",
+      "source": "http://heiyan.info",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".so",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".so"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "tag",
+      "source": "西瓜免费小说app",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "tag",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "tag"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "num",
+      "source": "http://m.yuedu.163.com",
+      "stage": "search",
+      "field": "ruleSearch.wordCount",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "num",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "num"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "牛爷爷",
+      "source": "https://s.fjwhcbsh.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "牛爷爷",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "牛爷爷"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "洛天依",
+      "source": "https://%e7%bd%91%e6%98%93%e4%ba%91%e9%9f%b3%e4%b9%90.luoyacheng.ip-ddns.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "洛天依",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "洛天依"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "明克街",
+      "source": "http://m.boquku.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "明克街",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "明克街"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "vip",
+      "source": "https://goway.reader.yueyouxs.com",
+      "stage": "toc",
+      "field": "ruleToc.isVip",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "vip",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "vip"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "红楼梦",
+      "source": "https://po5.net",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "红楼梦",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "红楼梦"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "周杰伦",
+      "source": "https://m.music.migu.cn",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "周杰伦",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "周杰伦"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "起风了",
+      "source": "http://78497.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "起风了",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "起风了"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "Img",
+      "source": "api-1#kd11",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "Img",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "Img"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "#nr",
+      "source": "https://pck.tvguaa.com",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "#nr",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "#nr"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".tt",
+      "source": "http://diyibanzhu.buzz",
+      "stage": "explore",
+      "field": "ruleExplore.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".tt",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".tt"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "div",
+      "source": "https://ww.fgh.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "div",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "div"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "img",
+      "source": "https://image.baidu.com",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "img",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "img"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "洪荒：",
+      "source": "https://sjks88.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "洪荒：",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "洪荒："
+          }
+        ]
+      }
+    },
+    {
+      "rule": "0.0",
+      "source": "https://m.chenxixsw.com",
+      "stage": "content",
+      "field": "ruleContent.imageStyle",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "0.0",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "0.0"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "VIP",
+      "source": "https://m.zongheng.com",
+      "stage": "toc",
+      "field": "ruleToc.isVip",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "VIP",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "VIP"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "沧元图",
+      "source": "https://dingdian.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "沧元图",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "沧元图"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".bk",
+      "source": "https://dmxs.org",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".bk",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".bk"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "new",
+      "source": "https://m.jjwxc.net/channel",
+      "stage": "search",
+      "field": "ruleSearch.lastChapter",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "new",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "new"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "cat",
+      "source": "https://m.jjwxc.net/channel",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "cat",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "cat"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "des",
+      "source": "https://m.jjwxc.net/channel",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "des",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "des"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "大理寺",
+      "source": "https://biquge.casa",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "大理寺",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "大理寺"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "断亲后",
+      "source": "https://shanhuzs.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "断亲后",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "断亲后"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "乱世书",
+      "source": "https://chiuhagi.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "乱世书",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "乱世书"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "##\\",
+      "source": "https://shanhuzs.com",
+      "stage": "content",
+      "field": "ruleContent.replaceRegex",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "##\\",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "##\\"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "快穿之",
+      "source": "https://api-new.iqingguo.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "快穿之",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "快穿之"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "url",
+      "source": "https://qidian.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "url",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "url"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "世无双",
+      "source": "https://read.douban.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "世无双",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "世无双"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "info",
+      "source": "https://htlvbooks.com",
+      "stage": "toc",
+      "field": "ruleToc.updateTime",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "info",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "info"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "text",
+      "source": "https://69shuba.cx",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "text",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "text"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "深渊独行",
+      "source": "https://%e6%9b%a6%e7%81%b5",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "深渊独行",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "深渊独行"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "meta",
+      "source": "http://botaodz.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.init",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "meta",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "meta"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "玄鉴仙族",
+      "source": "https://m.bqg121.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "玄鉴仙族",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "玄鉴仙族"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "失落文明",
+      "source": "http://weilaitianwang.org",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "失落文明",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "失落文明"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "大王饶命",
+      "source": "dragonquestqbkd1",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "大王饶命",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "大王饶命"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "烂柯棋缘",
+      "source": "https://m.qimanwu.app",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "烂柯棋缘",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "烂柯棋缘"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "病娇贵妃",
+      "source": "https://xn--pxtr7m.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "病娇贵妃",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "病娇贵妃"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "kind",
+      "source": "https://biqooge.com",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "kind",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "kind"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "data",
+      "source": "http://appi.kuwo.cn",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "data",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "data"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "#li1",
+      "source": "http://bequgew.info",
+      "stage": "explore",
+      "field": "ruleExplore.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "#li1",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "#li1"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "魔女之旅",
+      "source": "https://yq.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "魔女之旅",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "魔女之旅"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "link",
+      "source": "https://du.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "link",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "link"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "差一个你",
+      "source": "https://bxwx.in",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "差一个你",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "差一个你"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "回复术士",
+      "source": "http://mxdm.fans",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "回复术士",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "回复术士"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "full",
+      "source": "https://newsmiss.lofter.com",
+      "stage": "content",
+      "field": "ruleContent.imageStyle",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "full",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "full"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "girl",
+      "source": "https://webtoons.com/zh-hant",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "girl",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "girl"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "我的属性",
+      "source": "https://wap.biqusk.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "我的属性",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "我的属性"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "万族之劫",
+      "source": "https://s.lhdqsb.cn",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "万族之劫",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "万族之劫"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "head",
+      "source": "https://m.dxs.org",
+      "stage": "detail",
+      "field": "ruleBookInfo.init",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "head",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "head"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "desc",
+      "source": "http://api.ieasou.com",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "desc",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "desc"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "7号基地",
+      "source": "https://m.jhssd.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "7号基地",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "7号基地"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "dd a",
+      "source": "http://m.kushuge.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "dd a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "dd a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "DATA",
+      "source": "http://a.lc1001.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.init",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "DATA",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "DATA"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "Desc",
+      "source": "api-1#渊呀edit",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "Desc",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "Desc"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "女侠且慢",
+      "source": "https://103.188.121.74/h5",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "女侠且慢",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "女侠且慢"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "li a",
+      "source": "https://readnovelfull.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "li a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "li a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "秘密教学",
+      "source": "https://nvyoumh01.top",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "秘密教学",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "秘密教学"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "隐形战队",
+      "source": "https://ukuzy.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "隐形战队",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "隐形战队"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "斗罗大陆",
+      "source": "https://m.xdybz.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "斗罗大陆",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "斗罗大陆"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "社团学姐",
+      "source": "https://ikanhm.top",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "社团学姐",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "社团学姐"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "羞耻攻略",
+      "source": "https://beiyongzhan1.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "羞耻攻略",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "羞耻攻略"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "item",
+      "source": "http://app.wenku.com",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "item",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "item"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "社團學姊",
+      "source": "https://uuhanman.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "社團學姊",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "社團學姊"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".xbk",
+      "source": "https://wap.yingsx.com",
+      "stage": "explore",
+      "field": "ruleExplore.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".xbk",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".xbk"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "莎士比亚",
+      "source": "https://iswsk.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "莎士比亚",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "莎士比亚"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "诡秘之主",
+      "source": "https://m.ysts.cc",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "诡秘之主",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "诡秘之主"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "tr.1",
+      "source": "https://sanxingcable.com",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "tr.1",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "tr.1"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "dl a",
+      "source": "https://babazw.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "dl a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "dl a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "人间词话",
+      "source": "https://babazw.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "人间词话",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "人间词话"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$2$3",
+      "source": "http://heiyan.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "$2$3",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "$2$3"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "幽冥诡匠",
+      "source": "https://cn.baozimh.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "幽冥诡匠",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "幽冥诡匠"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "href",
+      "source": "https://69shuba.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "href",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "href"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "我有一个",
+      "source": "https://69shuba.cx",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "我有一个",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "我有一个"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "澳门往事",
+      "source": "https://v.ikanbot.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "澳门往事",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "澳门往事"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "我的青春",
+      "source": "https://wap2.xinbiquge.org",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "我的青春",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "我的青春"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "tags",
+      "source": "http://book.sina.cn",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "tags",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "tags"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "type",
+      "source": "https://m.hetushu.com",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "type",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "type"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "千方百计",
+      "source": "http://m.jmshuwu.net",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "千方百计",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "千方百计"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "dl@a",
+      "source": "http://hao8.net",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "dl@a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "dl@a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "Name",
+      "source": "api-1#kd11",
+      "stage": "detail",
+      "field": "ruleBookInfo.name",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "Name",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "Name"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "html",
+      "source": "http://dict.cn",
+      "stage": "content",
+      "field": "ruleContent.content",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "html",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "html"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "body",
+      "source": "http://dict.cn",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "body",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "body"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "size",
+      "source": "https://m.jjwxc.net/channel",
+      "stage": "search",
+      "field": "ruleSearch.wordCount",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "size",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "size"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "猫和老鼠",
+      "source": "https://agedm.org",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "猫和老鼠",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "猫和老鼠"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "赛博游戏",
+      "source": "https://haiyue8.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "赛博游戏",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "赛博游戏"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "堂吉诃德",
+      "source": "http://t.icesmall.cn",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "堂吉诃德",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "堂吉诃德"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "span",
+      "source": "http://new-qk.lifves.com",
+      "stage": "search",
+      "field": "ruleSearch.name",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "span",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "span"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "TEXT",
+      "source": "https://m.jjwxc.net/channel",
+      "stage": "content",
+      "field": "ruleContent.imageStyle",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "TEXT",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "TEXT"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "灰色童话",
+      "source": "http://9ggd.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "灰色童话",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "灰色童话"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "宿命之环",
+      "source": "https://3ubook.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "宿命之环",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "宿命之环"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "深空彼岸",
+      "source": "http://download.maoyankanshu.la",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "深空彼岸",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "深空彼岸"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$1##",
+      "source": "https://qdmm.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "$1##",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "$1##"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "完美世界",
+      "source": "https://biquge34.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "完美世界",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "完美世界"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "turl",
+      "source": "http://xiaoshuo.uc.cn",
+      "stage": "detail",
+      "field": "ruleBookInfo.tocUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "turl",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "turl"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "诸天万界",
+      "source": "http://m.hgqxs.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "诸天万界",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "诸天万界"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "word",
+      "source": "歪歪斜斜的字眼里，满篇都是吃人二字-----鲁迅",
+      "stage": "detail",
+      "field": "ruleBookInfo.wordCount",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "word",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "word"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "ol a",
+      "source": "https://sosadfun.org",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "ol a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "ol a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "我有一剑",
+      "source": "http://123yqw.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "我有一剑",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "我有一剑"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "ul@a",
+      "source": "https://m.1qxs.com",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "ul@a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "ul@a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "li@a",
+      "source": "https://m.quyuzhaiwu.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "li@a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "li@a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "FULL",
+      "source": "https://hetushu.com",
+      "stage": "content",
+      "field": "ruleContent.imageStyle",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "FULL",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "FULL"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "太古神王",
+      "source": "http://biquge5200.net",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "太古神王",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "太古神王"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "斗破苍穹",
+      "source": "https://mjjxs.net",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "斗破苍穹",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "斗破苍穹"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "true",
+      "source": "https://hetushu.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.canReName",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "true",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "true"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "天下长安",
+      "source": "http://ruochu.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "天下长安",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "天下长安"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "icon",
+      "source": "http://api.motie.com",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "icon",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "icon"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "极致心瘾",
+      "source": "https://m.xs.cn",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "极致心瘾",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "极致心瘾"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "time",
+      "source": "https://qidian.com",
+      "stage": "toc",
+      "field": "ruleToc.updateTime",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "time",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "time"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "深海余烬",
+      "source": "http://bbiquge8.net",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "深海余烬",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "深海余烬"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "name",
+      "source": "https://qidian.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "name",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "name"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "##€€",
+      "source": "https://dmxs.org",
+      "stage": "content",
+      "field": "ruleContent.replaceRegex",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "##€€",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "##€€"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "万古神帝",
+      "source": "http://yetianlian.org",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "万古神帝",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "万古神帝"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "1980",
+      "source": "https://jszxfx.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "1980",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "1980"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".box",
+      "source": "https://mianfeixiaoshuoyueduwang.com",
+      "stage": "explore",
+      "field": "ruleExplore.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".box",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".box"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "AUTO",
+      "source": "http://qidian.com",
+      "stage": "content",
+      "field": "ruleContent.imageStyle",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "AUTO",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "AUTO"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "tr!0",
+      "source": "https://m.xxbiqudu.com",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "tr!0",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "tr!0"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "dd@a",
+      "source": "https://m.xxbiqudu.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "dd@a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "dd@a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "朝花夕拾",
+      "source": "https://jingdianbook.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "朝花夕拾",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "朝花夕拾"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".p10",
+      "source": "http://ttwx.net",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".p10",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".p10"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "高天之上",
+      "source": "http://m.yunxs.info",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "高天之上",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "高天之上"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "li!1",
+      "source": "http://tianshuwx.com",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "li!1",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "li!1"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "list",
+      "source": "http://5sing.kugou.com",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "list",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "list"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "我的马甲",
+      "source": "http://m.rr3r.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "我的马甲",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "我的马甲"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "True",
+      "source": "https://m.zongheng.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.canReName",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "True",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "True"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "超级战舰",
+      "source": "http://qidian.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "超级战舰",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "超级战舰"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "光阴之外",
+      "source": "https://3uxiaoshuo.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "光阴之外",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "光阴之外"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "last",
+      "source": "http://luoxia.com",
+      "stage": "search",
+      "field": "ruleSearch.lastChapter",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "last",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "last"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "#zuo",
+      "source": "https://xstt5.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.init",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "#zuo",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "#zuo"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "我的世界",
+      "source": "http://ybsggzyjyxxw.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "我的世界",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "我的世界"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "摸金传人",
+      "source": "http://m.fbook.net",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "摸金传人",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "摸金传人"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "唯一救世者",
+      "source": "http://wap.115wx.cc",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "唯一救世者",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "唯一救世者"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "uname",
+      "source": "http://fuciyuanbang.ciyuans.com",
+      "stage": "search",
+      "field": "ruleSearch.author",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "uname",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "uname"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "Title",
+      "source": "http://xmanhua.com",
+      "stage": "explore",
+      "field": "ruleExplore.name",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "Title",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "Title"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "如来必须败",
+      "source": "https://wap.pan8.net",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "如来必须败",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "如来必须败"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "model",
+      "source": "https://api.uaa.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.init",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "model",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "model"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "九星霸体诀",
+      "source": "https://dkmi.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "九星霸体诀",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "九星霸体诀"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "不科学御兽",
+      "source": "https://zerifeisheng.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "不科学御兽",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "不科学御兽"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "ptags",
+      "source": "https://api-bc.wtzw.com",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "ptags",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "ptags"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "isVol",
+      "source": "http://qidian.com",
+      "stage": "toc",
+      "field": "ruleToc.isVolume",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "isVol",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "isVol"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "isVip",
+      "source": "http://qidian.com",
+      "stage": "toc",
+      "field": "ruleToc.isVip",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "isVip",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "isVip"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".item",
+      "source": "https://deqixs.com",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".item",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".item"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "title",
+      "source": "http://appi.kuwo.cn",
+      "stage": "search",
+      "field": "ruleSearch.name",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "title",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "title"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "#j@li",
+      "source": "https://m.bsxiaoshuo.com",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "#j@li",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "#j@li"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".dn@a",
+      "source": "https://m.bsxiaoshuo.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".dn@a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".dn@a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "dl@dd",
+      "source": "https://m.biqugl.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "dl@dd",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "dl@dd"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "udata",
+      "source": "https://v.ikanbot.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "udata",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "udata"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "tr@td",
+      "source": "http://shubang.net",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "tr@td",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "tr@td"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "li!-1",
+      "source": "https://m.po18wx.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "li!-1",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "li!-1"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "value",
+      "source": "https://dogemanga.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "value",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "value"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".post",
+      "source": "https://mixes.cloud/oo",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".post",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".post"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "count",
+      "source": "http://app.365ting.com",
+      "stage": "search",
+      "field": "ruleSearch.wordCount",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "count",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "count"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "凡人修仙传",
+      "source": "https://tatays.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "凡人修仙传",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "凡人修仙传"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "九转神龙诀",
+      "source": "http://yanqing.co",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "九转神龙诀",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "九转神龙诀"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "thumb",
+      "source": "http://fuciyuanbang.ciyuans.com",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "thumb",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "thumb"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "image",
+      "source": "https://m.music.migu.cn",
+      "stage": "detail",
+      "field": "ruleBookInfo.coverUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "image",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "image"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "tbody",
+      "source": "https://obsolete.lightnovel.us",
+      "stage": "explore",
+      "field": "ruleExplore.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "tbody",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "tbody"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "intro",
+      "source": "http://appi.kuwo.cn",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "intro",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "intro"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "我的前半生",
+      "source": "https://api.ylibrary.org",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "我的前半生",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "我的前半生"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".book",
+      "source": "https://quanben-xiaoshuo.com",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".book",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".book"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "cover",
+      "source": "https://m.jjwxc.net/channel",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "cover",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "cover"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "CName",
+      "source": "api-1#kd11",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "CName",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "CName"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "大奉打更人",
+      "source": "https://m.tcknh.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "大奉打更人",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "大奉打更人"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "秘密的世界",
+      "source": "https://comics.com",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "秘密的世界",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "秘密的世界"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "brief",
+      "source": "uaa·文学",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "brief",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "brief"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "level",
+      "source": "https://zongheng.com",
+      "stage": "toc",
+      "field": "ruleToc.isVip",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "level",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "level"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "price",
+      "source": "https://dushu.baidu.com",
+      "stage": "toc",
+      "field": "ruleToc.isVip",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "price",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "price"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "ol@li",
+      "source": "http://zfangchan.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "ol@li",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "ol@li"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "#hism",
+      "source": "https://123bqg.cc",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "#hism",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "#hism"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".burl",
+      "source": "https://ixdzs.tw",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".burl",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".burl"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "ul@li",
+      "source": "http://m.9ggd.com",
+      "stage": "explore",
+      "field": "ruleExplore.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "ul@li",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "ul@li"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "id.nr",
+      "source": "https://blshuge.com",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "id.nr",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "id.nr"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "穿进刑侦文",
+      "source": "https://m.jjwxc.net/channel",
+      "stage": "search",
+      "field": "ruleSearch.checkKeyWord",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "穿进刑侦文",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "穿进刑侦文"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".ccss",
+      "source": "http://92xs.info",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".ccss",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".ccss"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@href",
+      "source": "https://lengmen.org/search",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "@href",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "@href"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".pb-2",
+      "source": "https://manhuafree.com",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".pb-2",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".pb-2"
+          }
+        ]
+      }
+    },
+    {
+      "rule": ".bbox",
+      "source": "https://xstt5.com",
+      "stage": "explore",
+      "field": "ruleExplore.bookList",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": ".bbox",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": ".bbox"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "isPay",
+      "source": "http://书旗小说",
+      "stage": "toc",
+      "field": "ruleToc.isPay",
+      "backend": "css",
+      "allInOne": false,
+      "ir": {
+        "source": "isPay",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "isPay"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.t",
+      "source": "https://js.jsxsapp.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.t",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.t"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$[*]",
+      "source": "https://wcxsw.org",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$[*]",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$[*]"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.vip",
+      "source": "http://api.doufu.me",
+      "stage": "toc",
+      "field": "ruleToc.isVip",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.vip",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.vip"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.Img",
+      "source": "https://api.leeyegy.com",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.Img",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.Img"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.url",
+      "source": "https://music.liuzhijin.cn-netease",
+      "stage": "search",
+      "field": "ruleSearch.bookUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.url",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.url"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.lrc",
+      "source": "https://music.liuzhijin.cn-netease",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.lrc",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.lrc"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.src",
+      "source": "http://app.365ting.com",
+      "stage": "content",
+      "field": "ruleContent.content",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.src",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.src"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.tit",
+      "source": "https://ts.txs12.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.tit",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.tit"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.img",
+      "source": "https://api.97yd.com",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.img",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.img"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.des",
+      "source": "http://wellsoftteam.cn",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.des",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.des"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.[*]",
+      "source": "https://m.ysts.cc",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.[*]",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.[*]"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.tag",
+      "source": "https://9comic.cn",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.tag",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.tag"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.pic",
+      "source": "https://9comic.cn",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.pic",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.pic"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.cnt",
+      "source": "https://xdian.com",
+      "stage": "explore",
+      "field": "ruleExplore.wordCount",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.cnt",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.cnt"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.list",
+      "source": "https://cxb-pro.cread.com",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.list",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.list"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.desc",
+      "source": "https://api.97yd.com",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.desc",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.desc"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.Desc",
+      "source": "https://api.leeyegy.com",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.Desc",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.Desc"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.name",
+      "source": "https://api.leeyegy.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.name",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.name"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.href",
+      "source": "http://new-qk.lifves.com",
+      "stage": "explore",
+      "field": "ruleExplore.bookUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.href",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.href"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.body",
+      "source": "https://app.kujiang.com",
+      "stage": "explore",
+      "field": "ruleExplore.bookList",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.body",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.body"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.data",
+      "source": "http://api.jmlldsc.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.init",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.data",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.data"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.tags",
+      "source": "http://m.90bole.com",
+      "stage": "explore",
+      "field": "ruleExplore.kind",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.tags",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.tags"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.durl",
+      "source": "https://uuhanman.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.downloadUrls",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.durl",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.durl"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.icon",
+      "source": "https://novel-api.elklk.cn",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.icon",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.icon"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.page",
+      "source": "https://api.520diandu.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.page",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.page"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.link",
+      "source": "http://pub.ddrd8.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.link",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.link"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.size",
+      "source": "http://apitt.kanshushenapp.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.wordCount",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.size",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.size"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.info",
+      "source": "https://9comic.cn",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.info",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.info"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.zyid",
+      "source": "https://kuwo.cn",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.zyid",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.zyid"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.area",
+      "source": "https://yydsmh.com",
+      "stage": "explore",
+      "field": "ruleExplore.kind",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.area",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.area"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.word",
+      "source": "https://s30001.zhongyue001.com",
+      "stage": "search",
+      "field": "ruleSearch.wordCount",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.word",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.word"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.note",
+      "source": "https://api.coolapk.com",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.note",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.note"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.star",
+      "source": "http://biquys.com",
+      "stage": "search",
+      "field": "ruleSearch.author",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.star",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.star"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.kind",
+      "source": "https://uuhanman.com",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.kind",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.kind"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.time",
+      "source": "https://zhidao.baidu.com/msearch",
+      "stage": "toc",
+      "field": "ruleToc.updateTime",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.time",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.time"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.Name",
+      "source": "https://api.leeyegy.com",
+      "stage": "search",
+      "field": "ruleSearch.name",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.Name",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.Name"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.logo",
+      "source": "https://api.coolapk.com",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.logo",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.logo"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$..url",
+      "source": "http://tingshu.kuwo.cn",
+      "stage": "content",
+      "field": "ruleContent.content",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$..url",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$..url"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.rows",
+      "source": "dquestqball",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.rows",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.rows"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.books",
+      "source": "https://js.jsxsapp.com",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.books",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.books"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.brief",
+      "source": "https://api.uaa.com",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.brief",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.brief"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$..name",
+      "source": "https://h5.17k.com",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$..name",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$..name"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.ptags",
+      "source": "https://api-bc.wtzw.com",
+      "stage": "explore",
+      "field": "ruleExplore.kind",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.ptags",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.ptags"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.descp",
+      "source": "https://s30001.zhongyue001.com",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.descp",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.descp"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.words",
+      "source": "https://api-new.iqingguo.com",
+      "stage": "search",
+      "field": "ruleSearch.wordCount",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.words",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.words"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.bName",
+      "source": "https://xdian.com",
+      "stage": "explore",
+      "field": "ruleExplore.name",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.bName",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.bName"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.bAuth",
+      "source": "https://xdian.com",
+      "stage": "explore",
+      "field": "ruleExplore.author",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.bAuth",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.bAuth"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$..word",
+      "source": "https://s30001.zhongyue001.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.wordCount",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$..word",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$..word"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.title",
+      "source": "https://api-new.iqingguo.com",
+      "stage": "search",
+      "field": "ruleSearch.name",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.title",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.title"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.items",
+      "source": "https://m.jjwxc.net//",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.items",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.items"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.zishu",
+      "source": "http://app.api.bgwxc.com",
+      "stage": "search",
+      "field": "ruleSearch.wordCount",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.zishu",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.zishu"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.intro",
+      "source": "https://wcxsw.org",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.intro",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.intro"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$..Name",
+      "source": "https://xs.pigqq.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.name",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$..Name",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$..Name"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.cname",
+      "source": "http://app.api.bgwxc.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.cname",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.cname"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.CName",
+      "source": "https://souxs.pigqq.com",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.CName",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.CName"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.bkImg",
+      "source": "http://wd.wdxsb.com",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.bkImg",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.bkImg"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.isvip",
+      "source": "https://m.jjwxc.net//",
+      "stage": "toc",
+      "field": "ruleToc.isVip",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.isvip",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.isvip"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.pdate",
+      "source": "https://fx361.com",
+      "stage": "search",
+      "field": "ruleSearch.lastChapter",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.pdate",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.pdate"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.ctype",
+      "source": "https://ixdzs.tw",
+      "stage": "toc",
+      "field": "ruleToc.isVolume",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.ctype",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.ctype"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.cover",
+      "source": "http://api.jmlldsc.com",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.cover",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.cover"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.image",
+      "source": "https://reader.browser.miui.com/v2",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.image",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.image"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.isVip",
+      "source": "https://minipapi.sfacg.com",
+      "stage": "toc",
+      "field": "ruleToc.isVip",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.isVip",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.isVip"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.thumb",
+      "source": "http://biquys.com",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.thumb",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.thumb"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.bname",
+      "source": "https://yydsmh.com",
+      "stage": "explore",
+      "field": "ruleExplore.name",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.bname",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.bname"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.boyin",
+      "source": "https://m.ysts.cc",
+      "stage": "explore",
+      "field": "ruleExplore.author",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.boyin",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.boyin"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.price",
+      "source": "https://read.douban.com",
+      "stage": "toc",
+      "field": "ruleToc.isVip",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.price",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.price"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$..descp",
+      "source": "https://s30001.zhongyue001.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.intro",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$..descp",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$..descp"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.writer",
+      "source": "https://m.agedm.org",
+      "stage": "search",
+      "field": "ruleSearch.author",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.writer",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.writer"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.Author",
+      "source": "https://api.leeyegy.com",
+      "stage": "search",
+      "field": "ruleSearch.author",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.Author",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.Author"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$..cover",
+      "source": "http://api.jmlldsc.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.coverUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$..cover",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$..cover"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.artist",
+      "source": "http://tingshu.kuwo.cn",
+      "stage": "search",
+      "field": "ruleSearch.author",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.artist",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.artist"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.remark",
+      "source": "https://s.lhdqsb.cn",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.remark",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.remark"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$..intro",
+      "source": "https://m.ysts.cc",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$..intro",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$..intro"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.tocUrl",
+      "source": "https://kuwo.cn",
+      "stage": "detail",
+      "field": "ruleBookInfo.tocUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.tocUrl",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.tocUrl"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.xsName",
+      "source": "https://ts.txs12.com",
+      "stage": "search",
+      "field": "ruleSearch.name",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.xsName",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.xsName"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.latest",
+      "source": "https://uuhanman.com",
+      "stage": "search",
+      "field": "ruleSearch.lastChapter",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.latest",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.latest"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.imgUrl",
+      "source": "https://reader.browser.miui.com/v2",
+      "stage": "explore",
+      "field": "ruleExplore.coverUrl",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.imgUrl",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.imgUrl"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.newest",
+      "source": "https://missevan.com",
+      "stage": "search",
+      "field": "ruleSearch.lastChapter",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.newest",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.newest"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.bkName",
+      "source": "http://wd.wdxsb.com",
+      "stage": "search",
+      "field": "ruleSearch.name",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.bkName",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.bkName"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "$.textNo",
+      "source": "http://wd.wdxsb.com",
+      "stage": "search",
+      "field": "ruleSearch.wordCount",
+      "backend": "json",
+      "allInOne": false,
+      "ir": {
+        "source": "$.textNo",
+        "steps": [
+          {
+            "mode": "json",
+            "expression": "$.textNo"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//p[4]",
+      "source": "http://wenku8.net/index.php",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//p[4]",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//p[4]"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//@href",
+      "source": "https://imiaobige.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//@href",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//@href"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//ul/li",
+      "source": "https://tadu.com",
+      "stage": "explore",
+      "field": "ruleExplore.bookList",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//ul/li",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//ul/li"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/a/@href",
+      "source": "http://m.123wgk.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/a/@href",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/a/@href"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/files.*",
+      "source": "https://yq.com",
+      "stage": "content",
+      "field": "ruleContent.sourceRegex",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/files.*",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/files.*"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//@value",
+      "source": "https://fushucun.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//@value",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//@value"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//text()",
+      "source": "https://imiaobige.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/a/text()",
+      "source": "http://m.123wgk.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/a/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/a/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//span[6]",
+      "source": "http://wenku8.net/index.php",
+      "stage": "detail",
+      "field": "ruleBookInfo.intro",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//span[6]",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//span[6]"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//a/@href",
+      "source": "https://m.xtyxsw.org",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//a/@href",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//a/@href"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//a//@href",
+      "source": "http://txtdown.cc",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//a//@href",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//a//@href"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//a/text()",
+      "source": "http://txtdown.cc",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//a/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//a/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//img/@src",
+      "source": "https://huangdizhijia.com",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//img/@src",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//img/@src"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//p/text()",
+      "source": "http://txtdown.cc",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//p/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//p/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//img//@src",
+      "source": "http://txtdown.cc",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//img//@src",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//img//@src"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//div[2]/b/a",
+      "source": "http://wenku8.net/index.php",
+      "stage": "explore",
+      "field": "ruleExplore.name",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//div[2]/b/a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//div[2]/b/a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//a/img/@src",
+      "source": "https://m.xtyxsw.org",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//a/img/@src",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//a/img/@src"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//h2/a/@href",
+      "source": "https://huangdizhijia.com",
+      "stage": "search",
+      "field": "ruleSearch.bookUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//h2/a/@href",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//h2/a/@href"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//li[span]/a",
+      "source": "https://heiyan.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//li[span]/a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//li[span]/a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//h4/a/text()",
+      "source": "http://txtdown.cc",
+      "stage": "search",
+      "field": "ruleSearch.lastChapter",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//h4/a/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//h4/a/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//h3/a/text()",
+      "source": "https://m.yuzhai.info",
+      "stage": "search",
+      "field": "ruleSearch.name",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//h3/a/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//h3/a/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//p/allText()",
+      "source": "https://huangdizhijia.com",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//p/allText()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//p/allText()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//td[4]/text()",
+      "source": "http://duqu.net",
+      "stage": "explore",
+      "field": "ruleExplore.wordCount",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//td[4]/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//td[4]/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//td[3]/text()",
+      "source": "http://duqu.net",
+      "stage": "explore",
+      "field": "ruleExplore.author",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//td[3]/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//td[3]/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/p[2]/a/text()",
+      "source": "https://m.biqusa.com",
+      "stage": "search",
+      "field": "ruleSearch.lastChapter",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/p[2]/a/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/p[2]/a/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//tr[@id=\"nr\"]",
+      "source": "https://m.23wx.cc",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//tr[@id=\"nr\"]",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//tr[@id=\"nr\"]"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/story/{{$.id}}",
+      "source": "https://mobile.iceread.com",
+      "stage": "explore",
+      "field": "ruleExplore.bookUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/story/{{$.id}}",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/story/{{$.id}}"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//strong/text()",
+      "source": "http://heiyan.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.author",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//strong/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//strong/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//p[4]/a/text()",
+      "source": "https://m.blwenla.org",
+      "stage": "detail",
+      "field": "ruleBookInfo.lastChapter",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//p[4]/a/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//p[4]/a/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/i/{$.NovelID}/",
+      "source": "https://m.sfacg.com",
+      "stage": "search",
+      "field": "ruleSearch.bookUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/i/{$.NovelID}/",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/i/{$.NovelID}/"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//p[1]/a/text()",
+      "source": "https://wap.biquluo.info",
+      "stage": "detail",
+      "field": "ruleBookInfo.author",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//p[1]/a/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//p[1]/a/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/span[5]/text()",
+      "source": "https://wap.biquluo.info",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/span[5]/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/span[5]/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//h4/span/text()",
+      "source": "http://txtdown.cc",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//h4/span/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//h4/span/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//td[2]/a/text()",
+      "source": "http://duqu.net",
+      "stage": "explore",
+      "field": "ruleExplore.lastChapter",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//td[2]/a/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//td[2]/a/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//dl/dt/a/text()",
+      "source": "http://xsbiquge.co",
+      "stage": "search",
+      "field": "ruleSearch.name",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//dl/dt/a/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//dl/dt/a/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/span[2]/a/@href",
+      "source": "https://wap.biquluo.info",
+      "stage": "search",
+      "field": "ruleSearch.bookUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/span[2]/a/@href",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/span[2]/a/@href"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//p[img]/a/text()",
+      "source": "http://gzmeal.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.lastChapter",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//p[img]/a/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//p[img]/a/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/p[1]/a[2]/text()",
+      "source": "https://m.biqusa.com",
+      "stage": "search",
+      "field": "ruleSearch.author",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/p[1]/a[2]/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/p[1]/a[2]/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//*[@class=\"n\"]/a",
+      "source": "https://ibookben.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//*[@class=\"n\"]/a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//*[@class=\"n\"]/a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/span[4]/a/text()",
+      "source": "https://wap.biquluo.info",
+      "stage": "search",
+      "field": "ruleSearch.lastChapter",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/span[4]/a/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/span[4]/a/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/span[2]/a/text()",
+      "source": "https://wap.biquluo.info",
+      "stage": "search",
+      "field": "ruleSearch.name",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/span[2]/a/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/span[2]/a/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/span[3]/a/text()",
+      "source": "https://wap.biquluo.info",
+      "stage": "search",
+      "field": "ruleSearch.author",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/span[3]/a/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/span[3]/a/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//p[2]/text()##作者：",
+      "source": "http://xmanhua.com",
+      "stage": "search",
+      "field": "ruleSearch.author",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//p[2]/text()##作者：",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//p[2]/text()##作者："
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//p[2]/span/text()",
+      "source": "https://m.xtyxsw.org",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//p[2]/span/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//p[2]/span/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/pc/chapter/{$.id}",
+      "source": "http://app2.motie.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/pc/chapter/{$.id}",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/pc/chapter/{$.id}"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//span[1]/a//@href",
+      "source": "http://txtdown.cc",
+      "stage": "search",
+      "field": "ruleSearch.bookUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//span[1]/a//@href",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//span[1]/a//@href"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//p[img]/text()[1]",
+      "source": "http://gzmeal.com",
+      "stage": "detail",
+      "field": "ruleBookInfo.intro",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//p[img]/text()[1]",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//p[img]/text()[1]"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/pic/{{$._id}}.jpg",
+      "source": "http://lianjianxsw.com/download.html",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/pic/{{$._id}}.jpg",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/pic/{{$._id}}.jpg"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//dt[1]/a[1]/@href",
+      "source": "https://imiaobige.com",
+      "stage": "search",
+      "field": "ruleSearch.bookUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//dt[1]/a[1]/@href",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//dt[1]/a[1]/@href"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//td[1]/a[2]/text()",
+      "source": "http://duqu.net",
+      "stage": "explore",
+      "field": "ruleExplore.name",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//td[1]/a[2]/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//td[1]/a[2]/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//dd[4]/a[1]/text()",
+      "source": "https://imiaobige.com",
+      "stage": "search",
+      "field": "ruleSearch.lastChapter",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//dd[4]/a[1]/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//dd[4]/a[1]/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//dd[2]/a[1]/text()",
+      "source": "https://imiaobige.com",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//dd[2]/a[1]/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//dd[2]/a[1]/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//dd[2]/a[2]/text()",
+      "source": "https://imiaobige.com",
+      "stage": "search",
+      "field": "ruleSearch.author",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//dd[2]/a[2]/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//dd[2]/a[2]/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/novel/{{$.novelId}}",
+      "source": "http://download.maoyankanshu.la",
+      "stage": "search",
+      "field": "ruleSearch.bookUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/novel/{{$.novelId}}",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/novel/{{$.novelId}}"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//p[1]/strong/text()",
+      "source": "https://m.yuzhai.info",
+      "stage": "search",
+      "field": "ruleSearch.author",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//p[1]/strong/text()",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//p[1]/strong/text()"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//div[2]/p[1]##/分类.*",
+      "source": "http://wenku8.net/index.php",
+      "stage": "explore",
+      "field": "ruleExplore.author",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//div[2]/p[1]##/分类.*",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//div[2]/p[1]##/分类.*"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "/api/book/{$.bookId}",
+      "source": "https://api.yousuu.com",
+      "stage": "search",
+      "field": "ruleSearch.bookUrl",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "/api/book/{$.bookId}",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "/api/book/{$.bookId}"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//*[@id=\"bookcon\"]//tr",
+      "source": "https://2kxs.info",
+      "stage": "search",
+      "field": "ruleSearch.bookList",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//*[@id=\"bookcon\"]//tr",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//*[@id=\"bookcon\"]//tr"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//ul[@class=\"cf\"]/li/a",
+      "source": "https://bbs.fanfanu.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//ul[@class=\"cf\"]/li/a",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//ul[@class=\"cf\"]/li/a"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "//*[@class=\"lb fk\"]/li",
+      "source": "http://m.123wgk.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "xpath",
+      "allInOne": false,
+      "ir": {
+        "source": "//*[@class=\"lb fk\"]/li",
+        "steps": [
+          {
+            "mode": "css",
+            "expression": "//*[@class=\"lb fk\"]/li"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:'　'",
+      "source": "https://yidubk.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:'　'",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "'　'"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:\"详细\"",
+      "source": "http://dict.cn",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:\"详细\"",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "\"详细\""
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:'古龙'",
+      "source": "https://gulongwang.com",
+      "stage": "explore",
+      "field": "ruleExplore.author",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:'古龙'",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "'古龙'"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:result",
+      "source": "https://pan.baidu.com",
+      "stage": "content",
+      "field": "ruleContent.content",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:result",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "result"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:'正文预览'",
+      "source": "https://zei8.me",
+      "stage": "toc",
+      "field": "ruleToc.chapterName",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:'正文预览'",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "'正文预览'"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:baseUrl",
+      "source": "https://ximalaya.com",
+      "stage": "content",
+      "field": "ruleContent.content",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:baseUrl",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "baseUrl"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:java.get(\"页\")",
+      "source": "https://97k.cc",
+      "stage": "toc",
+      "field": "ruleToc.nextTocUrl",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:java.get(\"页\")",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "java.get(\"页\")"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:java.get(\"类\")",
+      "source": "必应搜书",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:java.get(\"类\")",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "java.get(\"类\")"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:java.get(\"c\")",
+      "source": "https://kenshu.cc",
+      "stage": "search",
+      "field": "ruleSearch.lastChapter",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:java.get(\"c\")",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "java.get(\"c\")"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:\"/img/am.jpg\"",
+      "source": "https://m.newbiquge.org",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:\"/img/am.jpg\"",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "\"/img/am.jpg\""
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:java.get(\"v\")",
+      "source": "https://97k.cc",
+      "stage": "detail",
+      "field": "ruleBookInfo.kind",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:java.get(\"v\")",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "java.get(\"v\")"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:java.get(\"img\")",
+      "source": "https://kenshu.cc",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:java.get(\"img\")",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "java.get(\"img\")"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:java.get('tag')",
+      "source": "https://szyangxiao.com",
+      "stage": "search",
+      "field": "ruleSearch.kind",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:java.get('tag')",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "java.get('tag')"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:java.get(\"curl\")",
+      "source": "https://kenshu.cc",
+      "stage": "search",
+      "field": "ruleSearch.bookUrl",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:java.get(\"curl\")",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "java.get(\"curl\")"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:java.get('last')",
+      "source": "https://m.sfacg.com",
+      "stage": "search",
+      "field": "ruleSearch.lastChapter",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:java.get('last')",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "java.get('last')"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:java.get('cover')",
+      "source": "https://szyangxiao.com",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:java.get('cover')",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "java.get('cover')"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:\"/img/249912.jpg\"",
+      "source": "https://pck.tvguaa.com",
+      "stage": "search",
+      "field": "ruleSearch.coverUrl",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:\"/img/249912.jpg\"",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "\"/img/249912.jpg\""
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:java.get('intro')",
+      "source": "https://m.sfacg.com",
+      "stage": "search",
+      "field": "ruleSearch.intro",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:java.get('intro')",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "java.get('intro')"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:!{{$.auth_access}}",
+      "source": "https://app.shubl.com",
+      "stage": "toc",
+      "field": "ruleToc.isVip",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:!{{$.auth_access}}",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "!{{$.auth_access}}"
+          }
+        ]
+      }
+    },
+    {
+      "rule": "@js:[java.get('json')]",
+      "source": "http://fuciyuanbang.ciyuans.com",
+      "stage": "toc",
+      "field": "ruleToc.chapterList",
+      "backend": "js",
+      "allInOne": false,
+      "ir": {
+        "source": "@js:[java.get('json')]",
+        "steps": [
+          {
+            "mode": "js",
+            "expression": "[java.get('json')]"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,286 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-09-12T05:51:08.387332Z",
+  "finishedAt": "2026-09-12T05:51:09.914029Z",
+  "durationMicros": 1526565,
+  "oracle": "legado-process",
+  "selfBaseline": false,
+  "metrics": {
+    "totalCases": 7,
+    "passedCases": 6,
+    "failedCases": 1,
+    "passRate": 0.8571428571428571,
+    "fieldsCompared": 21,
+    "mismatchCount": 1,
+    "mismatchRate": 0.047619047619047616,
+    "p50Micros": 2011,
+    "p95Micros": 24835,
+    "cacheHits": 0,
+    "cacheMisses": 0,
+    "cacheHitRate": 0.0,
+    "mismatchesByStage": {
+      "rule": 1
+    },
+    "mismatchesByField": {
+      "value": 1
+    },
+    "stages": {
+      "rule": {
+        "stage": "rule",
+        "totalCases": 7,
+        "passedCases": 6,
+        "failedCases": 1,
+        "passRate": 0.8571428571428571,
+        "fieldsCompared": 21,
+        "mismatchCount": 1,
+        "p50Micros": 2011,
+        "p95Micros": 24835,
+        "cacheHits": 0,
+        "cacheMisses": 0,
+        "cacheHitRate": 0.0
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "legado/regex-basic",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 2355,
+      "oracleElapsedMicros": 206389,
+      "input": {
+        "name": "regex-basic",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "Chapter (\\d+): (.*)",
+        "input": "Chapter 1: The Beginning\nChapter 2: The Middle"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "Chapter (\\d+): (.*)",
+        "value": [
+          "Chapter 1: The Beginning",
+          "1",
+          "The Beginning"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "Chapter (\\d+): (.*)",
+        "value": [
+          "Chapter 1: The Beginning",
+          "1",
+          "The Beginning"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/regex-multiline",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 102,
+      "oracleElapsedMicros": 164034,
+      "input": {
+        "name": "regex-multiline",
+        "kind": "regex",
+        "fallback": "regex",
+        "rule": "line (.*)",
+        "input": "line one\nline two\nline three"
+      },
+      "actual": {
+        "mode": "regex",
+        "expression": "line (.*)",
+        "value": [
+          "line one",
+          "one"
+        ]
+      },
+      "expected": {
+        "mode": "regex",
+        "expression": "line (.*)",
+        "value": [
+          "line one",
+          "one"
+        ]
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-text",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 24835,
+      "oracleElapsedMicros": 219147,
+      "input": {
+        "name": "css-text",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a@text",
+        "input": "<div><a href=\"/a\">Alpha</a><a href=\"/b\">Beta</a></div>"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a@text",
+        "value": "Alpha\nBeta"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a@text",
+        "value": "Alpha\nBeta"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-index-interval",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 2011,
+      "oracleElapsedMicros": 222014,
+      "input": {
+        "name": "css-index-interval",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a.0:2@text",
+        "input": "<p><a>zero</a><a>one</a><a>two</a><a>three</a></p>"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a.0:2@text",
+        "value": "zero\ntwo"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a.0:2@text",
+        "value": "zero\ntwo"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/css-attr-dedup",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 682,
+      "oracleElapsedMicros": 216768,
+      "input": {
+        "name": "css-attr-dedup",
+        "kind": "css",
+        "fallback": "css",
+        "rule": "a@href",
+        "input": "<p><a href=\"x\">a</a><a href=\"x\">b</a></p>"
+      },
+      "actual": {
+        "mode": "css",
+        "expression": "a@href",
+        "value": "x"
+      },
+      "expected": {
+        "mode": "css",
+        "expression": "a@href",
+        "value": "x"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/json-basic",
+      "stage": "rule",
+      "passed": true,
+      "elapsedMicros": 1811,
+      "oracleElapsedMicros": 201816,
+      "input": {
+        "name": "json-basic",
+        "kind": "json",
+        "fallback": "json",
+        "rule": "$.chapters",
+        "input": "{\"chapters\":[\"ch1\",\"ch2\",\"ch3\"]}"
+      },
+      "actual": {
+        "mode": "json",
+        "expression": "$.chapters",
+        "value": "ch1\nch2\nch3"
+      },
+      "expected": {
+        "mode": "json",
+        "expression": "$.chapters",
+        "value": "ch1\nch2\nch3"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "legado/xpath-element",
+      "stage": "rule",
+      "passed": false,
+      "elapsedMicros": 5285,
+      "oracleElapsedMicros": 255243,
+      "input": {
+        "name": "xpath-element",
+        "kind": "xpath",
+        "fallback": "xpath",
+        "rule": "//title",
+        "input": "<book><title>First</title><title>Second</title></book>"
+      },
+      "actual": {
+        "mode": "xpath",
+        "expression": "//title",
+        "value": "First\nSecond"
+      },
+      "expected": {
+        "mode": "xpath",
+        "expression": "//title",
+        "value": "<title>First</title>\n<title>Second</title>"
+      },
+      "cache": {
+        "hits": 0,
+        "misses": 0,
+        "lookups": 0,
+        "hitRate": 0.0
+      },
+      "mismatches": [
+        {
+          "caseId": "legado/xpath-element",
+          "stage": "rule",
+          "field": "value",
+          "kind": "value",
+          "actual": "First\nSecond",
+          "expected": "<title>First</title>\n<title>Second</title>"
+        }
+      ]
+    }
+  ]
+}

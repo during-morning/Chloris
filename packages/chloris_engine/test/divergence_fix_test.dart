@@ -73,7 +73,9 @@ void main() {
   group('JSONPath 递归通配', () {
     test('json-030: 递归通配 收集全部值（容器+叶子）', () {
       final jp = AnalyzeByJsonPath('{"a":1,"b":{"c":2}}');
-      expect(jp.getString(r'$..*'), '1\n{"c":2}\n2');
+      // Jayway toString：Map 走 Java AbstractMap 的 {k=v}（判题进程实测
+      // `1\n{c=2}\n2`），不是 jsonEncode 的 {"c":2}。
+      expect(jp.getString(r'$..*'), '1\n{c=2}\n2');
     });
 
     test(r'$..title 具名递归行为不变', () {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/persist/kv_settings.dart';
 import 'core/persist/settings_migrations.dart';
+import 'engine/prefs_kv_port.dart';
 
 import 'dart:async';
 import 'dart:convert';
@@ -79,6 +80,9 @@ Future<void> main() async {
   // Run the schema boundary before any provider or feature reads settings.
   // This keeps startup and feature writes on the same migration path.
   final prefs = await KvSettings.ready();
+  // 书源级 java.put/java.get 变量的持久层：此后所有 BookSource 实例
+  // （fromJson 或手动构造）自动带持久存储，重启后变量仍在。
+  BookSource.defaultVarStore = PrefsKvPort(prefs);
   final rawLog = prefs.getString('debugLog');
   if (rawLog != null && rawLog.isNotEmpty) {
     try {

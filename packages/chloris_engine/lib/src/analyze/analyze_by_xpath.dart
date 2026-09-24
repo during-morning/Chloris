@@ -160,6 +160,23 @@ class AnalyzeByXPath {
           .where((s) => s.trim().isNotEmpty)
           .toList();
     }
+    // 路径末端 node()：子轴/后代轴的**全部节点**（元素 + 文本）。
+    // 字面值取 XPath 规则：文本节点取其文本，元素取其文本内容 —— 与
+    // 下面纯元素路径 `e.text.trim()` 的取值口径一致，按文档序返回。
+    if (path.endsWith('//node()')) {
+      final base = path.substring(0, path.length - '//node()'.length);
+      return _select(root, base)
+          .expand((e) => _descendantNodeValues(e))
+          .where((s) => s.trim().isNotEmpty)
+          .toList();
+    }
+    if (path.endsWith('/node()')) {
+      final base = path.substring(0, path.length - '/node()'.length);
+      return _select(root, base)
+          .expand((e) => e.nodes.map(_nodeValue))
+          .where((s) => s.trim().isNotEmpty)
+          .toList();
+    }
     // 路径末端 @attr：属性节点 -> 属性值。命名空间前缀（foo:bar）一并支持。
     final attr = RegExp(r'/@([\w:-]+)$').firstMatch(path);
     if (attr != null) {
@@ -187,6 +204,26 @@ class AnalyzeByXPath {
         yield child.text.trim();
       } else if (child is Element) {
         yield* _descendantTextValues(child);
+      }
+    }
+  }
+
+  /// 节点的字面值：文本节点取其文本，元素取其聚合文本（与元素路径的
+  /// `e.text` 取值口径一致），注释节点取 `data`。
+  static String _nodeValue(Node n) {
+    if (n is Text) return n.text.trim();
+    if (n is Element) return n.text.trim();
+    return n.text?.trim() ?? '';
+  }
+
+  /// 后代轴 node() 的全部节点（元素 + 文本，按文档序）。
+  static Iterable<String> _descendantNodeValues(Element e) sync* {
+    for (final child in e.nodes) {
+      if (child is Text) {
+        yield child.text.trim();
+      } else if (child is Element) {
+        yield child.text.trim();
+        yield* _descendantNodeValues(child);
       }
     }
   }

@@ -41,6 +41,12 @@ class BookSource {
     this.customButton = false,
   });
 
+  /// App 级默认变量持久层：宿主启动时挂一次，此后**所有** BookSource 实例
+  /// （`fromJson`、手动构造、copyWith 不走此路径）自动获得持久化的
+  /// `java.put`/`java.get` 变量，重启后仍在 —— 对齐 Legado-E 的
+  /// `CacheManager` Room 兜底。引擎/单测不挂即可保持纯内存行为。
+  static KvPort? defaultVarStore;
+
   String bookSourceUrl;
   String bookSourceName;
   String? bookSourceGroup;
@@ -83,7 +89,8 @@ class BookSource {
   final Map<String, String> runtimeVars = {};
 
   /// 源级变量的持久层（可选）。为 null 时变量仅存活于本次运行。
-  KvPort? varStore;
+  /// 默认取 [defaultVarStore]，调用方仍可逐实例覆盖。
+  KvPort? varStore = BookSource.defaultVarStore;
 
   bool _warnedNoVarStore = false;
 

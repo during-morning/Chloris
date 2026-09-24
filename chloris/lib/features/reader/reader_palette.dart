@@ -19,6 +19,11 @@ class ReaderPalette {
   final int foreground;
   final bool followApp;
 
+  /// Whether the stored bg/fg are this paper's own data rather than a stale
+  /// copy of its static colors. `follow` resolves against the live scheme and
+  /// `custom` is the user's picked pair — reloading must keep their values.
+  bool get usesStoredColors => followApp || id == 'custom';
+
   /// Follow paper takes the live family name; scene papers keep [label].
   String labelFor(AppThemeFamily family) => followApp ? family.label : label;
 

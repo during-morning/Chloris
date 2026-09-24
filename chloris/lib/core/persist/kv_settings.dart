@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'settings_migrations.dart';
@@ -22,25 +24,48 @@ class KvSettings {
 
   static final instance = _KvOneShot();
 
+  static final StreamController<String> _changes =
+      StreamController<String>.broadcast();
+
+  /// Emits the written key after each mutation completes. Settings snapshots
+  /// — like the host environment feeding `java.getThemeConfig()` — subscribe
+  /// here instead of relying on every write site to remember a refresh.
+  static Stream<String> get changes => _changes.stream;
+
   String? getString(String key) => _p.getString(key);
-  Future<void> setString(String key, String value) async =>
-      _p.setString(key, value);
+  Future<void> setString(String key, String value) async {
+    await _p.setString(key, value);
+    _changes.add(key);
+  }
 
   bool? getBool(String key) => _p.getBool(key);
-  Future<void> setBool(String key, bool value) async => _p.setBool(key, value);
+  Future<void> setBool(String key, bool value) async {
+    await _p.setBool(key, value);
+    _changes.add(key);
+  }
 
   int? getInt(String key) => _p.getInt(key);
-  Future<void> setInt(String key, int value) async => _p.setInt(key, value);
+  Future<void> setInt(String key, int value) async {
+    await _p.setInt(key, value);
+    _changes.add(key);
+  }
 
   double? getDouble(String key) => _p.getDouble(key);
-  Future<void> setDouble(String key, double value) async =>
-      _p.setDouble(key, value);
+  Future<void> setDouble(String key, double value) async {
+    await _p.setDouble(key, value);
+    _changes.add(key);
+  }
 
   List<String>? getStringList(String key) => _p.getStringList(key);
-  Future<void> setStringList(String key, List<String> value) async =>
-      _p.setStringList(key, value);
+  Future<void> setStringList(String key, List<String> value) async {
+    await _p.setStringList(key, value);
+    _changes.add(key);
+  }
 
-  Future<void> remove(String key) async => _p.remove(key);
+  Future<void> remove(String key) async {
+    await _p.remove(key);
+    _changes.add(key);
+  }
 }
 
 class _KvOneShot {

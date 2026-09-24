@@ -1,3 +1,4 @@
+import 'package:chloris/core/persist/kv_settings.dart';
 import 'package:chloris/engine/host_environment_app.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -58,6 +59,32 @@ void main() {
     final env = AppHostEnvironment();
     await env.refresh();
     expect(env.readBookConfig(), isEmpty);
+  });
+
+  test('a settings write after construction refreshes the snapshot', () async {
+    SharedPreferences.setMockInitialValues({'themeMode': 'light'});
+    final env = AppHostEnvironment();
+    await env.refresh();
+    expect(env.themeMode(), 1);
+    await (await KvSettings.ready()).setString('themeMode', 'dark');
+    // The KvSettings change stream delivers the write asynchronously.
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(env.themeMode(), 2);
+    env.dispose();
+  });
+
+  test('writes that bypass KvSettings leave the snapshot stale', () async {
+    SharedPreferences.setMockInitialValues({'themeMode': 'light'});
+    final env = AppHostEnvironment();
+    await env.refresh();
+    expect(env.themeMode(), 1);
+    await (await SharedPreferences.getInstance()).setString('themeMode', 'dark');
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(env.themeMode(), 1);
+    await (await KvSettings.ready()).setString('themeMode', 'system');
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(env.themeMode(), 0);
+    env.dispose();
   });
 
   test('theme config reports family, style and e-ink', () async {

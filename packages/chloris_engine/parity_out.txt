@@ -1,4 +1,0 @@
-00:00 +0: loading test/css_index_parity_test.dart
-00:00 +0: range end is inclusive (Kotlin closed range)
-00:00 +1: same-side out-of-bounds range is skipped (empty result)
-00:00 +2: mixed-bounds range clamps out-of-bounds endpoint (legado :353-357)

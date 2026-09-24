@@ -21,6 +21,7 @@ build/
 
 # Flutter
 .dart_tool/
+.flutter
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages

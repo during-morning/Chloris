@@ -454,10 +454,10 @@ class AnalyzeByCss {
         for (final e in [...elements]) {
           e.querySelectorAll('script,style').forEach((n) => n.remove());
         }
-        final html = elements.map((e) => e.outerHtml).join();
+        final html = elements.map(jsoupOuterHtml).join();
         if (html.isNotEmpty) out.add(html);
       case 'all':
-        out.add(elements.map((e) => e.outerHtml).join());
+        out.add(elements.map(jsoupOuterHtml).join());
       default:
         for (final e in elements) {
           final v = e.attributes[lastRule] ?? '';
@@ -865,4 +865,275 @@ class _Range {
   final int? end;
   final int step;
   int get sentinel => start;
+}
+
+// ---------------------------------------------------------------------------
+// jsoup 1.16.2 pretty-print 序列化
+//
+// Legado 的 `e.outerHtml`/`el.html()` 走 jsoup 默认 OutputSettings
+// （prettyPrint=true、indentAmount=1、syntax=html），`@html`/`@all` 拿到的是
+// 缩进后的标记而不是 package:html 的紧凑序列化。下面是 jsoup 输出算法的
+// 逐行移植：Element.outerHtmlHead/Tail + TextNode.outerHtmlHead +
+// Node.indent（`\n` + depth*1 空格，封顶 30）。
+// ---------------------------------------------------------------------------
+
+/// jsoup Tag 表 —— blockTags（Tag.java）。
+const _jsoupBlockTags = {
+  'html', 'head', 'body', 'frameset', 'script', 'noscript', 'style', 'meta',
+  'link', 'title', 'frame', 'noframes', 'section', 'nav', 'aside', 'hgroup',
+  'header', 'footer', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol',
+  'pre', 'div', 'blockquote', 'hr', 'address', 'figure', 'figcaption', 'form',
+  'fieldset', 'ins', 'del', 'dl', 'dt', 'dd', 'li', 'table', 'caption',
+  'thead', 'tfoot', 'tbody', 'colgroup', 'col', 'tr', 'th', 'td', 'video',
+  'audio', 'canvas', 'details', 'menu', 'plaintext', 'template', 'article',
+  'main', 'svg', 'math', 'center', 'dir', 'applet', 'marquee', 'listing',
+};
+
+/// jsoup emptyTags：无子节点时序列化为 `<tag>` 且不带 `</tag>`。
+const _jsoupEmptyTags = {
+  'meta', 'link', 'base', 'frame', 'img', 'br', 'wbr', 'embed', 'hr', 'input',
+  'keygen', 'col', 'command', 'device', 'area', 'basefont', 'bgsound',
+  'menuitem', 'param', 'source', 'track',
+};
+
+/// jsoup formatAsInlineTags：是 block 但子节点不按块缩进（p/a/li/td/pre…）。
+const _jsoupFormatAsInlineTags = {
+  'title', 'a', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', 'address',
+  'li', 'th', 'td', 'script', 'style', 'ins', 'del', 's',
+};
+
+/// jsoup preserveWhitespaceTags：子文本不做空白归一。
+const _jsoupPreserveWhitespaceTags = {'pre', 'plaintext', 'title', 'textarea'};
+
+/// jsoup Attributes.booleanAttributes：值为空或等于键名时可折叠为裸键。
+const _jsoupBooleanAttrs = {
+  'allowfullscreen', 'async', 'autofocus', 'checked', 'compact', 'declare',
+  'default', 'defer', 'disabled', 'formnovalidate', 'hidden', 'inert',
+  'ismap', 'itemscope', 'multiple', 'muted', 'nohref', 'noresize', 'noshade',
+  'novalidate', 'nowrap', 'open', 'readonly', 'required', 'reversed',
+  'seamless', 'selected', 'sortable', 'truespeed', 'typemustmatch',
+};
+
+bool _jsoupIsBlock(String? name) => _jsoupBlockTags.contains(name);
+
+bool _jsoupIsEmpty(String? name) => _jsoupEmptyTags.contains(name);
+
+bool _jsoupFormatAsBlock(String? name) =>
+    _jsoupIsBlock(name) && !_jsoupFormatAsInlineTags.contains(name);
+
+/// `Element.preserveWhitespace`：自身或至多 5 层祖先带 preserveWhitespace 标签。
+bool _jsoupPreserveWhitespace(Node? node) {
+  var el = node is Element ? node : node?.parent;
+  var i = 0;
+  while (i < 6 && el != null) {
+    if (_jsoupPreserveWhitespaceTags.contains(el.localName)) return true;
+    el = el.parent;
+    i++;
+  }
+  return false;
+}
+
+int _nodeIndex(Node n) {
+  final p = n.parentNode;
+  return p == null ? 0 : p.nodes.indexOf(n);
+}
+
+Node? _prevSibling(Node n) {
+  final p = n.parentNode;
+  if (p == null) return null;
+  final i = _nodeIndex(n);
+  return i > 0 ? p.nodes[i - 1] : null;
+}
+
+Node? _nextSibling(Node n) {
+  final p = n.parentNode;
+  if (p == null) return null;
+  final i = _nodeIndex(n);
+  return i < p.nodes.length - 1 ? p.nodes[i + 1] : null;
+}
+
+/// 第一个子节点，或紧跟空白文本节点之后（jsoup `isEffectivelyFirst`）。
+bool _isEffectivelyFirst(Element el) {
+  final idx = _nodeIndex(el);
+  if (idx == 0) return true;
+  if (idx == 1) {
+    final prev = _prevSibling(el);
+    return prev is Text && prev.data.trim().isEmpty;
+  }
+  return false;
+}
+
+bool _isInlineable(Element el) {
+  if (el.localName == 'br') return false;
+  // jsoup Tag.isInline() = !isBlock；未知标签同理视作 inline。
+  if (_jsoupIsBlock(el.localName)) return false;
+  final parent = el.parent;
+  return (parent == null || _jsoupIsBlock(parent.localName)) &&
+      !_isEffectivelyFirst(el);
+}
+
+bool _isFormatAsBlock(Element el) =>
+    _jsoupIsBlock(el.localName) ||
+    (el.parent != null && _jsoupFormatAsBlock(el.parent!.localName));
+
+bool _shouldIndentElement(Element el) =>
+    _isFormatAsBlock(el) &&
+    !_isInlineable(el) &&
+    !_jsoupPreserveWhitespace(el.parentNode);
+
+/// `\n` + depth 个空格（indentAmount=1），jsoup `maxPaddingWidth` 封顶 30。
+void _indent(StringBuffer sb, int depth) {
+  sb.write('\n');
+  for (var i = 0; i < depth && i < 30; i++) {
+    sb.write(' ');
+  }
+}
+
+/// jsoup `StringUtil.normaliseWhitespace`：`\t\n\v\f\r` 与空格的连续段压成一个空格。
+String _normaliseWhitespace(String text) {
+  final sb = StringBuffer();
+  var lastWasWs = false;
+  for (var i = 0; i < text.length; i++) {
+    final c = text[i];
+    final isWs = c == ' ' ||
+        c == '\t' ||
+        c == '\n' ||
+        c == '\u000B' ||
+        c == '\f' ||
+        c == '\r';
+    if (isWs) {
+      if (lastWasWs) continue;
+      sb.write(' ');
+      lastWasWs = true;
+    } else {
+      sb.write(c);
+      lastWasWs = false;
+    }
+  }
+  return sb.toString();
+}
+
+/// 追加文本时若累加器末尾已是空白，吞掉新文本的前导空格
+/// （jsoup `appendNormalisedWhitespace` 的 `lastCharIsWhitespace(accum)`）。
+void _appendNormalised(StringBuffer sb, String text) {
+  if (text.isEmpty) return;
+  if (text.startsWith(' ') && sb.isNotEmpty) {
+    final last = sb.toString()[sb.length - 1];
+    if (last == ' ' || last == '\n') text = text.substring(1);
+  }
+  sb.write(text);
+}
+
+String _escapeText(String s) => s
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('\u00A0', '&nbsp;');
+
+String _escapeAttr(String s) => s
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('\u00A0', '&nbsp;');
+
+/// 逐行移植 jsoup `Element.outerHtml`（默认 prettyPrint、html syntax）。
+String jsoupOuterHtml(Element el) {
+  final sb = StringBuffer();
+  _emitJsoup(el, sb, 0);
+  return sb.toString();
+}
+
+void _emitJsoup(Node node, StringBuffer sb, int depth) {
+  if (node is Element) {
+    _emitElement(node, sb, depth);
+  } else if (node is Text) {
+    _emitText(node, sb, depth);
+  } else if (node is Comment) {
+    // jsoup Comment.outerHtmlHead：作为 formatAsBlock 父级的首个子节点时缩进。
+    final parent = node.parent;
+    if (_nodeIndex(node) == 0 &&
+        parent != null &&
+        _jsoupFormatAsBlock(parent.localName) &&
+        (node.data ?? '').trim().isNotEmpty) {
+      _indent(sb, depth);
+    }
+    sb.write('<!--${node.data ?? ''}-->');
+  } else if (node is DocumentType) {
+    sb.write('<!doctype html>');
+  }
+}
+
+void _emitElement(Element el, StringBuffer sb, int depth) {
+  if (_shouldIndentElement(el) && sb.isNotEmpty) _indent(sb, depth);
+  final name = el.localName ?? '';
+  sb.write('<');
+  sb.write(name);
+  el.attributes.forEach((key, value) {
+    final k = key.toString();
+    // Attribute.shouldCollapseAttribute：html 语法下值为空或等于键名的
+    // 布尔属性折叠为裸键（`disabled`），其余一律 `key="escaped"`。
+    final collapse = (value.isEmpty || value.toLowerCase() == k.toLowerCase()) &&
+        _jsoupBooleanAttrs.contains(k.toLowerCase());
+    sb.write(' ');
+    sb.write(k);
+    if (!collapse) {
+      sb.write('="');
+      sb.write(_escapeAttr(value));
+      sb.write('"');
+    }
+  });
+  final children = el.nodes;
+  if (children.isEmpty && _jsoupIsEmpty(name)) {
+    sb.write('>'); // html 语法下 empty 标签无自闭合斜杠、无尾标签
+    return;
+  }
+  sb.write('>');
+  for (final child in children) {
+    _emitJsoup(child, sb, depth + 1);
+  }
+  if (children.isNotEmpty &&
+      _jsoupFormatAsBlock(name) &&
+      !_jsoupPreserveWhitespace(el.parentNode)) {
+    _indent(sb, depth);
+  }
+  sb.write('</');
+  sb.write(name);
+  sb.write('>');
+}
+
+void _emitText(Text t, StringBuffer sb, int depth) {
+  final parent = t.parent;
+  final rawData = parent != null &&
+      (parent.localName == 'script' || parent.localName == 'style');
+  final normalise = !rawData && !_jsoupPreserveWhitespace(t.parentNode);
+  var text = t.data;
+  if (normalise) {
+    final parentName = parent?.localName;
+    final trimLikeBlock =
+        parent != null && (_jsoupIsBlock(parentName) || _jsoupFormatAsBlock(parentName));
+    final idx = _nodeIndex(t);
+    final next = _nextSibling(t);
+    final prev = _prevSibling(t);
+    final trimLeading = (trimLikeBlock && idx == 0) || t.parentNode is Document;
+    final trimTrailing = trimLikeBlock && next == null;
+    final isBlank = text.trim().isEmpty;
+    // 仅空白文本且下一节点要缩进 / 上一节点是块或 <br> 时整体跳过。
+    final couldSkip = (next is Element && _shouldIndentElement(next)) ||
+        (next is Text && next.data.trim().isEmpty) ||
+        (prev is Element &&
+            (_jsoupIsBlock(prev.localName) || prev.localName == 'br'));
+    if (couldSkip && isBlank) return;
+    if ((idx == 0 &&
+            parent != null &&
+            _jsoupFormatAsBlock(parentName) &&
+            !isBlank) ||
+        (idx > 0 && prev is Element && prev.localName == 'br')) {
+      _indent(sb, depth);
+    }
+    text = _normaliseWhitespace(text);
+    if (trimLeading) text = text.trimLeft();
+    if (trimTrailing) text = text.trimRight();
+    _appendNormalised(sb, _escapeText(text));
+    return;
+  }
+  sb.write(rawData ? text : _escapeText(text));
 }

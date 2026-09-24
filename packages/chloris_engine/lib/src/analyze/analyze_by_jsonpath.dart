@@ -66,6 +66,11 @@ class AnalyzeByJsonPath {
 
   String getString(String rule) {
     if (rule.isEmpty) return '';
+    // `%%` 只为 getStringList/getElements 的「逐位交错」服务：Legado 的
+    // getString 不把它当组合符，整条 `$.a[*]%%$.b[*]` 会作为单条 JsonPath
+    // 送进 Jayway，解析失败返回 ""。判题进程实测 `$.a[*]%%$.b[*]` → ""。
+    final typeCheck = RuleAnalyzer(rule);
+    if (typeCheck.splitRule(['%%']).length > 1) return '';
     final analyzer = RuleAnalyzer(rule, true);
     final parts = analyzer.splitRule(['&&', '||']);
     if (parts.length <= 1) {
@@ -173,10 +178,44 @@ class AnalyzeByJsonPath {
           if (e == null) return '';
           if (e is String) return e;
           if (e is num || e is bool) return e.toString();
-          return jsonEncode(e);
+          return _jaywayToString(e);
         })
         .where((e) => e.isNotEmpty)
         .toList();
+  }
+
+  /// Jayway JsonPath（json-smart provider）命中结果的 `String.valueOf`：
+  /// 对象落到 `LinkedHashMap.toString`（`{k=v, k=v}`，Java AbstractMap 格式），
+  /// 数组落到 `JSONArray.toString`（JSON 格式 `["a","b"]`）。判题进程实测：
+  /// `$.data`（对象）→ `{data=["d1","d2"]}`、`$..*` 里的嵌套对象 → `{c=2}`，
+  /// 即 Map 值位递归 AbstractMap 格式，而 Map 内的 List 值仍是 JSON 格式。
+  static String _jaywayToString(Object v) {
+    if (v is Map) {
+      final parts = <String>[
+        for (final e in v.entries) '${e.key}=${_jaywayMapValue(e.value)}',
+      ];
+      return '{${parts.join(', ')}}';
+    }
+    if (v is List) {
+      return '[${v.map(_jaywayListItem).join(',')}]';
+    }
+    return v.toString();
+  }
+
+  /// AbstractMap.toString 对值调用 `String.valueOf`：嵌套 Map 递归
+  /// `{k=v}`，List 用 JSON 格式，字符串原样（不加引号）。
+  static String _jaywayMapValue(Object? v) {
+    if (v == null) return 'null';
+    if (v is Map || v is List) return _jaywayToString(v);
+    return v.toString();
+  }
+
+  /// JSONArray.toString 走 JSON 序列化：字符串加引号，Map/List 用 JSON。
+  static String _jaywayListItem(Object? v) {
+    if (v is String) return jsonEncode(v);
+    if (v is Map || v is List) return jsonEncode(v);
+    if (v == null) return 'null';
+    return v.toString();
   }
 
   List<dynamic> _read(dynamic data, String path) {

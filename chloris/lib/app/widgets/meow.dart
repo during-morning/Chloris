@@ -338,8 +338,8 @@ class MeowRule extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final absolutely = theme.extension<AppStyleExtension>()?.style ==
-        AppUiStyle.absolutely;
+    final absolutely =
+        theme.extension<AppStyleExtension>()?.style == AppUiStyle.absolutely;
     // Absolutely: the masthead rule — a short ink dash closing the title,
     // the rest continuing as hairline. Print-column grammar.
     if (!absolutely) {
@@ -355,7 +355,10 @@ class MeowRule extends StatelessWidget {
           Container(width: 64, height: 2, color: cs.onSurface),
           const SizedBox(width: 8),
           Expanded(
-            child: Container(height: AppTokens.hairline, color: cs.outlineVariant),
+            child: Container(
+              height: AppTokens.hairline,
+              color: cs.outlineVariant,
+            ),
           ),
         ],
       ),
@@ -392,9 +395,7 @@ class MeowLabel extends StatelessWidget {
       ),
     );
     if (trailing == null) return label;
-    return Row(
-      children: [label, const Spacer(), trailing!],
-    );
+    return Row(children: [label, const Spacer(), trailing!]);
   }
 }
 
@@ -520,9 +521,7 @@ class _MeowQueryFieldState extends State<MeowQueryField> {
     final border = OutlineInputBorder(
       borderRadius: BorderRadius.circular(radius),
       borderSide: BorderSide(
-        color: classic
-            ? cs.outlineVariant.withValues(alpha: 0.72)
-            : cs.outline,
+        color: classic ? cs.outlineVariant.withValues(alpha: 0.72) : cs.outline,
       ),
     );
     return ScrollConfiguration(
@@ -550,17 +549,17 @@ class _MeowQueryFieldState extends State<MeowQueryField> {
           suffixIcon: widget.trailing == null || widget.trailing!.isEmpty
               ? null
               : Row(mainAxisSize: MainAxisSize.min, children: widget.trailing!),
-          suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+          suffixIconConstraints: const BoxConstraints(
+            minWidth: 0,
+            minHeight: 0,
+          ),
           isDense: true,
           filled: true,
           fillColor: cs.surfaceContainerLowest,
           border: border,
           enabledBorder: border,
           focusedBorder: border.copyWith(
-            borderSide: BorderSide(
-              color: focusColor,
-              width: classic ? 2 : 1.2,
-            ),
+            borderSide: BorderSide(color: focusColor, width: classic ? 2 : 1.2),
           ),
         ),
       ),
@@ -695,9 +694,7 @@ class MeowIconButton extends StatelessWidget {
           shape: active
               ? const StadiumBorder()
               : RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    ext?.controlRadius ?? 8,
-                  ),
+                  borderRadius: BorderRadius.circular(ext?.controlRadius ?? 8),
                   side: BorderSide(color: cs.outlineVariant),
                 ),
           minimumSize: const Size(36, 36),
@@ -727,8 +724,18 @@ class MeowChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return FilterChip(
-      label: Text(label),
+      // FilterChip's default label color can fall back to the platform theme
+      // when a custom ChipThemeData is active. Keep the text tied to the same
+      // contrast pair as the chip surface so dark themes never render labels
+      // as near-black text on a dark pill.
+      label: Text(
+        label,
+        style: TextStyle(
+          color: active ? colors.onSurface : colors.onSurfaceVariant,
+        ),
+      ),
       avatar: icon,
       selected: active,
       onSelected: onTap == null ? null : (_) => onTap!(),
@@ -783,7 +790,9 @@ class MeowEmpty extends StatelessWidget {
                   size: absolutely ? 44 : (ui == AppUiStyle.classic ? 64 : 56),
                   color: tone,
                 ),
-              SizedBox(height: absolutely ? AppTokens.space20 : AppTokens.space16),
+              SizedBox(
+                height: absolutely ? AppTokens.space20 : AppTokens.space16,
+              ),
               Text(
                 mono ? '[ $title ]' : title,
                 // Absolutely: display serif, never bold — the official error /
@@ -793,7 +802,9 @@ class MeowEmpty extends StatelessWidget {
                     : theme.textTheme.titleLarge,
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: absolutely ? AppTokens.space12 : AppTokens.space8),
+              SizedBox(
+                height: absolutely ? AppTokens.space12 : AppTokens.space8,
+              ),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 420),
                 child: Text(
@@ -808,7 +819,9 @@ class MeowEmpty extends StatelessWidget {
                 ),
               ),
               if (action != null) ...[
-                SizedBox(height: absolutely ? AppTokens.space24 : AppTokens.space20),
+                SizedBox(
+                  height: absolutely ? AppTokens.space24 : AppTokens.space20,
+                ),
                 action!,
               ],
             ],
@@ -826,7 +839,8 @@ class MeowLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mono = Theme.of(context).extension<AppStyleExtension>()?.mono ?? false;
+    final mono =
+        Theme.of(context).extension<AppStyleExtension>()?.mono ?? false;
     return AppEntrance(
       child: Center(
         child: Column(
@@ -880,11 +894,7 @@ class MeowError extends StatelessWidget {
                   ),
                 )
               else
-                AppIcon(
-                  AppIcons.error,
-                  size: mono ? 44 : 48,
-                  color: cs.error,
-                ),
+                AppIcon(AppIcons.error, size: mono ? 44 : 48, color: cs.error),
               const SizedBox(height: AppTokens.space12),
               Text(message, textAlign: TextAlign.center),
               if (onRetry != null) ...[

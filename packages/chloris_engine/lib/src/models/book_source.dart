@@ -32,6 +32,8 @@ class BookSource {
     this.exploreScreen,
     this.ruleExplore,
     this.searchUrl,
+    this.webSocketUrl,
+    this.webSocketSearch = false,
     this.ruleSearch,
     this.ruleBookInfo,
     this.ruleToc,
@@ -72,6 +74,8 @@ class BookSource {
   String? exploreScreen;
   ExploreRule? ruleExplore;
   String? searchUrl;
+  String? webSocketUrl;
+  bool webSocketSearch;
   SearchRule? ruleSearch;
   BookInfoRule? ruleBookInfo;
   TocRule? ruleToc;
@@ -130,6 +134,7 @@ class BookSource {
     if (persisted.isNotEmpty) runtimeVars[key] = persisted;
     return persisted;
   }
+
   ExploreRule getExploreRule() => ruleExplore ??= ExploreRule();
   BookInfoRule getBookInfoRule() => ruleBookInfo ??= BookInfoRule();
   TocRule getTocRule() => ruleToc ??= TocRule();
@@ -195,6 +200,8 @@ class BookSource {
       exploreScreen: JsonKit.string(json['exploreScreen']),
       ruleExplore: JsonKit.object(json['ruleExplore'], ExploreRule.fromJson),
       searchUrl: JsonKit.string(json['searchUrl']),
+      webSocketUrl: JsonKit.string(json['webSocketUrl']),
+      webSocketSearch: JsonKit.boolOf(json['webSocketSearch']),
       ruleSearch: JsonKit.object(json['ruleSearch'], SearchRule.fromJson),
       ruleBookInfo: JsonKit.object(json['ruleBookInfo'], BookInfoRule.fromJson),
       ruleToc: JsonKit.object(json['ruleToc'], TocRule.fromJson),
@@ -241,6 +248,8 @@ class BookSource {
     'exploreScreen': exploreScreen,
     'ruleExplore': ruleExplore?.toJson(),
     'searchUrl': searchUrl,
+    'webSocketUrl': webSocketUrl,
+    'webSocketSearch': webSocketSearch ? true : null,
     'ruleSearch': ruleSearch?.toJson(),
     'ruleBookInfo': ruleBookInfo?.toJson(),
     'ruleToc': ruleToc?.toJson(),

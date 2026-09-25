@@ -383,9 +383,15 @@ class JavaHost {
   Object? elementsEnvelope(List<Object> values) {
     if (values.isEmpty) return const {'__els': <Object?>[]};
     if (values.every((e) => e is Element)) {
-      return {'__els': <Object?>[for (final e in values) _elementDescriptor(e as Element)]};
+      return {
+        '__els': <Object?>[
+          for (final e in values) _elementDescriptor(e as Element),
+        ],
+      };
     }
-    return {'__raws': <Object?>[...values]};
+    return {
+      '__raws': <Object?>[...values],
+    };
   }
 
   /// Serves one facade method that needs to touch the live node.
@@ -408,9 +414,7 @@ class JavaHost {
     final Object? out = switch (op) {
       'select' => elementsEnvelope(_asElements(node.querySelectorAll(arg))),
       'selectFirst' => elementEnvelope(node.querySelector(arg)),
-      'children' => elementsEnvelope(
-        List<Object>.from(node.children),
-      ),
+      'children' => elementsEnvelope(List<Object>.from(node.children)),
       'parent' => elementEnvelope(node.parent),
       'tag' => elementsEnvelope(
         List<Object>.from(node.getElementsByTagName(arg)),
@@ -793,8 +797,11 @@ class JavaHost {
       hostEnvironment.openUrl(url, mimeType: mimeType);
 
   /// `java.openVideoPlayer(url, title[, isFloat])`.
-  Future<bool> openVideoPlayer(String url, String title, [bool isFloat = false]) =>
-      hostEnvironment.openVideo(url, title, float: isFloat);
+  Future<bool> openVideoPlayer(
+    String url,
+    String title, [
+    bool isFloat = false,
+  ]) => hostEnvironment.openVideo(url, title, float: isFloat);
 
   /// `java.startBrowser(url, title[, html])`.
   Future<bool> startBrowser(String url, String title) async =>
@@ -819,7 +826,8 @@ class JavaHost {
   /// `java.getReadBookConfig()` / `java.getReadBookConfigMap()`.
   String getReadBookConfig() => jsonEncode(hostEnvironment.readBookConfig());
 
-  Map<String, Object?> getReadBookConfigMap() => hostEnvironment.readBookConfig();
+  Map<String, Object?> getReadBookConfigMap() =>
+      hostEnvironment.readBookConfig();
 
   /// `java.getThemeConfig()` / `java.getThemeConfigMap()`.
   String getThemeConfig() => jsonEncode(hostEnvironment.themeConfig());
@@ -866,8 +874,18 @@ class JavaHost {
 
   // ------------------------------------------------------------- font query
 
+  /// Parsed font handles. Kept bounded because book-source scripts can run for
+  /// the lifetime of the application and may return a fresh font per chapter.
+  static const _fontRegistryCap = 32;
+  static const _fontCacheCap = 8;
   final Map<String, FontQuery> _fonts = {};
+  final Map<String, FontQuery> _fontCache = {};
   int _fontSeq = 0;
+  int _fontCacheHits = 0;
+  int _fontCacheMisses = 0;
+
+  int get fontCacheHits => _fontCacheHits;
+  int get fontCacheMisses => _fontCacheMisses;
 
   // ----------------------------------------------------------- byte handles
 
@@ -951,7 +969,18 @@ class JavaHost {
         suggestedAction: '检查字体地址是否可访问，或规则是否传入了正确的字体数据',
       );
     }
-    final parsed = FontQuery.parse(bytes);
+    final digest = sha256.convert(bytes).toString();
+    FontQuery? parsed;
+    if (useCache) {
+      parsed = _fontCache.remove(digest);
+      if (parsed != null) {
+        _fontCache[digest] = parsed;
+        _fontCacheHits++;
+      } else {
+        _fontCacheMisses++;
+      }
+    }
+    parsed ??= FontQuery.parse(bytes);
     if (parsed == null) {
       throw DomainError(
         code: 'font_unsupported',
@@ -962,8 +991,17 @@ class JavaHost {
         suggestedAction: '字体反爬目前只支持 TrueType 轮廓（glyf）',
       );
     }
+    if (useCache && !_fontCache.containsKey(digest)) {
+      if (_fontCache.length >= _fontCacheCap) {
+        _fontCache.remove(_fontCache.keys.first);
+      }
+      _fontCache[digest] = parsed;
+    }
     final handle = 'ttf${++_fontSeq}';
     _fonts[handle] = parsed;
+    while (_fonts.length > _fontRegistryCap) {
+      _fonts.remove(_fonts.keys.first);
+    }
     return handle;
   }
 

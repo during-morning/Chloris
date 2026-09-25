@@ -145,6 +145,7 @@ class ChlorisServer {
               'proxy': true,
               'rssSources': true,
               'bookSourceDebug': true,
+              'searchBook': backend != null,
             },
           ).toJson(),
         ),
@@ -161,7 +162,9 @@ class ChlorisServer {
       return _json(matches.isEmpty ? null : matches.first.toJson());
     });
     router.post('/saveBookSources', (req) async {
-      final list = BookSource.listFromJson(jsonDecode(await req.readAsString()));
+      final list = BookSource.listFromJson(
+        jsonDecode(await req.readAsString()),
+      );
       final byUrl = <String, BookSource>{
         for (final s in bookSources) s.bookSourceUrl: s,
       };
@@ -191,9 +194,8 @@ class ChlorisServer {
       final urls = body is List
           ? body
                 .map(
-                  (e) => e is Map
-                      ? e['bookSourceUrl']?.toString()
-                      : e.toString(),
+                  (e) =>
+                      e is Map ? e['bookSourceUrl']?.toString() : e.toString(),
                 )
                 .whereType<String>()
                 .toList()
@@ -306,10 +308,7 @@ class ChlorisServer {
 
     // ---- RSS sources -------------------------------------------------------
 
-    router.get(
-      ChlorisApiRoute.getRssSources.path,
-      (req) => _json(rssSources),
-    );
+    router.get(ChlorisApiRoute.getRssSources.path, (req) => _json(rssSources));
     router.get(ChlorisApiRoute.getRssSource.path, (req) {
       final url = req.url.queryParameters['url'] ?? '';
       final match = rssSources.where((s) => s['sourceUrl'] == url).toList();
@@ -339,9 +338,7 @@ class ChlorisServer {
       final urls = body is List
           ? body
                 .map(
-                  (e) => e is Map
-                      ? e['sourceUrl']?.toString()
-                      : e.toString(),
+                  (e) => e is Map ? e['sourceUrl']?.toString() : e.toString(),
                 )
                 .whereType<String>()
                 .toList()
@@ -391,7 +388,41 @@ class ChlorisServer {
         await req.response.close();
         return;
       }
-      if (req.uri.path == '/bookSourceDebug') {
+      if (req.uri.path == '/searchBook') {
+        final ws = await WebSocketTransformer.upgrade(req);
+        var closed = false;
+        ws.done.whenComplete(() => closed = true);
+        ws.listen((msg) async {
+          if (closed) return;
+          try {
+            final data = jsonDecode(msg.toString());
+            if (data is! Map)
+              throw const FormatException('request must be object');
+            final source =
+                data['tag']?.toString() ?? data['source']?.toString() ?? '';
+            final query =
+                data['key']?.toString() ?? data['query']?.toString() ?? '';
+            final page = (data['page'] as num?)?.toInt() ?? 1;
+            final b = backend;
+            if (b == null) {
+              ws.add(
+                jsonEncode({
+                  'error': 'capability_missing',
+                  'errorMsg': '搜索功能未装配',
+                }),
+              );
+            } else {
+              final books = await b.search(source, query, page: page);
+              for (final book in books) {
+                if (!closed) ws.add(jsonEncode(book));
+              }
+              if (!closed) ws.add(jsonEncode({'type': 'end', 'end': true}));
+            }
+          } catch (e) {
+            if (!closed) ws.add(jsonEncode({'error': e.toString()}));
+          }
+        });
+      } else if (req.uri.path == '/bookSourceDebug') {
         final ws = await WebSocketTransformer.upgrade(req);
         ws.listen((msg) {
           final data = jsonDecode(msg.toString()) as Map<String, dynamic>;
@@ -618,7 +649,8 @@ Future<Map<String, dynamic>> proxyHttp(Map<String, dynamic> body) async {
       res.headers.forEach((name, values) {
         headerMap[name] = values.join(', ');
       });
-      final contentType = headerMap['content-type'] ?? headerMap['Content-Type'];
+      final contentType =
+          headerMap['content-type'] ?? headerMap['Content-Type'];
       final text = HttpBodyDecoder.decode(
         bytes,
         charset: charset,

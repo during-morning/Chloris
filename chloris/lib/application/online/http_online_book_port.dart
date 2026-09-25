@@ -1,6 +1,6 @@
 import 'package:chloris_engine/chloris_engine.dart';
 
-import '../../services/web/api_client.dart';
+import '../../core/http/channel_ws_port.dart';
 import 'online_book_port.dart';
 
 /// [OnlineBookPort] backed by a Chloris server instead of the local engine.
@@ -32,7 +32,18 @@ class HttpOnlineBookPort implements OnlineBookPort {
     String query, {
     int page = 1,
     bool Function(String name, String author, String? kind)? filter,
-  }) async => throw _unsupported('在线搜索');
+  }) async {
+    if (!source.webSocketSearch) throw _unsupported('在线搜索');
+    final url = source.webSocketUrl;
+    if (url == null || url.trim().isEmpty) throw _unsupported('在线搜索');
+    return searchOverWebSocket(
+      port: const ChannelWsPort(),
+      source: source,
+      query: query,
+      page: page,
+      filter: filter,
+    );
+  }
 
   @override
   Future<List<SearchBook>> explore(
@@ -154,11 +165,7 @@ class HttpChapterContentStore implements ChapterContentStore {
       _mem[_key(sourceId, chapterUrl)];
 
   @override
-  Future<void> put(
-    String sourceId,
-    String chapterUrl,
-    String content,
-  ) async {
+  Future<void> put(String sourceId, String chapterUrl, String content) async {
     _mem[_key(sourceId, chapterUrl)] = content;
   }
 

@@ -17,6 +17,7 @@ import 'bookmark_provider.dart';
 import 'measured_paginator.dart';
 import 'read_pager.dart';
 import 'reader_controller.dart';
+import 'reader_layout_cache.dart';
 import 'reader_keys.dart';
 import 'reader_settings_provider.dart';
 import '../../app/theme/app_icons.dart';
@@ -89,6 +90,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   double _edgePull = 0;
   String _paginatedContent = '';
   PaginatedChapter? _measured;
+  final ReaderLayoutCache<PaginatedChapter> _layoutCache =
+      ReaderLayoutCache<PaginatedChapter>();
   Size? _lastSize;
   TextStyle? _lastStyle;
   double _lastPad = 0;
@@ -270,10 +273,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   }
 
   bool _doublePageActive(Size size, ReaderSettings settings) {
-    return doublePageModeById(settings.doublePage).activeFor(
-      size.width,
-      scroll: _pageAnim == PageAnim.scroll,
-    );
+    return doublePageModeById(
+      settings.doublePage,
+    ).activeFor(size.width, scroll: _pageAnim == PageAnim.scroll);
   }
 
   void _goChapter(int dir) {
@@ -324,7 +326,10 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     final item = ref
         .read(onlineShelfProvider)
         .cast<OnlineShelfItem?>()
-        .firstWhere((e) => e?.searchBook.bookUrl == bookUrl, orElse: () => null);
+        .firstWhere(
+          (e) => e?.searchBook.bookUrl == bookUrl,
+          orElse: () => null,
+        );
     if (item == null) {
       _autoSourceSwitched = true;
       return;
@@ -333,10 +338,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       _resetAutoSwitchFlags();
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('本章内容为空，正在寻找其它源…')),
-    );
-    final emptyChapter = (widget.chapterIndex >= 0 &&
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('本章内容为空，正在寻找其它源…')));
+    final emptyChapter =
+        (widget.chapterIndex >= 0 &&
             widget.chapterIndex < widget.chapters.length)
         ? widget.chapters[widget.chapterIndex]
         : BookChapter(url: '', title: widget.chapterTitle);
@@ -362,9 +368,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     }
     if (result == null || result.chapters.isEmpty) {
       // 无可用候选 / 换源后仍取不到目录：明确提示，不静默。
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('没有找到可用的其它源')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('没有找到可用的其它源')));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('已自动换源 → ${result.source.bookSourceName}')),

@@ -104,21 +104,45 @@ extension _ReaderLayout on _ReaderScreenState {
         ? restH
         : (restH - headingH).clamp(80.0, restH);
     final readH = restH;
-    if (_measured != null &&
-        _layoutFull &&
-        _previewConsumed == 0 &&
-        _paginatedContent == body &&
-        _lastSize != null &&
-        (_lastSize!.width - readW).abs() < 2 &&
-        (_lastSize!.height - readH).abs() < 2 &&
-        _lastPad == pad &&
-        _lastStyle?.fontSize == style.fontSize &&
-        _lastStyle?.height == style.height &&
-        _lastStyle?.letterSpacing == style.letterSpacing &&
-        _lastStyle?.fontFamily == style.fontFamily &&
-        _lastTextScaler == textScaler &&
-        _lastDoublePage == doublePage) {
-      return _measured!;
+    final layoutKey = ReaderLayoutKey(
+      contentHash: Object.hash(body),
+      chapterTitle: widget.chapterTitle,
+      bookTitle: widget.bookTitle ?? '',
+      bookAuthor: widget.bookAuthor,
+      replaceFingerprint: Object.hashAll(
+        ref
+            .read(replaceRulesProvider)
+            .map(
+              (rule) => Object.hashAll(
+                rule.toJson().entries.map((e) => Object.hash(e.key, e.value)),
+              ),
+            ),
+      ),
+      enableReplace: settings.enableReplace,
+      chineseConvert: settings.chineseConvert,
+      paragraphIndent: settings.paragraphIndent,
+      viewportWidth: readW.round(),
+      viewportHeight: readH.round(),
+      pagePadding: pad.round(),
+      fontSize: (style.fontSize ?? 0).round(),
+      lineHeight: ((style.height ?? 0) * 1000).round(),
+      letterSpacing: ((style.letterSpacing ?? 0) * 1000).round(),
+      fontFamily: style.fontFamily,
+      textScaler: textScaler.hashCode,
+      paragraphSpacing: settings.paragraphSpacing.round(),
+      doublePage: doublePage,
+    );
+    if (_layoutFull && _previewConsumed == 0 && _paginatedContent == body) {
+      final cached = _layoutCache.get(layoutKey);
+      if (cached != null) {
+        _measured = cached;
+        _lastSize = Size(readW, readH);
+        _lastStyle = style;
+        _lastPad = pad;
+        _lastTextScaler = textScaler;
+        _lastDoublePage = doublePage;
+        return cached;
+      }
     }
     final keepPos = () {
       final pages = _measured?.pages ?? const <TextPage>[];
@@ -142,31 +166,44 @@ extension _ReaderLayout on _ReaderScreenState {
     } else if (!preview) {
       _layoutFull = true;
     }
-    final next = _appendingOrFull(preview, appending, body, () {
-      return MeasuredPaginator.layout(
-        content: body,
-        width: readW,
-        height: readH,
-        firstPageHeight: firstH == restH ? null : firstH,
-        style: style,
-        textScaler: textScaler,
-        paragraphSpacing: settings.paragraphSpacing,
-        maxChars: preview ? 2800 : null,
-      );
-    }, () {
-      // 增量续排：从预览消费位置继续，段间无首页标题高度（首页已在预览段）。
-      return MeasuredPaginator.layout(
-        content: body,
-        width: readW,
-        height: readH,
-        style: style,
-        textScaler: textScaler,
-        paragraphSpacing: settings.paragraphSpacing,
-        startOffset: _previewConsumed,
-      );
-    });
+    final next = _appendingOrFull(
+      preview,
+      appending,
+      body,
+      () {
+        return MeasuredPaginator.layout(
+          content: body,
+          width: readW,
+          height: readH,
+          firstPageHeight: firstH == restH ? null : firstH,
+          style: style,
+          textScaler: textScaler,
+          paragraphSpacing: settings.paragraphSpacing,
+          maxChars: preview ? 2800 : null,
+        );
+      },
+      () {
+        // 增量续排：从预览消费位置继续，段间无首页标题高度（首页已在预览段）。
+        return MeasuredPaginator.layout(
+          content: body,
+          width: readW,
+          height: readH,
+          style: style,
+          textScaler: textScaler,
+          paragraphSpacing: settings.paragraphSpacing,
+          startOffset: _previewConsumed,
+        );
+      },
+    );
     _measured = next;
     _paginatedContent = body;
+    if (!preview && !appending) {
+      _layoutCache.put(
+        layoutKey,
+        next,
+        weight: body.length + next.pages.length * 64,
+      );
+    }
     _lastSize = Size(readW, readH);
     _lastStyle = style;
     _lastPad = pad;

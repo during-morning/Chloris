@@ -37,6 +37,8 @@ export 'src/net/cookie_store.dart';
 export 'src/net/file_port.dart';
 export 'src/net/host_environment.dart';
 export 'src/net/http_port.dart';
+export 'src/net/ws_port.dart';
+export 'src/net/legado_search_ws.dart';
 export 'src/net/web_view_port.dart';
 export 'src/net/network_utils.dart';
 export 'src/net/rate_limiter.dart';

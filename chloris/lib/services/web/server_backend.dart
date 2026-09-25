@@ -32,7 +32,24 @@ abstract interface class ServerBackend {
   /// `/getBookContent`
   Future<Map<String, dynamic>> bookContent(String bookUrl, int chapterIndex);
 
-  /// `/cover` — raw image bytes, or null when the book has no cover.
+  /// WebSocket `/searchBook` search stream.
+  ///
+  /// Older backend implementations may omit this optional capability; the
+  /// server turns the explicit error into a 501 capability response.
+  Future<List<Map<String, dynamic>>> search(
+    String sourceUrl,
+    String query, {
+    int page = 1,
+  }) async {
+    throw DomainError(
+      code: 'capability_missing',
+      stage: DomainErrorStage.search,
+      message: '搜索功能未装配',
+      recoverable: false,
+      retryable: false,
+    );
+  }
+
   Future<Uint8List?> cover(String bookUrl);
 
   /// `/image` — raw bytes for a remote image URL.

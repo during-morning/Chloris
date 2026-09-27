@@ -50,27 +50,21 @@ abstract final class BookType {
 abstract final class PageAnim {
   static const int cover = 0;
   static const int slide = 1;
+
+  /// Legacy value retained so settings imported from Legado remain readable.
   static const int simulation = 2;
   static const int scroll = 3;
   static const int noAnim = 4;
 
-  static const List<int> all = [cover, slide, simulation, scroll, noAnim];
-  static const List<int> choices = [
-    cover,
-    slide,
-    simulation,
-    scroll,
-    noAnim,
-  ];
+  static const List<int> all = [cover, slide, scroll, noAnim];
+  static const List<int> choices = [cover, slide, scroll, noAnim];
 
-  static int normalize(int anim) =>
-      all.contains(anim) ? anim : slide;
+  static int normalize(int anim) => all.contains(anim) ? anim : slide;
 
   static String label(int anim) {
     return switch (anim) {
       cover => '覆盖',
       slide => '滑动',
-      simulation => '仿真',
       scroll => '滚动',
       _ => '无动画',
     };
@@ -87,9 +81,11 @@ abstract final class AppPattern {
     caseSensitive: false,
   );
   static final RegExp exp = RegExp(r'\{\{([\w\W]*?)\}\}');
+
   /// Matches an `<img>` tag across newlines / wrapped attributes.
   static final RegExp img = RegExp(r'<img\b[\s\S]*?>', caseSensitive: false);
   static final RegExp splitGroup = RegExp(r'[,;，；]');
+
   /// TextFile joins toc regex and optional JS replacement with these chars.
   static const String txtTocJoiner = '🫅🈳🏻';
 }

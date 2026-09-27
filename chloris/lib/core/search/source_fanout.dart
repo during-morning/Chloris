@@ -49,6 +49,7 @@ class SourceFanout {
   }) async {
     if (sources.isEmpty) return false;
     final cacheReady = SearchHitCache.ensureLoaded();
+    final healthReady = SourceHealthStore.ensureLoaded();
     if (waitForCache) await cacheReady;
     final claimed = List<bool>.filled(sources.length, false);
     final inFlightHost = <String, int>{};
@@ -56,10 +57,10 @@ class SourceFanout {
     final cap = EngineLimits.searchPool;
     final pool = sources.length < cap ? sources.length : cap;
     final earlyStopHits = earlyStop ? EngineLimits.searchEarlyStopHits : 0;
-    // Cumulative merged hit count (sum of usable books across delivered
-    // rows). Mirrors `SearchSession.hits` so the threshold matches the merged
-    // view the user actually sees.
-    var mergedHits = 0;
+    // Count identities rather than raw rows. A source can return the same
+    // book several times; counting row.books.length would stop the fan-out
+    // before higher-quality sources have a chance to contribute.
+    final mergedIdentityKeys = <String>{};
     // Set once the threshold is reached; workers stop claiming new sources but
     // already-started requests still run to completion.
     var stoppedEarly = false;
@@ -109,23 +110,21 @@ class SourceFanout {
         }
         final source = sources[idx];
         onStart?.call(source);
-        // Capture the semantic key once.  Search JS is allowed to mutate
-        // source runtime variables; using a second fingerprint after the
-        // request would write the hit under a key that the next invocation
-        // cannot reproduce.
-        final cacheContext = searchCacheContext(source);
+        // Capture the semantic key once. JS evaluation may mutate runtime
+        // variables; writing with a recomputed context would make this hit
+        // unavailable to the next invocation.
+        final cacheKey = SearchCacheKey.fromSource(
+          source: source,
+          query: query,
+          page: page,
+        );
         final host = searchSourceHost(source);
         final sw = Stopwatch()..start();
         var failed = false;
         var fromCache = false;
         SourceSearchResult row;
         try {
-          final cached = SearchHitCache.instance.take(
-            query,
-            page,
-            source.bookSourceUrl,
-            context: cacheContext,
-          );
+          final cached = SearchHitCache.instance.takeKey(cacheKey);
           if (cached != null) {
             fromCache = true;
             row = SourceSearchResult(source: source, books: cached);
@@ -134,13 +133,7 @@ class SourceFanout {
             final usable = list
                 .where((b) => isUsableSearchBook(b, query: query))
                 .toList();
-            SearchHitCache.instance.put(
-              query,
-              page,
-              source.bookSourceUrl,
-              usable,
-              context: cacheContext,
-            );
+            SearchHitCache.instance.putKey(cacheKey, usable);
             row = SourceSearchResult(source: source, books: usable);
           }
         } catch (e) {
@@ -172,16 +165,22 @@ class SourceFanout {
             failed: failed,
           );
           SourceLatencyStore.record(source.bookSourceUrl, source.respondTime);
+          SourceHealthStore.record(
+            source.bookSourceUrl,
+            success: !failed && row.books.isNotEmpty,
+          );
         }
         if (isCancelled()) return;
-        // Count merged hits and arm the early-stop flag for the next loop
-        // iteration. This runs synchronously between awaits, so the plain
-        // counter is safe across the worker pool.
-        mergedHits += row.books.length;
+        // Count newly discovered identities and arm early-stop for the next
+        // loop iteration. This runs synchronously between awaits, so the set
+        // is safe across the worker pool.
+        for (final book in row.books) {
+          mergedIdentityKeys.add(SearchMerge.identity(book));
+        }
         if (earlyStopHits > 0 &&
             !stoppedEarly &&
             searchShouldEarlyStop(
-              mergedHits: mergedHits,
+              mergedHits: mergedIdentityKeys.length,
               earlyStopHits: earlyStopHits,
             )) {
           stoppedEarly = true;
@@ -192,7 +191,9 @@ class SourceFanout {
 
     await Future.wait(List.generate(pool, (_) => worker()));
     await cacheReady;
+    await healthReady;
     SourceLatencyStore.flush();
+    SourceHealthStore.flush();
     SearchHitCache.instance.flush();
     return stoppedEarly;
   }

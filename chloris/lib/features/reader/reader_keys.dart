@@ -1,6 +1,12 @@
 import 'package:flutter/services.dart';
 
-enum ReaderKeyAction { prevPage, nextPage, prevChapter, nextChapter, toggleMenu }
+enum ReaderKeyAction {
+  prevPage,
+  nextPage,
+  prevChapter,
+  nextChapter,
+  toggleMenu,
+}
 
 /// Page mode: ↑↓ / WS page. Scroll mode: ↑↓ / WS scroll (same action).
 /// ←→ / AD always change chapter.
@@ -57,11 +63,11 @@ extension DoublePageModeX on DoublePageMode {
 const readerDoublePageGutter = 16.0;
 const readerDoublePageRule = 1.0;
 const readerDoublePageInnerPad = 24.0;
-const readerMenuTopBar = 56.0;
-const readerMenuBottomBar = 64.0;
+const readerMenuTopBar = 60.0;
+const readerMenuBottomBar = 72.0;
 
 /// Top/bottom inset shared by pagination and the on-screen column.
-/// Hidden chrome uses the page pad so text reflows into the vacated bands.
+/// The reading area follows the animated chrome visibility state.
 double readerVerticalInset({
   required bool menuVisible,
   required double pagePadding,
@@ -69,7 +75,10 @@ double readerVerticalInset({
   required bool top,
 }) {
   final pad = pagePadding.clamp(12.0, 48.0);
-  if (!menuVisible) return pad + (top ? 4.0 : 0.0);
+  // Keep a small inset above the chapter heading, but let the final lines
+  // reach the viewport edge when the chrome is hidden. On devices with a
+  // bottom safe area, retain only that hardware inset.
+  if (!menuVisible) return top ? pad + 8.0 : safePadding;
   final bar = top ? readerMenuTopBar : readerMenuBottomBar;
   return (bar + safePadding).clamp(52.0, 160.0);
 }

@@ -212,7 +212,7 @@ Future<AutoSwitchResult?> autoSwitchSourceForEmptyChapter(
   required SearchBook seedBook,
   required List<BookChapter> currentChapters,
   required BookChapter emptyChapter,
-  int maxVerify = 5,
+  int? maxVerify,
   bool Function()? isCancelled,
 }) async {
   final hit = await findVerifiedAlternativeSource(
@@ -223,6 +223,7 @@ Future<AutoSwitchResult?> autoSwitchSourceForEmptyChapter(
     currentBookUrl: currentBook.bookUrl,
     seedBook: seedBook,
     catalog: ref.read(loadOnlineCatalogUseCaseProvider),
+    content: ref.read(loadOnlineChapterContentUseCaseProvider),
     maxVerify: maxVerify,
     isCancelled: isCancelled,
   );

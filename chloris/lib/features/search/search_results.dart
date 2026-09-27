@@ -282,7 +282,15 @@ class _SuggestRow extends ConsumerWidget {
             for (final q in hits)
               Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: ActionChip(label: Text(q), onPressed: () => onPick(q)),
+                child: ActionChip(
+                  label: Text(
+                    q,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  onPressed: () => onPick(q),
+                ),
               ),
           ],
         ),
@@ -321,7 +329,15 @@ class _History extends ConsumerWidget {
               GestureDetector(
                 onLongPress: () =>
                     ref.read(searchHistoryProvider.notifier).remove(q),
-                child: ActionChip(label: Text(q), onPressed: () => onPick(q)),
+                child: ActionChip(
+                  label: Text(
+                    q,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  onPressed: () => onPick(q),
+                ),
               ),
           ],
         ),

@@ -140,6 +140,8 @@ class ChlorisServer {
               'bookshelf': backend != null,
               'chapterList': backend != null,
               'bookContent': backend != null,
+              'exploreBooks': backend != null,
+              'bookInfo': backend != null,
               'cover': backend != null,
               'image': backend != null,
               'proxy': true,
@@ -283,6 +285,40 @@ class ChlorisServer {
       return _withBackend(
         '正文',
         (b) async => await b.bookContent(q.bookUrl, q.chapterIndex),
+      );
+    });
+    router.post(ChlorisApiRoute.exploreBooks.path, (req) async {
+      final raw = jsonDecode(await req.readAsString());
+      final q = raw is Map
+          ? OnlineBookRequest.fromJson(Map<String, dynamic>.from(raw))
+          : const OnlineBookRequest(sourceUrl: '');
+      return _withBackend(
+        '发现',
+        (b) async => await b.explore(q.sourceUrl, q.url, page: q.page),
+      );
+    });
+    router.post(ChlorisApiRoute.getBookInfo.path, (req) async {
+      final raw = jsonDecode(await req.readAsString());
+      final q = raw is Map
+          ? OnlineBookRequest.fromJson(Map<String, dynamic>.from(raw))
+          : const OnlineBookRequest(sourceUrl: '');
+      final book = q.book;
+      if (book == null) {
+        return _envelope(
+          ApiEnvelope.failure(
+            const DomainError(
+              code: 'book_missing',
+              stage: DomainErrorStage.detail,
+              message: '缺少书籍详情请求体',
+              recoverable: false,
+            ),
+          ),
+          status: 400,
+        );
+      }
+      return _withBackend(
+        '书籍详情',
+        (b) async => await b.bookInfo(q.sourceUrl, book.toJson()),
       );
     });
     router.get(ChlorisApiRoute.getCover.path, (req) async {

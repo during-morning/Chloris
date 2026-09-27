@@ -64,7 +64,12 @@ class SettingsScreen extends ConsumerWidget {
                   for (final item in AppUiStyle.values)
                     ChoiceChip(
                       avatar: _StyleDot(style: item),
-                      label: Text(item.label),
+                      label: Text(
+                        item.label,
+                        style: TextStyle(
+                          color: Theme.of(ctx).colorScheme.onSurface,
+                        ),
+                      ),
                       selected: style == item,
                       onSelected: (_) async {
                         await applyUiStyle(ref, item);
@@ -74,10 +79,7 @@ class SettingsScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              Text(
-                style.blurb,
-                style: Theme.of(ctx).textTheme.bodySmall,
-              ),
+              Text(style.blurb, style: Theme.of(ctx).textTheme.bodySmall),
               const SizedBox(height: 16),
               Wrap(
                 spacing: 8,
@@ -88,11 +90,15 @@ class SettingsScreen extends ConsumerWidget {
                     ThemeMode.system,
                   ])
                     ChoiceChip(
-                      label: Text(_themeLabel(m)),
+                      label: Text(
+                        _themeLabel(m),
+                        style: TextStyle(
+                          color: Theme.of(ctx).colorScheme.onSurface,
+                        ),
+                      ),
                       // Absolutely now offers paper (light) and slate (dark)
                       // canvases, so the mode chips unlock there too.
-                      selected:
-                          current == m && style.fixedThemeMode == null,
+                      selected: current == m && style.fixedThemeMode == null,
                       avatar: style.fixedThemeMode == null
                           ? null
                           : const AppIcon(AppIcons.lock, size: 14),
@@ -120,7 +126,12 @@ class SettingsScreen extends ConsumerWidget {
                     for (final f in AppThemeFamily.all)
                       ChoiceChip(
                         avatar: CircleAvatar(backgroundColor: f.seed),
-                        label: Text(f.label),
+                        label: Text(
+                          f.label,
+                          style: TextStyle(
+                            color: Theme.of(ctx).colorScheme.onSurface,
+                          ),
+                        ),
                         selected: familyId == f.id && !eink,
                         onSelected: (_) async {
                           ref.read(einkThemeProvider.notifier).state = false;
@@ -133,7 +144,12 @@ class SettingsScreen extends ConsumerWidget {
                         },
                       ),
                     ChoiceChip(
-                      label: const Text('扁平 / 墨水屏'),
+                      label: Text(
+                        '扁平 / 墨水屏',
+                        style: TextStyle(
+                          color: Theme.of(ctx).colorScheme.onSurface,
+                        ),
+                      ),
                       selected: eink,
                       onSelected: (_) async {
                         ref.read(einkThemeProvider.notifier).state = true;

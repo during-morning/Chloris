@@ -90,6 +90,63 @@ class ImportedRssNotifier extends Notifier<List<RssSource>> {
     state = state.where((s) => s.sourceUrl != url).toList();
     _persist();
   }
+
+  void updateStyle(String url, int style) {
+    state = [
+      for (final source in state)
+        if (source.sourceUrl == url)
+          RssSource(
+            sourceUrl: source.sourceUrl,
+            sourceName: source.sourceName,
+            sourceGroup: source.sourceGroup,
+            sourceIcon: source.sourceIcon,
+            sourceComment: source.sourceComment,
+            customOrder: source.customOrder,
+            enabled: source.enabled,
+            enabledCookieJar: source.enabledCookieJar,
+            enableJs: source.enableJs,
+            singleUrl: source.singleUrl,
+            loadWithBaseUrl: source.loadWithBaseUrl,
+            articleStyle: style,
+            lastUpdateTime: source.lastUpdateTime,
+            ruleArticles: source.ruleArticles,
+            ruleTitle: source.ruleTitle,
+            rulePubDate: source.rulePubDate,
+            ruleDescription: source.ruleDescription,
+            ruleContent: source.ruleContent,
+            ruleImage: source.ruleImage,
+            ruleLink: source.ruleLink,
+            ruleNextPage: source.ruleNextPage,
+            variableComment: source.variableComment,
+            jsLib: source.jsLib,
+            concurrentRate: source.concurrentRate,
+            header: source.header,
+            loginUrl: source.loginUrl,
+            loginUi: source.loginUi,
+            loginCheckJs: source.loginCheckJs,
+            coverDecodeJs: source.coverDecodeJs,
+            sortUrl: source.sortUrl,
+            contentWhitelist: source.contentWhitelist,
+            contentBlacklist: source.contentBlacklist,
+            style: source.style,
+            injectJs: source.injectJs,
+            preloadJs: source.preloadJs,
+            startHtml: source.startHtml,
+            startStyle: source.startStyle,
+            startJs: source.startJs,
+            type: source.type,
+            showWebLog: source.showWebLog,
+            preload: source.preload,
+            cacheFirst: source.cacheFirst,
+            searchUrl: source.searchUrl,
+            shouldOverrideUrlLoading: source.shouldOverrideUrlLoading,
+            extra: source.extra,
+          )
+        else
+          source,
+    ];
+    _persist();
+  }
 }
 
 final allRssSourcesProvider = Provider<AsyncValue<List<RssSource>>>((ref) {

@@ -12,7 +12,8 @@ import 'router.dart';
 import 'theme/app_style_shell.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_provider.dart';
-import 'theme/style_host_stub.dart' if (dart.library.html) 'theme/style_host_web.dart';
+import 'theme/style_host_stub.dart'
+    if (dart.library.html) 'theme/style_host_web.dart';
 
 class _ChlorisScrollBehavior extends MaterialScrollBehavior {
   const _ChlorisScrollBehavior();
@@ -69,7 +70,9 @@ class _ChlorisAppState extends ConsumerState<ChlorisApp> {
     });
     KvSettings.ready().then((p) {
       if (!mounted) return;
-      setState(() => _accepted = p.getBool('welcomeAccepted') ?? false);
+      // Keep the guide available from Settings, but do not interrupt a fresh
+      // install with a required onboarding screen on first launch.
+      setState(() => _accepted = p.getBool('welcomeAccepted') ?? true);
     });
   }
 
@@ -133,9 +136,13 @@ class _ChlorisAppState extends ConsumerState<ChlorisApp> {
           final reduce = ref.watch(reduceMotionProvider);
           final bold = ref.watch(boldTextProvider);
           final mq = MediaQuery.of(context);
+          // Preserve the operating-system scale and multiply the app's
+          // accessibility setting on top.  Replacing the inherited scaler
+          // outright used to silently discard iOS/Android large-text mode.
+          final systemScale = mq.textScaler.scale(1.0);
           return MediaQuery(
             data: mq.copyWith(
-              textScaler: TextScaler.linear(scale),
+              textScaler: TextScaler.linear(systemScale * scale),
               disableAnimations: reduce || mq.disableAnimations,
               highContrast: hc || mq.highContrast,
               boldText: bold || mq.boldText,

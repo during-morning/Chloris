@@ -4,21 +4,35 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:chloris_engine/chloris_engine.dart';
 import '../../core/persist/kv_settings.dart';
 import '../../core/persist/persist_queue.dart';
+import '../../core/search/search_match.dart';
 import '../../data/database/shelf_repository.dart';
 
 import '../../services/persist/vault_sync.dart';
 
 class OnlineShelfItem {
-  const OnlineShelfItem({required this.source, required this.searchBook});
+  const OnlineShelfItem({
+    required this.source,
+    required this.searchBook,
+    this.identityBookUrl,
+  });
 
   final BookSource source;
   final SearchBook searchBook;
+  /// URL of the deduplicated identity row in `books`.
+  final String? identityBookUrl;
 
-  String get bookUrl => searchBook.bookUrl;
+  /// Shelf operations use the identity URL; scraping uses candidateBookUrl.
+  String get bookUrl => identityBookUrl == null || identityBookUrl!.isEmpty
+      ? searchBook.bookUrl
+      : identityBookUrl!;
+
+  String get candidateBookUrl => searchBook.bookUrl;
 
   Map<String, dynamic> toJson() => {
         'source': source.toJson(),
         'book': searchBook.toJson(),
+        if (identityBookUrl != null && identityBookUrl!.isNotEmpty)
+          'identityBookUrl': identityBookUrl,
       };
 
   static OnlineShelfItem? fromJson(Map<String, dynamic> json) {
@@ -28,6 +42,7 @@ class OnlineShelfItem {
     return OnlineShelfItem(
       source: BookSource.fromJson(Map<String, dynamic>.from(s)),
       searchBook: SearchBook.fromJson(Map<String, dynamic>.from(b)),
+      identityBookUrl: json['identityBookUrl']?.toString().trim(),
     );
   }
 }
@@ -69,15 +84,18 @@ class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
       searchBook: SearchBook(
         name: c?.name ?? entry.book.name,
         author: c?.author ?? entry.book.author,
-        bookUrl: entry.book.bookUrl,
-        origin: entry.book.origin ?? '',
-        originName: entry.book.originName ?? '',
+        // Candidate URL identifies the source record. It must not be replaced
+        // with the identity URL used by the shelf row.
+        bookUrl: c?.bookUrl ?? entry.book.bookUrl,
+        origin: c?.origin ?? entry.book.origin ?? '',
+        originName: c?.originName ?? entry.book.originName ?? '',
         kind: c?.kind ?? entry.book.kind,
         intro: c?.intro ?? entry.book.intro,
         coverUrl: c?.coverUrl ?? entry.book.coverUrl,
         latestChapterTitle:
             c?.latestChapterTitle ?? entry.book.latestChapterTitle,
       ),
+      identityBookUrl: entry.book.bookUrl,
     );
   }
 
@@ -132,15 +150,55 @@ class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
   }
 
   void add(BookSource source, SearchBook searchBook) {
-    if (state.any((e) => e.bookUrl == searchBook.bookUrl)) return;
-    state = [...state, OnlineShelfItem(source: source, searchBook: searchBook)];
-    PersistQueue.instance.schedule('shelf.add.${searchBook.bookUrl}', () async {
+    final identity = _identityKey(searchBook.name, searchBook.author);
+    final existingIndex = state.indexWhere(
+      (e) => _identityKey(e.searchBook.name, e.searchBook.author) == identity,
+    );
+    if (existingIndex >= 0) {
+      final existing = state[existingIndex];
+      // A different source URL is a valid candidate. Only suppress an exact
+      // source candidate duplicate.
+      if (existing.searchBook.bookUrl == searchBook.bookUrl &&
+          existing.searchBook.origin == source.bookSourceUrl) {
+        return;
+      }
+      final next = [...state];
+      next[existingIndex] = OnlineShelfItem(
+        source: source,
+        searchBook: searchBook,
+        identityBookUrl: existing.identityBookUrl ?? existing.bookUrl,
+      );
+      state = next;
+    } else {
+      state = [
+        ...state,
+        OnlineShelfItem(
+          source: source,
+          searchBook: searchBook,
+          identityBookUrl: searchBook.bookUrl,
+        ),
+      ];
+    }
+    final queueKey =
+        'shelf.add.${source.bookSourceUrl}|${searchBook.bookUrl}';
+    PersistQueue.instance.schedule(queueKey, () async {
       final repo = await ref.read(shelfRepositoryProvider.future);
       if (repo == null) {
         await _persistLegacy();
         return;
       }
-      await repo.addCandidate(source, searchBook);
+      final identityUrl = await repo.addCandidate(source, searchBook);
+      state = state.map((e) {
+        if (e.searchBook.bookUrl == searchBook.bookUrl &&
+            e.searchBook.origin == source.bookSourceUrl) {
+          return OnlineShelfItem(
+            source: e.source,
+            searchBook: e.searchBook,
+            identityBookUrl: identityUrl,
+          );
+        }
+        return e;
+      }).toList();
     });
   }
 
@@ -150,16 +208,28 @@ class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
     for (final e in state) {
       if (!replaced &&
           (e.bookUrl == oldUrl ||
-              (e.searchBook.name == searchBook.name &&
-                  e.searchBook.author == searchBook.author))) {
-        next.add(OnlineShelfItem(source: source, searchBook: searchBook));
+              (_identityKey(e.searchBook.name, e.searchBook.author) ==
+                  _identityKey(searchBook.name, searchBook.author)))) {
+        next.add(
+          OnlineShelfItem(
+            source: source,
+            searchBook: searchBook,
+            identityBookUrl: e.identityBookUrl ?? e.bookUrl,
+          ),
+        );
         replaced = true;
       } else {
         next.add(e);
       }
     }
     if (!replaced) {
-      next.add(OnlineShelfItem(source: source, searchBook: searchBook));
+      next.add(
+        OnlineShelfItem(
+          source: source,
+          searchBook: searchBook,
+          identityBookUrl: oldUrl.isEmpty ? searchBook.bookUrl : oldUrl,
+        ),
+      );
     }
     state = next;
     PersistQueue.instance.schedule(
@@ -204,4 +274,7 @@ class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
     });
   }
   bool contains(String bookUrl) => state.any((e) => e.bookUrl == bookUrl);
+
+  static String _identityKey(String name, String author) =>
+      '${normalizeSearchText(name)}\u0000${normalizeSearchText(author)}';
 }

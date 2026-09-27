@@ -11,6 +11,7 @@ class _SettingsHome extends ConsumerWidget {
       body: MeowPage(
         eyebrow: '我的',
         title: '我的',
+        fullBleedBody: true,
         child: ListView(
           children: [
             ListTile(

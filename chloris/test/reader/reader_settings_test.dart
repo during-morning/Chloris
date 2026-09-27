@@ -1,8 +1,14 @@
+import 'package:chloris_engine/chloris_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chloris/features/reader/reader_palette.dart';
 import 'package:chloris/features/reader/reader_settings_provider.dart';
 
 void main() {
+  test('移除仿真翻页且旧配置安全回退到滑动', () {
+    expect(PageAnim.choices, isNot(contains(PageAnim.simulation)));
+    expect(PageAnim.normalize(PageAnim.simulation), PageAnim.slide);
+  });
+
   test('自定义字体设置可序列化并恢复', () {
     const settings = ReaderSettings(fontFamily: 'Noto Sans SC');
     final restored = ReaderSettings.fromJson(settings.toJson());
@@ -11,9 +17,7 @@ void main() {
 
   test('默认打开替换净化，并记住双页视图', () {
     expect(const ReaderSettings().enableReplace, isTrue);
-    final restored = ReaderSettings.fromJson({
-      'doublePage': 'on',
-    });
+    final restored = ReaderSettings.fromJson({'doublePage': 'on'});
     expect(restored.enableReplace, isTrue);
     expect(restored.doublePage, 'on');
   });

@@ -1,9 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'page_curl_layout.dart';
-
-enum ReadPagerStyle { slide, cover, simulation, none }
+enum ReadPagerStyle { slide, cover, none }
 
 /// legado-E style pager: only prev/cur/next, drag clamped to one screen,
 /// release snaps to adjacent page or back. Never skips pages.
@@ -197,7 +195,10 @@ class _ReadPagerState extends State<ReadPager>
     if (_pointer != e.pointer) return;
     _pointer = null;
     if (!_dragging) {
-      widget.onTap?.call(e.localPosition, _viewport == Size.zero ? Size(w, 1) : _viewport);
+      widget.onTap?.call(
+        e.localPosition,
+        _viewport == Size.zero ? Size(w, 1) : _viewport,
+      );
       _down = null;
       return;
     }
@@ -339,18 +340,6 @@ class _ReadPagerState extends State<ReadPager>
             child: ValueListenableBuilder<double>(
               valueListenable: _dxn,
               builder: (context, dx, _) {
-                if (widget.style == ReadPagerStyle.simulation) {
-                  return _buildSimulation(
-                    context,
-                    width: w,
-                    height: h,
-                    dx: dx,
-                    cur: curPage,
-                    prev: prevPage,
-                    next: nextPage,
-                    i: i,
-                  );
-                }
                 return Stack(
                   children: [
                     if (cover) ...[
@@ -371,140 +360,5 @@ class _ReadPagerState extends State<ReadPager>
         );
       },
     );
-  }
-
-  /// 仿真翻页：前翻当前页卷起露出下一页，后翻上一页从左铺回。
-  /// 几何由 [curlForward]/[curlBackward] 给出，纸背用渐变模拟。
-  Widget _buildSimulation(
-    BuildContext context, {
-    required double width,
-    required double height,
-    required double dx,
-    required Widget cur,
-    Widget? prev,
-    Widget? next,
-    required int i,
-  }) {
-    final base = widget.background ?? Theme.of(context).colorScheme.surface;
-    Widget full(Widget child) => RepaintBoundary(child: child);
-    Widget layer(double left, Widget child) => Positioned(
-          left: left,
-          top: 0,
-          width: width,
-          height: height,
-          child: child,
-        );
-
-    Widget clipped(Widget child, double visibleWidth) {
-      if (visibleWidth >= width - 0.5) return full(child);
-      return SizedBox(
-        width: visibleWidth,
-        height: height,
-        child: ClipRect(
-          child: OverflowBox(
-            maxWidth: width,
-            alignment: Alignment.topLeft,
-            child: SizedBox(width: width, height: height, child: child),
-          ),
-        ),
-      );
-    }
-
-    List<Widget> flapAndShadow(CurlGeometry g, {required bool forward}) {
-      final fold = g.visibleLeft + g.visibleWidth;
-      return [
-          // 下层页面折缝附近的软阴影
-          if (g.hasShadow)
-            Positioned(
-              left: g.shadowLeft,
-              top: 0,
-              width: g.shadowWidth,
-              height: height,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Colors.black.withValues(alpha: 0.22),
-                      Colors.black.withValues(alpha: 0.0),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          // 纸背：卷起部分的背面，靠折缝处最亮（受光），外缘渐暗
-          if (g.hasFlap)
-            Positioned(
-              left: g.flapLeft,
-              top: 0,
-              width: g.flapWidth,
-              height: height,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: base,
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.10),
-                      Colors.black.withValues(alpha: forward ? 0.10 : 0.28),
-                      Colors.black.withValues(alpha: forward ? 0.30 : 0.10),
-                    ],
-                    stops: const [0.0, 0.12, 1.0],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.25),
-                      blurRadius: 8,
-                      spreadRadius: -2,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          if (g.hasVisible)
-            Positioned(
-              left: fold - 1.5,
-              top: 0,
-              width: 1.5,
-              height: height,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Colors.black.withValues(alpha: 0.30),
-                      Colors.black.withValues(alpha: 0.0),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-    ];
-  }
-
-    if (dx < 0 && next != null) {
-      final g = curlForward((-dx / width).clamp(0.0, 1.0), width);
-      return Stack(
-        children: [
-          layer(0, full(next)),
-          if (g.hasVisible) layer(0, clipped(cur, g.visibleWidth)),
-          ...flapAndShadow(g, forward: true),
-        ],
-      );
-    }
-    if (dx > 0 && prev != null) {
-      final g = curlBackward((dx / width).clamp(0.0, 1.0), width);
-      return Stack(
-        children: [
-          layer(0, full(cur)),
-          if (g.hasVisible) layer(0, clipped(prev, g.visibleWidth)),
-          ...flapAndShadow(g, forward: false),
-        ],
-      );
-    }
-    return Stack(children: [layer(0, full(cur))]);
   }
 }

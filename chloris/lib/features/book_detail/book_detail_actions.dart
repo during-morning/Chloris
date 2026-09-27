@@ -118,6 +118,7 @@ extension _BookDetailActions on _BookDetailScreenState {
         currentBookUrl: _searchBook.bookUrl,
         seedBook: _searchBook,
         catalog: ref.read(loadOnlineCatalogUseCaseProvider),
+        content: ref.read(loadOnlineChapterContentUseCaseProvider),
         isCancelled: () => !mounted,
       );
       if (!mounted) return;

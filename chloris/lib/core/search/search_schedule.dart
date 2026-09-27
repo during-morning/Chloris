@@ -33,6 +33,11 @@ List<BookSource> orderSearchSources(List<BookSource> sources) {
     final ah = isHttpSearchUrl(a) ? 0 : 1;
     final bh = isHttpSearchUrl(b) ? 0 : 1;
     if (ah != bh) return ah - bh;
+    final aq = SourceHealthStore.quality(a.bookSourceUrl);
+    final bq = SourceHealthStore.quality(b.bookSourceUrl);
+    // Reliability gets a meaningful vote, but a new/low-sample source keeps
+    // the neutral prior so it is still explored.
+    if ((aq - bq).abs() >= 0.12) return bq.compareTo(aq);
     final ar = effectiveRespondTime(a);
     final br = effectiveRespondTime(b);
     if (ar != br) return ar.compareTo(br);
@@ -50,6 +55,38 @@ class CachedSourceHits {
   final DateTime at;
 
   bool get isFresh => DateTime.now().difference(at) < SearchHitCache.ttl;
+}
+
+/// Stable cache identity for a single source search. Keeping construction in
+/// one value object prevents callers from accidentally omitting page or the
+/// semantic source context when they build a key.
+class SearchCacheKey {
+  const SearchCacheKey({
+    required this.query,
+    required this.page,
+    required this.sourceUrl,
+    this.context = '',
+  });
+
+  final String query;
+  final int page;
+  final String sourceUrl;
+  final String context;
+
+  String get value =>
+      '$page\u0001$sourceUrl\u0001${query.trim()}\u0001$context';
+
+  factory SearchCacheKey.fromSource({
+    required BookSource source,
+    required String query,
+    required int page,
+  }) =>
+      SearchCacheKey(
+        query: query,
+        page: page,
+        sourceUrl: source.bookSourceUrl,
+        context: searchCacheContext(source),
+      );
 }
 
 /// 同关键词 + 页 + 书源的短期命中缓存。未命中的源照常请求。
@@ -73,7 +110,12 @@ class SearchHitCache {
     int page,
     String sourceUrl, {
     String context = '',
-  }) => '$page\u0001$sourceUrl\u0001${query.trim()}\u0001$context';
+  }) => SearchCacheKey(
+        query: query,
+        page: page,
+        sourceUrl: sourceUrl,
+        context: context,
+      ).value;
 
   List<SearchBook>? take(
     String query,
@@ -95,6 +137,25 @@ class SearchHitCache {
     return hit.books;
   }
 
+  List<SearchBook>? takeForSource(
+    BookSource source,
+    String query, {
+    int page = 1,
+  }) {
+    final key = SearchCacheKey.fromSource(
+      source: source,
+      query: query,
+      page: page,
+    );
+    return takeKey(key);
+  }
+
+  /// Uses a key captured before rule execution. A JS rule may mutate runtime
+  /// variables while searching; recomputing the context for the write would
+  /// make the next invocation unable to reproduce the request key.
+  List<SearchBook>? takeKey(SearchCacheKey key) =>
+      take(key.query, key.page, key.sourceUrl, context: key.context);
+
   void put(
     String query,
     int page,
@@ -115,6 +176,28 @@ class SearchHitCache {
     }
     _dirty = true;
   }
+
+  void putForSource(
+    BookSource source,
+    String query,
+    List<SearchBook> books, {
+    int page = 1,
+  }) {
+    final key = SearchCacheKey.fromSource(
+      source: source,
+      query: query,
+      page: page,
+    );
+    putKey(key, books);
+  }
+
+  void putKey(SearchCacheKey key, List<SearchBook> books) => put(
+        key.query,
+        key.page,
+        key.sourceUrl,
+        books,
+        context: key.context,
+      );
 
   static bool _hydrated = false;
   static bool _dirty = false;
@@ -263,6 +346,91 @@ class SourceLatencyStore {
     try {
       final prefs = await KvSettings.ready();
       await prefs.setString(prefsKey, jsonEncode(times));
+    } catch (_) {}
+  }
+}
+
+class _SourceHealthEntry {
+  _SourceHealthEntry({this.successes = 0, this.failures = 0});
+
+  int successes;
+  int failures;
+
+  double get quality => (successes + 2) / (successes + failures + 4);
+
+  Map<String, dynamic> toJson() => {
+    'successes': successes,
+    'failures': failures,
+  };
+}
+
+/// Small, decaying-independent reliability ledger used as a secondary source
+/// ordering signal. Latency alone can permanently favor a fast but broken
+/// source, so empty/error responses contribute failures and valid responses
+/// contribute successes.
+class SourceHealthStore {
+  SourceHealthStore._();
+
+  static const prefsKey = 'sourceHealthV1';
+  static final Map<String, _SourceHealthEntry> _entries = {};
+  static bool _loaded = false;
+  static bool _dirty = false;
+  static Future<void>? _loadFuture;
+
+  static Future<void> ensureLoaded() {
+    if (_loaded) return Future<void>.value();
+    return _loadFuture ??= _load();
+  }
+
+  static Future<void> _load() async {
+    try {
+      final prefs = await KvSettings.ready();
+      final raw = prefs.getString(prefsKey);
+      if (raw != null && raw.isNotEmpty) {
+        final decoded = jsonDecode(raw);
+        if (decoded is Map) {
+          decoded.forEach((key, value) {
+            if (value is! Map) return;
+            _entries[key.toString()] = _SourceHealthEntry(
+              successes: (value['successes'] as num?)?.toInt() ?? 0,
+              failures: (value['failures'] as num?)?.toInt() ?? 0,
+            );
+          });
+        }
+      }
+    } catch (_) {}
+    _loaded = true;
+    _loadFuture = null;
+  }
+
+  static double quality(String sourceUrl) =>
+      _entries[sourceUrl]?.quality ?? 0.5;
+
+  static void record(String sourceUrl, {required bool success}) {
+    final entry = _entries.putIfAbsent(sourceUrl, _SourceHealthEntry.new);
+    if (success) {
+      entry.successes++;
+    } else {
+      entry.failures++;
+    }
+    // Keep the ledger bounded and let old history lose influence.
+    final total = entry.successes + entry.failures;
+    if (total > 200) {
+      entry.successes = (entry.successes * 0.75).round();
+      entry.failures = (entry.failures * 0.75).round();
+    }
+    _dirty = true;
+  }
+
+  static Future<void> flush() async {
+    if (!_dirty) return;
+    _dirty = false;
+    try {
+      final prefs = await KvSettings.ready();
+      await prefs.setString(
+        prefsKey,
+        jsonEncode({for (final e in _entries.entries) e.key: e.value.toJson()}),
+      );
     } catch (_) {}
   }
 }

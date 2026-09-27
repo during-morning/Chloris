@@ -48,10 +48,11 @@ class _ChapterTocPanelState extends ConsumerState<ChapterTocPanel> {
   }
 
   List<MapEntry<int, BookChapter>> get _list {
+    final query = _q.trim().toLowerCase();
     var list = widget.chapters
         .asMap()
         .entries
-        .where((e) => _q.isEmpty || e.value.title.contains(_q))
+        .where((e) => query.isEmpty || e.value.title.toLowerCase().contains(query))
         .toList();
     if (_rev) list = list.reversed.toList();
     return list;

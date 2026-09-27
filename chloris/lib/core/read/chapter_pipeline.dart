@@ -14,8 +14,7 @@ String chapterPipelineIsolate(Map<String, Object?> args) {
     replaceRules: rawRules is List
         ? [
             for (final r in rawRules)
-              if (r is Map)
-                ReplaceRule.fromJson(Map<String, dynamic>.from(r)),
+              if (r is Map) ReplaceRule.fromJson(Map<String, dynamic>.from(r)),
           ]
         : const [],
     chineseConvert: args['chineseConvert'] == true,
@@ -28,6 +27,9 @@ class ChapterPipeline {
   const ChapterPipeline._();
 
   static const offMainChars = 4000;
+  static final RegExp _lineSeparators = RegExp(
+    r'\r\n|[\r\n\u000b\u000c\u001c-\u001e\u0085\u2028\u2029]',
+  );
 
   static Future<String> runOffMain({
     required String content,
@@ -95,9 +97,10 @@ class ChapterPipeline {
         origin: '',
       );
       final ch = BookChapter(url: '', title: chapterTitle);
-      text = ContentProcessor.forBook(book, allRules: replaceRules)
-          .processSync(book: book, chapter: ch, content: text)
-          .text;
+      text = ContentProcessor.forBook(
+        book,
+        allRules: replaceRules,
+      ).processSync(book: book, chapter: ch, content: text).text;
     }
     if (chineseConvert) text = ChineseConvert.s2t(text);
     // 排版（含段首两字缩进）必须在**任何**路径上都执行 —— 以前它藏在
@@ -114,7 +117,7 @@ class ChapterPipeline {
   }
 
   static String htmlToPlain(String raw) {
-    if (!raw.contains('<')) return raw;
+    if (!raw.contains('<')) return _joinWrappedFragments(raw);
     final doc = html_parser.parse(raw);
     for (final e in doc.querySelectorAll('br')) {
       e.replaceWith(html_dom.Text('\n'));
@@ -122,7 +125,77 @@ class ChapterPipeline {
     for (final e in doc.querySelectorAll('p,div,li,h1,h2,h3,blockquote')) {
       e.append(html_dom.Text('\n\n'));
     }
-    return doc.body?.text.replaceAll(RegExp(r'\n{3,}'), '\n\n').trim() ?? raw;
+    final plain = doc.body?.text
+            .replaceAll(_lineSeparators, '\n')
+            .replaceAll(RegExp(r'\n{3,}'), '\n\n')
+            .trim() ??
+        raw;
+    return _joinWrappedFragments(plain);
+  }
+
+  /// Rejoin physical lines that split a sentence during scraping. Blank lines
+  /// and sentence-ending lines remain paragraph boundaries.
+  static String _joinWrappedFragments(String raw) {
+    final lines = raw
+        // Some source rules emit Unicode line/paragraph separators instead of
+        // LF. Flutter renders those as hard breaks, so normalize them before
+        // the same short-fragment joining pass.
+        .replaceAll(_lineSeparators, '\n')
+        .split('\n');
+    final paragraphs = <String>[];
+    var current = '';
+    for (final rawLine in lines) {
+      final line = rawLine.trim();
+      if (line.isEmpty) {
+        final complete = RegExp(r'[。！？!?；;」』”’]$').hasMatch(current);
+        // HTML block boundaries become blank lines here. Treat them as real
+        // paragraph breaks only after a complete sentence; some sources split
+        // a sentence across <p> blocks, including a long fragment followed by
+        // one or two characters (for example “随” + “后”).
+        if (current.isNotEmpty && complete) {
+          paragraphs.add(current);
+          current = '';
+        }
+        continue;
+      }
+      final previousEndsSentence =
+          current.isNotEmpty && RegExp(r'[。！？!?；;」』”’]$').hasMatch(current);
+      if (current.isNotEmpty && !previousEndsSentence) {
+        current = '$current$line';
+      } else {
+        if (current.isNotEmpty) paragraphs.add(current);
+        current = line;
+      }
+    }
+    if (current.isNotEmpty) paragraphs.add(current);
+
+    // Some sites put every wrapped glyph in its own <p>/<div>, which creates
+    // blank lines that ordinary line-wrap handling deliberately preserves.
+    // Rejoin runs of tiny paragraphs so long Chinese lines cannot collapse
+    // into a vertical column one character at a time.
+    final out = <String>[];
+    bool tiny(String value) => value.runes.length <= 3;
+    for (var i = 0; i < paragraphs.length;) {
+      if (!tiny(paragraphs[i])) {
+        out.add(paragraphs[i++]);
+        continue;
+      }
+      var end = i + 1;
+      while (end < paragraphs.length && tiny(paragraphs[end])) {
+        end++;
+      }
+      final run = paragraphs.sublist(i, end).join();
+      final isRun = end - i > 1;
+      final previousIsOpen =
+          out.isNotEmpty && !RegExp(r'[。！？!?；;」』”’]$').hasMatch(out.last);
+      if (out.isNotEmpty && (isRun || previousIsOpen)) {
+        out[out.length - 1] = '${out.last}$run';
+      } else {
+        out.add(run);
+      }
+      i = end;
+    }
+    return out.join('\n\n');
   }
 
   static String stripLeadingTitle(String heading, String body) {

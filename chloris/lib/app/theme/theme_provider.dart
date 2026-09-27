@@ -5,7 +5,7 @@ import '../../core/persist/kv_settings.dart';
 import '../../services/persist/vault_sync.dart';
 import 'app_theme.dart';
 
-final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
+final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
 
 Future<void> applyThemeMode(WidgetRef ref, ThemeMode next) async {
   ref.read(themeModeProvider.notifier).state = next;
@@ -38,7 +38,9 @@ ThemeMode flipThemeMode(ThemeMode current) =>
     current == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
 final themeFamilyIdProvider = StateProvider<String>((ref) => 'green');
 final einkThemeProvider = StateProvider<bool>((ref) => false);
-final uiStyleProvider = StateProvider<AppUiStyle>((ref) => AppUiStyle.classic);
+final uiStyleProvider = StateProvider<AppUiStyle>(
+  (ref) => AppUiStyle.absolutely,
+);
 
 /// 界面文字缩放（无障碍）。阅读正文仍用阅读设置字号。
 final uiTextScaleProvider = StateProvider<double>((ref) => 1.0);

@@ -96,6 +96,8 @@ Future<List<SearchBook>> searchOverWebSocket({
   int page = 1,
   bool Function(String name, String author, String? kind)? filter,
   Duration? timeout,
+  Map<String, String> headers = const {},
+  String? requestId,
 }) async {
   final uri = Uri.parse(
     source.webSocketUrl ?? source.searchUrl ?? source.bookSourceUrl,
@@ -106,6 +108,7 @@ Future<List<SearchBook>> searchOverWebSocket({
           uri: uri,
           timeout: timeout ?? EngineLimits.searchTimeout,
           session: 'search',
+          headers: headers,
         ),
       )
       .timeout(timeout ?? EngineLimits.searchTimeout);
@@ -143,6 +146,7 @@ Future<List<SearchBook>> searchOverWebSocket({
           source: source,
           query: query,
           page: page,
+          requestId: requestId,
         ),
       ),
     );

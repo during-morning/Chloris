@@ -9,7 +9,7 @@ abstract final class LegalTexts {
       'Chloris 不运营内容平台，不出售小说，不提供正版书城，也不托管任何书籍正文。打开应用后，你看到的书、源、订阅和规则，'
       '要么来自本机导入的文件，要么来自你自己添加的第三方书源。应用只负责按规则去请求、解析和展示，不保证任何网站仍然可用，'
       '也不对第三方站点的合法性、稳定性和内容质量作背书。\n\n'
-      '界面按 Material 3 组织，并提供经典、Absolutely、终端等外观外壳。阅读器支持单页 / 双页、滚动与仿真翻页、替换净化、'
+      '界面按 Material 3 组织，并提供经典、Absolutely、终端等外观外壳。阅读器支持单页 / 双页、滚动与滑动翻页、替换净化、'
       '繁简转换、自定义纸色与快捷键。书库、进度、书签、Cookie 与设置默认只写在本机；只有在你主动打开 Web 服务或配置 WebDAV 时，'
       '数据才会按你的操作离开这台设备。\n\n'
       '项目参考开源阅读及其衍生实现，但并非官方产品，也不属于任何商业阅读 App 的分支。名称、图标与文档中的“兼容”只表示规则层尽量对齐，'
@@ -99,5 +99,6 @@ abstract final class LegalTexts {
 
 Chloris 只是一把跑在你设备上的开源钥匙：它不生产书籍，不担保书源，不替你取得授权，也不为第三方网站的内容或安全背书。合法取得内容、谨慎选择书源、保管好本机数据，是使用本软件的前提。感谢你花时间读完本声明。''';
 
-  static int get disclaimerLength => legalDisclaimer.replaceAll(RegExp(r'\s'), '').length;
+  static int get disclaimerLength =>
+      legalDisclaimer.replaceAll(RegExp(r'\s'), '').length;
 }

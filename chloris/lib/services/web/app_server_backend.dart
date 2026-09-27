@@ -72,6 +72,50 @@ class AppServerBackend implements ServerBackend {
     return [for (final book in books) book.toJson()];
   }
 
+  Future<BookSource> _requireSource(String sourceUrl) async {
+    final sources = await _ref.read(allSourcesProvider.future);
+    final source = sources.cast<BookSource?>().firstWhere(
+      (s) => s?.bookSourceUrl == sourceUrl,
+      orElse: () => null,
+    );
+    if (source == null) {
+      throw DomainError(
+        code: 'source_not_found',
+        stage: DomainErrorStage.search,
+        message: '找不到书源: $sourceUrl',
+        sourceId: sourceUrl,
+        recoverable: false,
+      );
+    }
+    return source;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> explore(
+    String sourceUrl,
+    String url, {
+    int page = 1,
+  }) async {
+    final source = await _requireSource(sourceUrl);
+    final books = await _ref.read(exploreOnlineBooksUseCaseProvider)(
+      source,
+      url,
+      page: page,
+    );
+    return [for (final book in books) book.toJson()];
+  }
+
+  @override
+  Future<Map<String, dynamic>> bookInfo(
+    String sourceUrl,
+    Map<String, dynamic> rawBook,
+  ) async {
+    final source = await _requireSource(sourceUrl);
+    final seed = Book.fromJson(rawBook);
+    final book = await _ref.read(loadOnlineBookInfoUseCaseProvider)(source, seed);
+    return book.toJson();
+  }
+
   Future<List<Map<String, dynamic>>> bookshelf() async => [
     for (final item in _ref.read(onlineShelfProvider))
       {

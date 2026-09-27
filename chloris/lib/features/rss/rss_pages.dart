@@ -20,6 +20,15 @@ class _ArticlesState extends ConsumerState<_Articles> {
   }
 
   @override
+  void didUpdateWidget(covariant _Articles oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.source.sourceUrl != widget.source.sourceUrl) {
+      _selectedUrl = widget.source.sourceUrl;
+      _q = '';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final sorts = widget.source.sortUrls();
     final articles = _selectedUrl == widget.source.sourceUrl
@@ -39,77 +48,89 @@ class _ArticlesState extends ConsumerState<_Articles> {
             padding: EdgeInsets.all(12),
             child: Center(child: CircularProgressIndicator()),
           ),
-          error: (e, _) =>
-              Padding(padding: const EdgeInsets.all(12), child: Text('拉取失败：$e')),
+          error: (e, _) => Padding(
+            padding: const EdgeInsets.all(12),
+            child: Text('拉取失败：$e'),
+          ),
           data: (list) {
-        if (list.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.all(12),
-            child: Text('暂无文章'),
-          );
-        }
-        final starred = ref.watch(starredRssProvider);
-        final q = _q.toLowerCase();
-        final shown =
-            (q.isEmpty
-                  ? List.of(list)
-                  : list
-                        .where(
-                          (a) =>
-                              a.title.toLowerCase().contains(q) ||
-                              a.author.toLowerCase().contains(q),
-                        )
-                        .toList())
-              ..sort((a, b) {
-                final da = DateTime.tryParse(a.pubDate);
-                final db = DateTime.tryParse(b.pubDate);
-                if (da != null && db != null) return db.compareTo(da);
-                return b.pubDate.compareTo(a.pubDate);
-              });
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              child: MeowQueryField(
-                hint: '筛选文章',
-                leading: Icons.filter_list,
-                onChanged: (v) => setState(() => _q = v.trim()),
-              ),
-            ),
-            ...shown.map(
-              (a) => ListTile(
-                dense: true,
-                title: Text(a.title),
-                subtitle: Text(
-                  [a.pubDate, a.author].where((e) => e.isNotEmpty).join(' · '),
-                ),
-                trailing: IconButton(
-                  icon: Icon(
-                    starred.contains(a.link) ? Icons.star : Icons.star_border,
+            if (list.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.all(12),
+                child: Text('暂无文章'),
+              );
+            }
+            final starred = ref.watch(starredRssProvider);
+            final q = _q.toLowerCase();
+            final shown =
+                (q.isEmpty
+                      ? List.of(list)
+                      : list
+                            .where(
+                              (a) =>
+                                  a.title.toLowerCase().contains(q) ||
+                                  a.author.toLowerCase().contains(q),
+                            )
+                            .toList())
+                  ..sort((a, b) {
+                    final da = DateTime.tryParse(a.pubDate);
+                    final db = DateTime.tryParse(b.pubDate);
+                    if (da != null && db != null) return db.compareTo(da);
+                    return b.pubDate.compareTo(a.pubDate);
+                  });
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
                   ),
-                  onPressed: a.link.isEmpty
-                      ? null
-                      : () => ref
-                            .read(starredRssProvider.notifier)
-                            .toggle(a.link),
+                  child: MeowQueryField(
+                    hint: '筛选文章',
+                    leading: Icons.filter_list,
+                    onChanged: (v) => setState(() => _q = v.trim()),
+                  ),
                 ),
-                onTap: () => _showArticle(context, a),
+                ...shown.map(
+                  (a) => ListTile(
+                    dense: true,
+                    title: Text(a.title),
+                    subtitle: Text(
+                      [
+                        a.pubDate,
+                        a.author,
+                      ].where((e) => e.isNotEmpty).join(' · '),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(
+                        starred.contains(a.link)
+                            ? Icons.star
+                            : Icons.star_border,
+                      ),
+                      onPressed: a.link.isEmpty
+                          ? null
+                          : () => ref
+                                .read(starredRssProvider.notifier)
+                                .toggle(a.link),
+                    ),
+                    onTap: () => _showArticle(context, widget.source, a),
 
-                onLongPress: () async {
-                  await ref.read(rssArticleSnapshotsProvider.notifier).save(a);
-                  final text = a.link.isNotEmpty ? a.link : a.title;
-                  await Clipboard.setData(ClipboardData(text: text));
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text('已复制链接')));
-                  }
-                },
-              ),
-            ),
-          ],
-        );
-      },
+                    onLongPress: () async {
+                      await ref
+                          .read(rssArticleSnapshotsProvider.notifier)
+                          .save(a);
+                      final text = a.link.isNotEmpty ? a.link : a.title;
+                      await Clipboard.setData(ClipboardData(text: text));
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(const SnackBar(content: Text('已复制链接')));
+                      }
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ],
     );
@@ -124,11 +145,7 @@ class _ArticlesState extends ConsumerState<_Articles> {
         children: [
           _categoryChip('全部', widget.source.sourceUrl, theme),
           for (final s in sorts)
-            _categoryChip(
-              s.name.isEmpty ? s.url : s.name,
-              s.url,
-              theme,
-            ),
+            _categoryChip(s.name.isEmpty ? s.url : s.name, s.url, theme),
         ],
       ),
     );
@@ -139,7 +156,10 @@ class _ArticlesState extends ConsumerState<_Articles> {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: ChoiceChip(
-        label: Text(label),
+        label: Text(
+          label,
+          style: TextStyle(color: theme.colorScheme.onSurface),
+        ),
         selected: selected,
         onSelected: (_) => setState(() => _selectedUrl = url),
       ),
@@ -147,15 +167,28 @@ class _ArticlesState extends ConsumerState<_Articles> {
   }
 }
 
-void _showArticle(BuildContext context, RssArticle article) {
-  Navigator.of(
-    context,
-    rootNavigator: true,
-  ).push(MaterialPageRoute(builder: (_) => RssReadPage(article: article)));
+void _showArticle(BuildContext context, RssSource source, RssArticle article) {
+  Navigator.of(context, rootNavigator: true).push(
+    MaterialPageRoute(
+      builder: (_) => RssReadPage(source: source, article: article),
+    ),
+  );
+}
+
+String _rssArticleCss(int style) {
+  switch (style) {
+    case 1:
+      return 'font-size: 18px; line-height: 2.0; text-align: justify;';
+    case 2:
+      return 'font-size: 15px; line-height: 1.65;';
+    default:
+      return 'font-size: 16px; line-height: 1.8;';
+  }
 }
 
 class RssReadPage extends StatelessWidget {
-  const RssReadPage({super.key, required this.article});
+  const RssReadPage({super.key, required this.source, required this.article});
+  final RssSource source;
   final RssArticle article;
 
   @override
@@ -210,8 +243,9 @@ class RssReadPage extends StatelessWidget {
               htmlContent: article.content.isNotEmpty
                   ? article.content
                   : article.description,
-              css: '''
-                .chloris-reader-article { font-size: 16px; line-height: 1.8; overflow-wrap: anywhere; }
+              css:
+                  '''
+                .chloris-reader-article { ${_rssArticleCss(source.articleStyle)} overflow-wrap: anywhere; }
                 .chloris-reader-article img { max-width: 100%; height: auto; }
                 .chloris-reader-article a { color: inherit; }
               ''',
@@ -331,7 +365,14 @@ class _RssFavoritesPageState extends ConsumerState<RssFavoritesPage> {
                                     : _selected.add(key),
                               )
                             : (article != null
-                                  ? () => _showArticle(context, article)
+                                  ? () => _showArticle(
+                                      context,
+                                      RssSource(
+                                        sourceUrl: article.sourceName,
+                                        sourceName: article.sourceName,
+                                      ),
+                                      article,
+                                    )
                                   : () => launchUrl(Uri.parse(key))),
                         trailing: selecting
                             ? null

@@ -2200,7 +2200,7 @@ class $SearchBooksTable extends SearchBooks
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {bookUrl};
+  Set<GeneratedColumn> get $primaryKey => {bookUrl, origin};
   @override
   SearchBook map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -10906,6 +10906,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'search_books_origin',
     'CREATE INDEX search_books_origin ON search_books (origin)',
   );
+  late final Index searchBooksBookUrl = Index(
+    'search_books_book_url',
+    'CREATE INDEX search_books_book_url ON search_books (book_url)',
+  );
   late final Index bookChaptersBookIndex = Index(
     'book_chapters_book_index',
     'CREATE UNIQUE INDEX book_chapters_book_index ON book_chapters (book_url, "index")',
@@ -10932,6 +10936,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     booksLastRead,
     booksGroup,
     searchBooksOrigin,
+    searchBooksBookUrl,
     bookChaptersBookIndex,
   ];
   @override

@@ -82,7 +82,14 @@ class TextFile {
       var start = 0;
       var csNum = 0;
       var numE = 0;
+      var lineStartMatches = 0;
       for (final m in re.allMatches(sample)) {
+        final lineStart = m.start == 0
+            ? 0
+            : sample.lastIndexOf('\n', m.start - 1) + 1;
+        if (sample.substring(lineStart, m.start).trim().isEmpty) {
+          lineStartMatches++;
+        }
         final contentLength = m.start - start;
         if (start == 0 || contentLength > 1000) {
           csNum++;
@@ -91,7 +98,14 @@ class TextFile {
           numE++;
         }
       }
-      if (csNum >= numE * 3 && csNum > maxNum + overRuleCount) {
+      // Short TXT files can contain perfectly valid chapter headings less
+      // than 100 characters apart. In that case prefer repeated headings on
+      // their own lines over the distance-only false-positive filter.
+      final repeatedLineHeadings = lineStartMatches >= 3 &&
+          lineStartMatches > numE;
+      if ((csNum >= numE * 3 || repeatedLineHeadings) &&
+          (csNum > maxNum + overRuleCount ||
+              (repeatedLineHeadings && lineStartMatches > maxNum))) {
         maxNum = csNum;
         best = r;
         if (maxNum > 70) break;

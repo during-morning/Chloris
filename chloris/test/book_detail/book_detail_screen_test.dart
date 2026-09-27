@@ -7,6 +7,7 @@ import 'package:chloris/core/search/search_schedule.dart';
 import 'package:chloris/features/book_detail/book_detail_provider.dart';
 import 'package:chloris/features/book_detail/book_detail_screen.dart';
 import 'package:chloris/features/book_detail/chapter_text_cache.dart';
+import 'package:chloris/application/online/online_book_port.dart';
 import 'package:chloris/features/sources/source_library_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,6 +43,34 @@ class _ChangeSourceFacade extends EngineFacade {
   }) async {
     return hits[source.bookSourceUrl] ?? const [];
   }
+}
+
+class _MemoryCatalogStore implements ChapterCatalogStore {
+  _MemoryCatalogStore(this.bookUrl, this.chapters);
+
+  final String bookUrl;
+  final List<BookChapter> chapters;
+
+  @override
+  Future<void> ensureLoaded() async {}
+
+  @override
+  Future<void> hydrate(String key) async {}
+
+  @override
+  List<BookChapter>? peek(String key) => key == bookUrl ? chapters : null;
+
+  @override
+  List<BookChapter>? take(String key) => peek(key);
+
+  @override
+  Future<void> put(String key, List<BookChapter> value) async {}
+
+  @override
+  Future<void> remove(String key) async {}
+
+  @override
+  void skipNext(String key) {}
 }
 
 void main() {
@@ -164,6 +193,9 @@ void main() {
       ProviderScope(
         overrides: [
           engineFacadeProvider.overrideWithValue(_ChangeSourceFacade()),
+          chapterCatalogStoreProvider.overrideWithValue(
+            _MemoryCatalogStore('https://b.com/xianni', chapters),
+          ),
           allSourcesProvider.overrideWith((ref) async => [sourceA, sourceB]),
           enabledSourcesProvider.overrideWith(
             (ref) async => [sourceA, sourceB],

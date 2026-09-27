@@ -25,6 +25,7 @@ class MeowPage extends StatelessWidget {
     this.subtitle,
     this.variant = MeowPageVariant.largeTitle,
     this.showBackButton,
+    this.fullBleedBody = false,
   });
 
   final String eyebrow;
@@ -38,6 +39,11 @@ class MeowPage extends StatelessWidget {
   /// Such a branch may report `canPop == false` even though the page has a
   /// clear return path when opened from Settings.
   final bool? showBackButton;
+
+  /// Lets list-heavy pages use the entire route width on desktop/tablet while
+  /// keeping the editorial header column measured.  The default retains the
+  /// existing style-specific reading measure.
+  final bool fullBleedBody;
 
   @override
   Widget build(BuildContext context) {
@@ -55,11 +61,10 @@ class MeowPage extends StatelessWidget {
     // Header sits in a Column, so it has unbounded height: constrain the
     // width only and let it shrink-wrap vertically.
     //
-    // 对齐方式用**靠左**而不是居中：内容列限宽后若再居中，侧栏和正文之间会
-    // 留出一大块悬空的空白，窗口越宽越明显（用户反馈「页面布局不合理」）。
-    // 限宽本身保留 —— 那是可读行长的约束，与对齐无关。
+    // Editorial pages keep their measured header. Full-bleed pages expand the
+    // header too, so trailing actions stay at the far edge of the content area.
     Widget headerBox(Widget w) {
-      if (!measured) return w;
+      if (!measured || fullBleedBody) return w;
       return Align(
         alignment: Alignment.topLeft,
         child: ConstrainedBox(
@@ -75,6 +80,9 @@ class MeowPage extends StatelessWidget {
       if (!measured) return w;
       return LayoutBuilder(
         builder: (context, c) {
+          if (fullBleedBody) {
+            return SizedBox(width: c.maxWidth, height: c.maxHeight, child: w);
+          }
           final width = c.maxWidth < maxWidth ? c.maxWidth : maxWidth;
           return Align(
             alignment: Alignment.topLeft,
@@ -85,68 +93,102 @@ class MeowPage extends StatelessWidget {
     }
 
     if (variant == MeowPageVariant.compact) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          AppEntrance(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                pagePadding,
-                AppTokens.space8,
-                pagePadding,
-                AppTokens.space8,
-              ),
-              child: headerBox(
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+      final compactHeader = AppEntrance(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            pagePadding,
+            AppTokens.space8,
+            pagePadding,
+            AppTokens.space8,
+          ),
+          child: headerBox(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        if (canPop)
-                          _BackButton(ui: ui, style: style)
-                        else if (mono)
-                          const _TerminalPrompt(),
-                        Expanded(
-                          child: Text(
-                            mono ? '[ $title ]' : title,
-                            style: theme.textTheme.titleLarge,
-                          ),
-                        ),
-                        if (actions != null && actions!.isNotEmpty)
-                          Flexible(
-                            fit: FlexFit.loose,
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: Wrap(
-                                alignment: WrapAlignment.end,
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                spacing: 8,
-                                runSpacing: 4,
-                                children: actions!,
-                              ),
+                    if (canPop)
+                      _BackButton(ui: ui, style: style)
+                    else if (mono)
+                      const _TerminalPrompt(),
+                    Expanded(
+                      child: Text(
+                        mono ? '[ $title ]' : title,
+                        style: theme.textTheme.titleLarge,
+                      ),
+                    ),
+                    if (actions != null && actions!.isNotEmpty)
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          // Keep the compact masthead one row tall at
+                          // narrow widths. Wrapping every toolbar button
+                          // vertically can consume the whole viewport in
+                          // a short window; horizontal scrolling preserves
+                          // access to every action without flex overflow.
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                for (var i = 0; i < actions!.length; i++)
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                      left: i == 0 ? 0 : AppTokens.space8,
+                                    ),
+                                    child: actions![i],
+                                  ),
+                              ],
                             ),
                           ),
-                      ],
-                    ),
-                    if (rule) ...[
-                      const SizedBox(height: AppTokens.space8),
-                      const MeowRule(),
-                    ],
+                        ),
+                      ),
+                  ],
+                ),
+                if (rule) ...[
+                  const SizedBox(height: AppTokens.space8),
+                  const MeowRule(),
+                ],
+              ],
+            ),
+          ),
+        ),
+      );
+      final compactBody = AppEntrance(
+        delay: const Duration(milliseconds: 45),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: pagePadding),
+          child: bodyBox(child),
+        ),
+      );
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.hasBoundedHeight && constraints.maxHeight < 120) {
+            // Below the masthead's minimum useful height, make the whole page
+            // scroll. A nested body viewport alone cannot bring its controls
+            // into view when the page chrome already occupies the viewport.
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    compactHeader,
+                    SizedBox(height: 160, child: compactBody),
                   ],
                 ),
               ),
-            ),
-          ),
-          Expanded(
-            child: AppEntrance(
-              delay: const Duration(milliseconds: 45),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: pagePadding),
-                child: bodyBox(child),
-              ),
-            ),
-          ),
-        ],
+            );
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              compactHeader,
+              Expanded(child: compactBody),
+            ],
+          );
+        },
       );
     }
 
@@ -303,7 +345,7 @@ class _BackButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(style?.controlRadius ?? 8),
           ),
-          minimumSize: const Size(36, 36),
+          minimumSize: const Size(AppTokens.touchTarget, AppTokens.touchTarget),
         ),
       );
     }
@@ -675,7 +717,7 @@ class MeowIconButton extends StatelessWidget {
           foregroundColor: active ? cs.onInverseSurface : cs.onSurface,
           side: BorderSide(color: active ? cs.onSurface : cs.outlineVariant),
           shape: const RoundedRectangleBorder(),
-          minimumSize: const Size(32, 32),
+          minimumSize: const Size(AppTokens.touchTarget, AppTokens.touchTarget),
           padding: EdgeInsets.zero,
         ),
       );
@@ -697,7 +739,7 @@ class MeowIconButton extends StatelessWidget {
                   borderRadius: BorderRadius.circular(ext?.controlRadius ?? 8),
                   side: BorderSide(color: cs.outlineVariant),
                 ),
-          minimumSize: const Size(36, 36),
+          minimumSize: const Size(AppTokens.touchTarget, AppTokens.touchTarget),
           padding: EdgeInsets.zero,
         ),
       );
@@ -750,12 +792,14 @@ class MeowEmpty extends StatelessWidget {
     required this.body,
     this.action,
     this.mark = '◌',
+    this.compact = false,
   });
 
   final String title;
   final String body;
   final Widget? action;
   final String mark;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -772,60 +816,188 @@ class MeowEmpty extends StatelessWidget {
         : ui == AppUiStyle.classic
         ? cs.primary
         : cs.onSurfaceVariant;
-    return AppEntrance(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 460),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (mono)
-                Text(
-                  mark,
-                  style: theme.textTheme.displaySmall?.copyWith(color: tone),
-                )
-              else
-                AppIcon(
-                  AppIcons.library,
-                  size: absolutely ? 44 : (ui == AppUiStyle.classic ? 64 : 56),
-                  color: tone,
-                ),
-              SizedBox(
-                height: absolutely ? AppTokens.space20 : AppTokens.space16,
-              ),
-              Text(
-                mono ? '[ $title ]' : title,
-                // Absolutely: display serif, never bold — the official error /
-                // capabilities page hero.
-                style: absolutely
-                    ? theme.textTheme.displaySmall
-                    : theme.textTheme.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(
-                height: absolutely ? AppTokens.space12 : AppTokens.space8,
-              ),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Text(
-                  body,
-                  textAlign: TextAlign.center,
-                  // Absolutely: the subtitle is serif too — muted and airy.
-                  style: absolutely
-                      ? AppTheme.absolutelySubtitle(theme)
-                      : theme.textTheme.bodyMedium?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                ),
-              ),
-              if (action != null) ...[
-                SizedBox(
-                  height: absolutely ? AppTokens.space24 : AppTokens.space20,
-                ),
-                action!,
-              ],
-            ],
+    final content = ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: compact ? 680 : 460),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (mono)
+            Text(
+              mark,
+              style: theme.textTheme.displaySmall?.copyWith(color: tone),
+            )
+          else
+            AppIcon(
+              AppIcons.library,
+              size: compact
+                  ? (absolutely ? 36 : 48)
+                  : (absolutely ? 44 : (ui == AppUiStyle.classic ? 64 : 56)),
+              color: tone,
+            ),
+          SizedBox(
+            height: compact
+                ? AppTokens.space12
+                : absolutely
+                ? AppTokens.space20
+                : AppTokens.space16,
           ),
+          Text(
+            mono ? '[ $title ]' : title,
+            // Absolutely: display serif, never bold — the official error /
+            // capabilities page hero.
+            style: compact
+                ? theme.textTheme.titleLarge
+                : absolutely
+                ? theme.textTheme.displaySmall
+                : theme.textTheme.titleLarge,
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(
+            height: compact
+                ? AppTokens.space6
+                : absolutely
+                ? AppTokens.space12
+                : AppTokens.space8,
+          ),
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: compact ? 560 : 420),
+            child: Text(
+              body,
+              textAlign: TextAlign.center,
+              // Absolutely: the subtitle is serif too — muted and airy.
+              style: absolutely
+                  ? AppTheme.absolutelySubtitle(theme)
+                  : theme.textTheme.bodyMedium?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+            ),
+          ),
+          if (action != null) ...[
+            SizedBox(
+              height: compact
+                  ? AppTokens.space12
+                  : absolutely
+                  ? AppTokens.space24
+                  : AppTokens.space20,
+            ),
+            action!,
+          ],
+        ],
+      ),
+    );
+    final positioned = compact
+        ? Align(
+            alignment: const Alignment(0, -0.16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTokens.space20,
+              ),
+              child: content,
+            ),
+          )
+        : Center(child: content);
+    if (!compact) return AppEntrance(child: positioned);
+
+    return AppEntrance(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // A compact page can be resized to any height. Keep the regular hero
+          // while it fits comfortably; switch to a denser summary on short
+          // windows, and always put the result in a viewport so even a window
+          // shorter than the controls can scroll instead of overflowing.
+          final hasRoomForHero =
+              constraints.hasBoundedHeight && constraints.maxHeight >= 320;
+          final viewportHeight = constraints.hasBoundedHeight
+              ? constraints.maxHeight
+              : 0.0;
+          final child = hasRoomForHero
+              ? positioned
+              : _compactSummary(
+                  context,
+                  theme: theme,
+                  mono: mono,
+                  tone: tone,
+                  absolutely: absolutely,
+                  colorScheme: cs,
+                );
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: AppTokens.space8),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: (viewportHeight - AppTokens.space16).clamp(
+                  0.0,
+                  double.infinity,
+                ),
+              ),
+              child: Center(child: child),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _compactSummary(
+    BuildContext context, {
+    required ThemeData theme,
+    required bool mono,
+    required Color tone,
+    required bool absolutely,
+    required ColorScheme colorScheme,
+  }) {
+    final summary = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            if (mono)
+              Text(
+                mark,
+                style: theme.textTheme.titleLarge?.copyWith(color: tone),
+              )
+            else
+              AppIcon(AppIcons.library, size: 26, color: tone),
+            const SizedBox(width: AppTokens.space12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    mono ? '[ $title ]' : title,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  Text(
+                    body,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: absolutely
+                        ? AppTheme.absolutelySubtitle(
+                            theme,
+                          ).copyWith(fontSize: 12)
+                        : theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        if (action != null) ...[
+          const SizedBox(height: AppTokens.space8),
+          action!,
+        ],
+      ],
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppTokens.space20),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 680),
+          child: summary,
         ),
       ),
     );

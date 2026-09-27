@@ -521,7 +521,7 @@ abstract final class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size(48, 40),
+          minimumSize: const Size(48, AppTokens.touchTarget),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           shape: stadium,
           side: eink ? BorderSide(color: scheme.outline) : null,
@@ -529,7 +529,7 @@ abstract final class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size(48, 40),
+          minimumSize: const Size(48, AppTokens.touchTarget),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           shape: stadium,
           side: BorderSide(color: scheme.outline, width: eink ? 1.5 : 1),
@@ -537,7 +537,7 @@ abstract final class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          minimumSize: const Size(48, 40),
+          minimumSize: const Size(48, AppTokens.touchTarget),
           shape: stadium,
         ),
       ),
@@ -1090,7 +1090,7 @@ abstract final class AppTheme {
           foregroundColor: scheme.surface,
           disabledBackgroundColor: scheme.surfaceContainerHigh,
           disabledForegroundColor: scheme.onSurfaceVariant,
-          minimumSize: const Size(48, 40),
+          minimumSize: const Size(48, AppTokens.touchTarget),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           shape: pill,
           elevation: 0,
@@ -1100,7 +1100,7 @@ abstract final class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: scheme.onSurface,
-          minimumSize: const Size(48, 40),
+          minimumSize: const Size(48, AppTokens.touchTarget),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           shape: pill,
           side: BorderSide(color: scheme.outline),
@@ -1110,7 +1110,7 @@ abstract final class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: scheme.onSurface,
-          minimumSize: const Size(40, 36),
+          minimumSize: const Size(44, AppTokens.touchTarget),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           shape: pill,
           textStyle: textTheme.labelLarge,
@@ -1544,7 +1544,7 @@ abstract final class AppTheme {
           foregroundColor: scheme.onInverseSurface,
           disabledBackgroundColor: scheme.surfaceContainerHigh,
           disabledForegroundColor: scheme.onSurfaceVariant,
-          minimumSize: const Size(44, 34),
+          minimumSize: const Size(44, AppTokens.touchTarget),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           shape: boxStrong,
           elevation: 0,
@@ -1554,7 +1554,7 @@ abstract final class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: scheme.onSurface,
-          minimumSize: const Size(44, 34),
+          minimumSize: const Size(44, AppTokens.touchTarget),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           shape: boxStrong,
           side: BorderSide(color: scheme.outline),
@@ -1564,7 +1564,7 @@ abstract final class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: scheme.onSurface,
-          minimumSize: const Size(36, 30),
+          minimumSize: const Size(44, AppTokens.touchTarget),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           shape: box,
           textStyle: textTheme.labelLarge,
@@ -1573,7 +1573,7 @@ abstract final class AppTheme {
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
           foregroundColor: scheme.onSurface,
-          minimumSize: const Size(32, 32),
+          minimumSize: const Size(AppTokens.touchTarget, AppTokens.touchTarget),
           iconSize: 18,
           shape: box,
         ),

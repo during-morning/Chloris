@@ -64,6 +64,32 @@ void main() {
     expect(tidied, ['他终于明白了这件。', '事的真', '相法']);
     expect(tidied.every((e) => !e.startsWith('。')), isTrue);
     expect(tidied.every((e) => e.length != 1), isTrue);
+    expect(tidyCjkLineStrings(const ['寇洪拔刀相向', '！”']), ['寇洪拔刀相向！”']);
+  });
+
+  testWidgets('分页行测量不会把截图中的中文短尾拆成碎片行', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const SizedBox());
+    const paragraph =
+        '　　道玄子的语气忽地变为凶狠：“既如此，如今长生法门在前，我又怎么可能放过你，我又怎么可能不欺人太甚！”\n\n'
+        '　　寇洪大笑：“不过做过一场罢了！可笑你我百年兄弟，如今却为了 一线生机拔刀相向！”\n\n'
+        '　　寇洪却忽然说道：“我知道我不是你的对手，今日想必难逃一劫。但是此地凡人如此之多，却又不知道，你是否又能抵挡得住如此浓度的仙凡瘴呢！”';
+    final page = MeasuredPaginator.layout(
+      content: paragraph,
+      width: 360,
+      height: 800,
+      style: const TextStyle(
+        fontFamily: 'PTSerif',
+        fontFamilyFallback: ['NotoSerifSC'],
+        fontSize: 20,
+        height: 1.6,
+      ),
+    );
+    final lines = page.pages.expand((p) => p.lines).where((l) => l.isNotEmpty);
+    expect(lines, isNotEmpty);
+    expect(lines.where((line) => line.trim().runes.length < 3), isEmpty);
+    expect(page.pages.expand((p) => p.lines).join(), contains('我又怎么可能不欺人太甚'));
   });
 
   test('collapseReaderBlankLines keeps one break between paragraphs', () {

@@ -6,9 +6,9 @@
 /// drifting route by route — so every route, request shape and error mapping
 /// lives here rather than being re-invented at each call site.
 ///
-/// Status: skeleton. The routes below are declared and typed; A2 wires the
-/// handlers and A3 rewrites the Web client to consume them. Nothing here talks
-/// to the network yet.
+/// Status: versioned contract. Book search, discovery, detail, catalogue and
+/// content have concrete client/server adapters; remaining routes may still
+/// report an explicit capability error.
 library;
 
 import 'package:chloris_engine/chloris_engine.dart';
@@ -49,6 +49,8 @@ enum ChlorisApiRoute {
   getChapterList('GET', '/getChapterList'),
   refreshToc('GET', '/refreshToc'),
   getBookContent('GET', '/getBookContent'),
+  exploreBooks('POST', '/exploreBooks'),
+  getBookInfo('POST', '/getBookInfo'),
   getCover('GET', '/cover'),
   getImage('GET', '/image'),
 
@@ -195,6 +197,41 @@ class BookContentQuery {
         bookUrl: q['url'] ?? '',
         chapterIndex: int.tryParse(q['index'] ?? '') ?? 0,
       );
+}
+
+/// Body for server-side explore and book-info operations.
+class OnlineBookRequest {
+  const OnlineBookRequest({
+    required this.sourceUrl,
+    this.url = '',
+    this.page = 1,
+    this.book,
+  });
+
+  final String sourceUrl;
+  final String url;
+  final int page;
+  final Book? book;
+
+  Map<String, dynamic> toJson() => {
+    'sourceUrl': sourceUrl,
+    if (url.isNotEmpty) 'url': url,
+    'page': page,
+    if (book != null) 'book': book!.toJson(),
+  };
+
+  static OnlineBookRequest fromJson(Map<String, dynamic> json) {
+    final rawBook = json['book'];
+    final rawPage = (json['page'] as num?)?.toInt() ?? 1;
+    return OnlineBookRequest(
+      sourceUrl: json['sourceUrl']?.toString() ?? '',
+      url: json['url']?.toString() ?? '',
+      page: rawPage < 1 ? 1 : rawPage,
+      book: rawBook is Map
+          ? Book.fromJson(Map<String, dynamic>.from(rawBook))
+          : null,
+    );
+  }
 }
 
 /// Body for [ChlorisApiRoute.saveBookProgress].

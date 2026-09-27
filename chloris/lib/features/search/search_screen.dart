@@ -87,6 +87,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       body: MeowPage(
         eyebrow: '搜索',
         title: '寻找书籍',
+        fullBleedBody: true,
         actions: [
           MeowChip(
             label: _merged ? '合并' : '分源',

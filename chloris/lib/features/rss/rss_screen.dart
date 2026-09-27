@@ -262,16 +262,35 @@ class RssScreen extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           children: [
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton.icon(
-                                onPressed: () =>
-                                    ref.invalidate(rssArticlesProvider(source)),
-                                icon: const Icon(Icons.refresh, size: 16),
-                                label: const Text('刷新文章'),
+                              ListTile(
+                                dense: true,
+                                leading: const Icon(Icons.style_outlined),
+                                title: const Text('文章样式'),
+                                trailing: DropdownButton<int>(
+                                  value: source.articleStyle.clamp(0, 2).toInt(),
+                                  items: const [
+                                    DropdownMenuItem(value: 0, child: Text('标准')),
+                                    DropdownMenuItem(value: 1, child: Text('舒展')),
+                                    DropdownMenuItem(value: 2, child: Text('紧凑')),
+                                  ],
+                                  onChanged: (value) {
+                                    if (value == null) return;
+                                    final imported = ref.read(importedRssSourcesProvider);
+                                    if (!imported.any((s) => s.sourceUrl == source.sourceUrl)) return;
+                                    ref.read(importedRssSourcesProvider.notifier).updateStyle(source.sourceUrl, value);
+                                  },
+                                ),
                               ),
-                            ),
-                            _Articles(source: source),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton.icon(
+                                  onPressed: () =>
+                                      ref.invalidate(rssArticlesProvider(source)),
+                                  icon: const Icon(Icons.refresh, size: 16),
+                                  label: const Text('刷新文章'),
+                                ),
+                              ),
+                              _Articles(source: source),
                           ],
                         ),
                       );

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:chloris_engine/chloris_engine.dart';
 import '../../core/persist/kv_settings.dart';
 import '../../app/theme/app_theme.dart';
@@ -79,14 +80,26 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       backgroundColor: c.paper,
       endDrawer: _style2 ? _style2Drawer(c) : null,
       body: books.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('加载失败：$e')),
+        loading: () => const MeowLoading(label: '正在加载书库'),
+        error: (e, _) => MeowError(
+          message: '加载失败：$e',
+          onRetry: () => ref.invalidate(booksProvider),
+        ),
         data: (list) {
           final items = _filterAndSort(list);
           return MeowPage(
             eyebrow: '书库',
             title: '书库',
+            variant: MediaQuery.sizeOf(context).height < 240
+                ? MeowPageVariant.compact
+                : MeowPageVariant.largeTitle,
+            fullBleedBody: true,
             actions: [
+              MeowIconButton(
+                icon: AppIcons.explore,
+                tooltip: '书店 · 浏览在线书源',
+                onPressed: () => context.go('/explore'),
+              ),
               MeowIconButton(
                 icon: _style2 ? AppIcons.viewList : AppIcons.menu,
                 tooltip: _style2 ? '风格1 顶栏筛选' : '风格2 侧栏',
@@ -112,9 +125,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                   await Clipboard.setData(ClipboardData(text: json));
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('已复制 ' + books.length.toString() + ' 本书'),
-                      ),
+                      SnackBar(content: Text('已复制 ${books.length} 本书')),
                     );
                   }
                 },
@@ -147,16 +158,35 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                 ? MeowEmpty(
                     mark: '书',
                     title: '你的阅读空间',
-                    body: '书库还没有书。从本地导入 TXT / EPUB，或去「寻找」添加在线书籍。',
-                    action: MeowPrimaryButton(
-                      icon: AppIcons.add,
-                      label: '导入本地书',
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const LocalImportScreen(),
+                    body: '书库还没有书。导入 TXT / EPUB，或打开在线找书与书源探索。',
+                    compact: true,
+                    action: Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        MeowPrimaryButton(
+                          icon: AppIcons.add,
+                          label: '导入本地书',
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const LocalImportScreen(),
+                            ),
+                          ),
                         ),
-                      ),
+                        TextButton.icon(
+                          onPressed: () => context.go('/search'),
+                          icon: const AppIcon(AppIcons.search, size: 17),
+                          label: const Text('寻找在线书籍'),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => context.go('/explore'),
+                          icon: const AppIcon(AppIcons.explore, size: 17),
+                          label: const Text('探索书源分类'),
+                        ),
+                      ],
                     ),
                   )
                 : Column(
@@ -177,12 +207,10 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                               final p = progress[book.bookUrl];
                               if (p == null) return null;
                               if (p.chapterTitle.isNotEmpty) {
-                                return '读到 · ' + p.chapterTitle;
+                                return '读到 · ${p.chapterTitle}';
                               }
                               if (p.chapterIndex > 0) {
-                                return '读到第 ' +
-                                    (p.chapterIndex + 1).toString() +
-                                    ' 章';
+                                return '读到第 ${p.chapterIndex + 1} 章';
                               }
                               return null;
                             }

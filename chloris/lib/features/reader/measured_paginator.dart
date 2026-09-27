@@ -1,5 +1,4 @@
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
 import 'package:chloris_engine/chloris_engine.dart';
 
 import 'reader_controller.dart';
@@ -126,8 +125,9 @@ class MeasuredPaginator {
       final cached = _measureCacheGet(para, w, style, textScaler, fontSize);
       if (cached != null) return cached;
 
-      // Layout each paragraph once. Character ranges come from caret Y, not
-      // getLineBoundary — on Flutter web that API often returns one glyph.
+      // Layout each paragraph once. ComputeLineMetrics is the source of truth
+      // for visual rows: selection boxes may be split by fallback-font runs
+      // within one CJK line and must not be treated as additional lines.
       final painter = TextPainter(
         text: TextSpan(text: para, style: style),
         textDirection: TextDirection.ltr,
@@ -144,25 +144,10 @@ class MeasuredPaginator {
         return <_MeasuredLine>[_MeasuredLine(para, fontSize)];
       }
 
-      final boxes = painter.getBoxesForSelection(
-        TextSelection(baseOffset: 0, extentOffset: para.length),
-      );
-      final tops = <double>[];
-      if (boxes.isNotEmpty) {
-        for (final box in boxes) {
-          if (tops.isEmpty || (box.top - tops.last).abs() > 1) {
-            tops.add(box.top);
-          }
-        }
-      }
-
       final raw = <_MeasuredLine>[];
       var offset = 0;
-      final lineCount = tops.length > 1 ? tops.length : metrics.length;
-      for (var i = 0; i < lineCount && offset < para.length; i++) {
-        final nextTop = i + 1 < tops.length
-            ? tops[i + 1]
-            : i + 1 < metrics.length
+      for (var i = 0; i < metrics.length && offset < para.length; i++) {
+        final nextTop = i + 1 < metrics.length
             ? metrics[i + 1].baseline - metrics[i + 1].ascent
             : double.infinity;
         final end = _exclusiveLineEnd(
@@ -277,7 +262,7 @@ class _MeasuredLine {
 }
 
 /// Punctuation that must not start a line (kinsoku / 行首禁则).
-const _cjkNoLineStart = '。，、；：！？）》」』】〉…—–-,.';
+const _cjkNoLineStart = '。，、；：！？）》」』】〉…—–-,."”’';
 
 /// Opening marks that should not end a line.
 const _cjkNoLineEnd = '（《「『【〈“‘';

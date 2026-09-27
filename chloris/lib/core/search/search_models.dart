@@ -55,14 +55,20 @@ class SearchSession {
   /// All sources in this scope (e.g. 3643).
   final int universe;
 
-  /// Source URLs whose requests have already been started in this scan.
+  /// Source URLs that returned a result (including a source error) in this scan.
   ///
-  /// This is separate from [rows] because UI progress updates are throttled;
-  /// a request may finish between two rendered snapshots and must still be
-  /// excluded when the user resumes a cancelled scan.
+  /// This is separate from [rows] because UI progress updates are throttled.
+  /// Cancelled in-flight requests are omitted so continuation retries them.
   final Set<String> attemptedSourceUrls;
 
-  int get hits => rows.fold(0, (a, r) => a + r.books.length);
+  /// Unique identities shown by the merged search view. Keep [rawHits] for
+  /// diagnostics; source rows can contain the same book more than once.
+  int get hits => {
+    for (final row in rows)
+      for (final book in row.books) SearchMerge.identity(book),
+  }.length;
+
+  int get rawHits => rows.fold(0, (a, r) => a + r.books.length);
   int get failCount =>
       rows.where((r) => r.error != null && r.error!.isNotEmpty).length;
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,6 +27,7 @@ import '../../features/library/online_shelf_provider.dart';
 import 'package:go_router/go_router.dart';
 import '../book_detail/book_detail_provider.dart';
 import 'reading_settings_sheet.dart';
+import 'tts_service.dart';
 
 part 'reader_stack.dart';
 part 'reader_chrome_layer.dart';
@@ -87,6 +89,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   bool _switchingChapter = false;
   Timer? _auto;
   Timer? _hideMenu;
+  Timer? _chapterSwitchReset;
   double _edgePull = 0;
   String _paginatedContent = '';
   PaginatedChapter? _measured;
@@ -100,7 +103,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   String _plain = '';
   Object? _pipeKey;
   int _pipeToken = 0;
+  int _screenPrefsToken = 0;
   DateTime _lastScrollUi = DateTime.fromMillisecondsSinceEpoch(0);
+  final ValueNotifier<double> _scrollProgressUi = ValueNotifier(0);
   bool _layoutFull = false;
   // 增量分页：预览段已消费到的字符位置（0 = 无待续排）；_appended 防重复续排。
   int _previewConsumed = 0;
@@ -122,7 +127,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
   /// 屏幕常亮 + 方向锁定（对齐 legado keepScreenOn / screenOrientation）。
   void _applyScreenPrefs(ReaderSettings s) {
-    SystemChrome.setPreferredOrientations(switch (s.orientation) {
+    final token = ++_screenPrefsToken;
+    final orientations = switch (s.orientation) {
       'portrait' => const [DeviceOrientation.portraitUp],
       'landscape' => const [
         DeviceOrientation.landscapeLeft,
@@ -134,24 +140,53 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
       ],
-    });
-    WakelockPlus.toggle(enable: s.keepScreenOn);
+    };
+    // All calls are serialized through one async task. This prevents a fast
+    // settings change (or a route pop during rotation) from letting a stale
+    // platform-channel reply restore the old reader state.
+    unawaited(_applyScreenPrefsAsync(token, orientations, s.keepScreenOn));
+  }
+
+  Future<void> _applyScreenPrefsAsync(
+    int token,
+    List<DeviceOrientation> orientations,
+    bool keepScreenOn,
+  ) async {
+    try {
+      await SystemChrome.setPreferredOrientations(orientations);
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      await WakelockPlus.toggle(enable: keepScreenOn);
+    } catch (_) {
+      // Desktop, web and test hosts may not implement every system channel.
+      // Reader content remains usable when a platform preference is ignored.
+    }
+    if (!mounted || token != _screenPrefsToken) return;
   }
 
   @override
   void dispose() {
+    ++_screenPrefsToken;
     _auto?.cancel();
     _hideMenu?.cancel();
+    _chapterSwitchReset?.cancel();
     _keys.dispose();
     _scroll.dispose();
+    _scrollProgressUi.dispose();
     // 离开阅读器恢复全局默认：不常亮、跟随系统方向。
-    SystemChrome.setPreferredOrientations(const [
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-    WakelockPlus.toggle(enable: false);
+    unawaited(() async {
+      try {
+        await SystemChrome.setPreferredOrientations(const [
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+        await WakelockPlus.toggle(enable: false);
+      } catch (_) {
+        // Ignore unsupported platform channels while leaving the reader.
+      }
+    }());
     super.dispose();
   }
 
@@ -181,11 +216,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     final a = _pageAnim;
     if (a == PageAnim.noAnim) return ReadPagerStyle.none;
     if (a == PageAnim.cover) return ReadPagerStyle.cover;
-    if (a == PageAnim.simulation) return ReadPagerStyle.simulation;
     return ReadPagerStyle.slide;
   }
 
   void _toggleMenu() {
+    if (_pageAnim == PageAnim.scroll) {
+      _scrollProgressUi.value = _progress;
+    }
     setState(() {
       _menu = !_menu;
       if (!_menu) _toc = false;
@@ -237,11 +274,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           curve: Curves.easeOut,
         );
       } else if (widget.hasNext) {
-        _switchingChapter = true;
-        widget.onNextChapter?.call();
-        Future<void>.delayed(const Duration(milliseconds: 280), () {
-          if (mounted) _switchingChapter = false;
-        });
+        _requestChapter(widget.onNextChapter);
       }
       return;
     }
@@ -280,10 +313,24 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
   void _goChapter(int dir) {
     if (dir < 0 && widget.hasPrev) {
-      widget.onPrevChapter?.call();
+      _requestChapter(widget.onPrevChapter);
     } else if (dir > 0 && widget.hasNext) {
-      widget.onNextChapter?.call();
+      _requestChapter(widget.onNextChapter);
     }
+  }
+
+  /// Guard every chapter callback, including auto page and edge pull. A
+  /// network backed route can take longer than one animation; a short fixed
+  /// delay used to allow duplicate callbacks before didUpdateWidget arrived.
+  void _requestChapter(VoidCallback? callback) {
+    if (callback == null || _switchingChapter) return;
+    _switchingChapter = true;
+    _chapterSwitchReset?.cancel();
+    callback();
+    _chapterSwitchReset = Timer(const Duration(milliseconds: 1200), () {
+      if (!mounted) return;
+      _switchingChapter = false;
+    });
   }
 
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
@@ -428,6 +475,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       _layoutFull = false;
       _lastDoublePage = null;
       _switchingChapter = false;
+      _chapterSwitchReset?.cancel();
       _pendingEnd = widget.openAtEnd;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || !_scroll.hasClients) return;
@@ -502,60 +550,67 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
     return Scaffold(
       backgroundColor: bg,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final size = constraints.biggest;
-          final paginated = isScroll
-              ? PaginatedChapter(
-                  content: body,
-                  pages: const [],
-                  totalChars: body.length,
-                )
-              : _measure(
-                  body,
-                  size,
-                  settings,
-                  style,
-                  MediaQuery.textScalerOf(context),
-                  doublePage: _doublePageActive(size, settings),
-                );
-          final total = (isScroll ? 1 : paginated.total).clamp(1, 99999);
-          if (!isScroll && _page >= total) _page = total - 1;
-          final bookPct = widget.chapters.isEmpty
-              ? 0
-              : (((widget.chapterIndex +
-                                (isScroll
-                                    ? _progress
-                                    : ((_page + 1) / total))) /
-                            widget.chapters.length) *
-                        100)
-                    .clamp(0, 100)
-                    .round();
-          final pct = isScroll
-              ? (_progress * 100).round()
-              : (((_page + 1) / total) * 100).round();
+      body: ColoredBox(
+        // Keep an explicit opaque paper layer behind scroll/platform views.
+        // Scaffold background alone can be skipped by macOS compositor
+        // snapshots after a modal route is dismissed.
+        color: bg,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final size = constraints.biggest;
+            final paginated = isScroll
+                ? PaginatedChapter(
+                    content: body,
+                    pages: const [],
+                    totalChars: body.length,
+                  )
+                : _measure(
+                    body,
+                    size,
+                    settings,
+                    style,
+                    MediaQuery.textScalerOf(context),
+                    doublePage: _doublePageActive(size, settings),
+                  );
+            final total = (isScroll ? 1 : paginated.total).clamp(1, 99999);
+            if (!isScroll && _page >= total) _page = total - 1;
+            final bookPct = widget.chapters.isEmpty
+                ? 0
+                : (((widget.chapterIndex +
+                                  (isScroll
+                                      ? _progress
+                                      : ((_page + 1) / total))) /
+                              widget.chapters.length) *
+                          100)
+                      .clamp(0, 100)
+                      .round();
+            final pct = isScroll
+                ? (_progress * 100).round()
+                : (((_page + 1) / total) * 100).round();
 
-          return Focus(
-            focusNode: _keys,
-            autofocus: true,
-            onKeyEvent: _onKeyEvent,
-            child: _readerStack(
-              isScroll: isScroll,
-              settings: settings,
-              heading: heading,
-              body: body,
-              style: style,
-              bg: bg,
-              fg: fg,
-              paginated: paginated,
-              total: total,
-              pct: pct,
-              bookPct: bookPct,
-              textScaler: MediaQuery.textScalerOf(context),
-              viewport: size,
-            ),
-          );
-        },
+            return Focus(
+              focusNode: _keys,
+              autofocus: true,
+              onKeyEvent: _onKeyEvent,
+              child: _readerStack(
+                isScroll: isScroll,
+                settings: settings,
+                heading: heading,
+                body: body,
+                style: style,
+                bg: bg,
+                fg: fg,
+                paginated: paginated,
+                total: total,
+                pct: pct,
+                bookPct: bookPct,
+                textScaler: MediaQuery.textScalerOf(context),
+                viewport: size,
+                scrollProgress: _scrollProgressUi,
+              ),
+            );
+          },
+        ),
       ),
     );
   }

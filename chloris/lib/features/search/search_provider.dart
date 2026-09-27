@@ -133,12 +133,8 @@ class SearchController extends Notifier<SearchSession> {
       ),
       isCancelled: () => token != _token,
       errorOf: friendlySearchError,
-      onStart: (source) {
-        // Record the claim before awaiting the request.  If cancellation
-        // races an in-flight response, resume must skip this source rather
-        // than issuing a duplicate request on the next tap.
-        _attemptedSourceUrls.add(source.bookSourceUrl);
-      },
+      // Only a delivered row is complete. A manually cancelled in-flight
+      // request must remain eligible for the next `loadMore()` attempt.
       onRow: (row) {
         if (token != _token) return;
         completed++;

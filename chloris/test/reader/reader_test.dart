@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:chloris_engine/chloris_engine.dart';
 import 'package:chloris/features/reader/comic_reader.dart';
 import 'package:chloris/features/reader/reader_controller.dart';
 import 'package:chloris/features/reader/reader_screen.dart';
@@ -37,5 +38,47 @@ void main() {
     );
     await tester.pump();
     expect(find.text('第一章'), findsWidgets);
+  });
+
+  testWidgets('关闭阅读设置后阅读画布仍保持可见', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: ReaderScreen(content: '持续可见的正文', chapterTitle: '第一章'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('阅读设置'));
+    await tester.pumpAndSettle();
+    expect(find.text('阅读设置'), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('第一章'), findsWidgets);
+    expect(find.textContaining('持续可见的正文'), findsOneWidget);
+  });
+
+  testWidgets('滚动时只刷新阅读进度且正文继续显示', (tester) async {
+    final content = List.generate(180, (i) => '正文段落 $i，保持阅读内容稳定。').join('\n\n');
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: ReaderScreen(
+            content: content,
+            chapterTitle: '滚动章节',
+            pageAnimOverride: PageAnim.scroll,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('滚动 · 0%'), findsOneWidget);
+
+    await tester.drag(find.byType(ListView).first, const Offset(0, -500));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('滚动 · 0%'), findsNothing);
+    expect(find.textContaining('滚动 · '), findsOneWidget);
+    expect(find.textContaining('正文段落 0'), findsOneWidget);
   });
 }

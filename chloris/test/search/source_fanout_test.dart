@@ -83,7 +83,9 @@ void main() {
       page: 1,
       search: (source) async => [
         SearchBook(
-          name: '早停结果',
+          // Early-stop counts unique works, not copies of the same work from
+          // multiple sources.
+          name: '早停结果 ${source.bookSourceName}',
           author: '作者',
           bookUrl: '${source.bookSourceUrl}/book',
           origin: source.bookSourceUrl,

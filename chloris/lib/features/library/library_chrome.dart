@@ -155,23 +155,28 @@ extension _LibraryChrome on _LibraryScreenState {
       ),
     );
   }
+
   List<Book> _filterAndSort(List<Book> list) {
     final filter = ref.read(libraryFilterProvider);
     var out = list;
     if (_q.isNotEmpty) {
       final k = _q.toLowerCase();
       out = out
-          .where((b) =>
-              b.name.toLowerCase().contains(k) ||
-              b.author.toLowerCase().contains(k))
+          .where(
+            (b) =>
+                b.name.toLowerCase().contains(k) ||
+                b.author.toLowerCase().contains(k),
+          )
           .toList();
     }
     if (filter == 'reading') {
       final prog = ref.read(readingProgressProvider);
       out = out
-          .where((b) =>
-              b.durChapterIndex > 0 ||
-              (prog[b.bookUrl]?.chapterIndex ?? 0) > 0)
+          .where(
+            (b) =>
+                b.durChapterIndex > 0 ||
+                (prog[b.bookUrl]?.chapterIndex ?? 0) > 0,
+          )
           .toList();
     } else if (filter == 'local') {
       // `Book.isLocal` keys off the type bit flag (like Legado's `type &
@@ -202,7 +207,10 @@ extension _LibraryChrome on _LibraryScreenState {
         out.sort((a, b) => a.order.compareTo(b.order));
         break;
       default:
-        out.sort((a, b) => (b.latestChapterTime ?? 0).compareTo(a.latestChapterTime ?? 0));
+        out.sort(
+          (a, b) =>
+              (b.latestChapterTime ?? 0).compareTo(a.latestChapterTime ?? 0),
+        );
     }
     if (pinned.isNotEmpty) {
       out.sort((a, b) {
@@ -227,7 +235,9 @@ extension _LibraryChrome on _LibraryScreenState {
     required String sourceUrl,
   }) async {
     ref.read(pinnedUrlsProvider.notifier).unpin(bookUrl);
-    await ref.read(bookCleanupProvider).cleanBook(
+    await ref
+        .read(bookCleanupProvider)
+        .cleanBook(
           bookUrl: bookUrl,
           name: name,
           author: author,
@@ -342,15 +352,15 @@ extension _LibraryChrome on _LibraryScreenState {
                   for (final g in sheetRef.watch(bookGroupsProvider))
                     ListTile(
                       leading: Icon(
-                        sheetRef.watch(bookGroupMapProvider).containsKey(
-                                  book.bookUrl,
-                                ) &&
-                            (sheetRef
-                                        .watch(bookGroupMapProvider)[
-                                    book.bookUrl] ??
-                                0) &
-                                (1 << g.id) !=
-                                0
+                        sheetRef
+                                    .watch(bookGroupMapProvider)
+                                    .containsKey(book.bookUrl) &&
+                                (sheetRef.watch(
+                                              bookGroupMapProvider,
+                                            )[book.bookUrl] ??
+                                            0) &
+                                        (1 << g.id) !=
+                                    0
                             ? Icons.folder_special
                             : Icons.folder_outlined,
                       ),
@@ -365,7 +375,9 @@ extension _LibraryChrome on _LibraryScreenState {
                     onTap: () async {
                       final name = await _promptGroupName(ctx);
                       if (name == null || name.trim().isEmpty) return;
-                      await ref.read(bookGroupsProvider.notifier).addGroup(name);
+                      await ref
+                          .read(bookGroupsProvider.notifier)
+                          .addGroup(name);
                       final groups = ref.read(bookGroupsProvider);
                       final hit = groups.where((g) => g.name == name.trim());
                       if (hit.isNotEmpty) {
@@ -405,7 +417,8 @@ extension _LibraryChrome on _LibraryScreenState {
       if (shown.length >= 8) break;
     }
     if (shown.isEmpty) return const SizedBox.shrink();
-    final absolutely = Theme.of(context).extension<AppStyleExtension>()?.style ==
+    final absolutely =
+        Theme.of(context).extension<AppStyleExtension>()?.style ==
         AppUiStyle.absolutely;
     return Padding(
       padding: const EdgeInsets.only(top: 12),
@@ -420,16 +433,20 @@ extension _LibraryChrome on _LibraryScreenState {
               // the "fig." plate label from the style book (§8 式二).
               child: absolutely
                   ? AbsolutelySpecimenTag(label: '最近 · ${shown.length}')
-                  : Text(
-                      '最近',
-                      style: TextStyle(fontSize: 12, color: c.muted),
-                    ),
+                  : Text('最近', style: TextStyle(fontSize: 12, color: c.muted)),
             ),
             for (final b in shown)
               Padding(
                 padding: const EdgeInsets.only(right: 6),
                 child: ActionChip(
-                  label: Text(b.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  label: Text(
+                    b.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                   onPressed: () => _onBookTap(b),
                 ),
               ),
@@ -565,5 +582,4 @@ extension _LibraryChrome on _LibraryScreenState {
       }
     });
   }
-
 }

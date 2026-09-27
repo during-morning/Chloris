@@ -2,12 +2,14 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:chloris/features/sources/source_unify.dart';
+import 'package:chloris/application/sources/source_unify.dart';
 import 'package:chloris_engine/chloris_engine.dart';
 
 void main(List<String> args) {
   if (args.isEmpty) {
-    stderr.writeln('usage: dart run tool/import_default_sources.dart <file.json>');
+    stderr.writeln(
+      'usage: dart run tool/import_default_sources.dart <file.json>',
+    );
     exit(64);
   }
   final decoded = jsonDecode(File(args.first).readAsStringSync());

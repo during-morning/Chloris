@@ -75,6 +75,41 @@ double searchMatchRatio(SearchBook book, String query) {
   return nr > ar ? nr : ar;
 }
 
+/// Shared relevance score for a candidate used by the change-source sheet and
+/// automatic source switching. Keeping this in the search domain prevents the
+/// two flows from silently choosing different candidates for the same book.
+int sourceCandidateScore(
+  SearchBook book, {
+  required String bookName,
+  String bookAuthor = '',
+}) {
+  final byName = searchMatchScore(book, bookName);
+  if (byName >= 300) return byName;
+  if (searchMatchRatio(book, bookName) >= 0.5) return 400;
+  final author = bookAuthor.trim();
+  if (author.length >= 2) {
+    final byAuthor = searchMatchScore(book, author);
+    if (byAuthor >= 520 &&
+        normalizeSearchText(book.name).contains(normalizeSearchText(bookName))) {
+      return byAuthor;
+    }
+  }
+  return byName;
+}
+
+bool isAcceptableSourceCandidate(
+  SearchBook book, {
+  required String bookName,
+  String bookAuthor = '',
+}) =>
+    isUsableSearchBook(book, query: bookName) &&
+    sourceCandidateScore(
+          book,
+          bookName: bookName,
+          bookAuthor: bookAuthor,
+        ) >=
+        300;
+
 double _coverRatio(String text, String query) {
   if (text.isEmpty || query.isEmpty) return 0;
   if (text.contains(query)) return 1;

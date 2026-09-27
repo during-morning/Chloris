@@ -9,6 +9,8 @@ extension _ReaderChromeLayer on _ReaderScreenState {
     required int total,
     required int pct,
     required int bookPct,
+    required String speechText,
+    required ValueNotifier<double> scrollProgress,
   }) {
     final theme = Theme.of(context);
     final ext = theme.extension<AppStyleExtension>();
@@ -18,11 +20,8 @@ extension _ReaderChromeLayer on _ReaderScreenState {
     // floating toolbar pasted on top of it.
     final barColor = bg.withValues(alpha: 0.97);
     final hairline = BorderSide(color: fg.withValues(alpha: 0.14));
-    final titleStyle =
-        (theme.textTheme.titleMedium ?? const TextStyle()).copyWith(
-          color: fg,
-          fontWeight: FontWeight.w600,
-        );
+    final titleStyle = (theme.textTheme.titleMedium ?? const TextStyle())
+        .copyWith(color: fg, fontWeight: FontWeight.w600);
     final metaStyle = (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
       color: fg.withValues(alpha: 0.55),
     );
@@ -107,8 +106,8 @@ extension _ReaderChromeLayer on _ReaderScreenState {
                               tooltip: tts.status == TtsStatus.playing
                                   ? '暂停朗读'
                                   : tts.status == TtsStatus.paused
-                                      ? '继续朗读'
-                                      : '朗读',
+                                  ? '继续朗读'
+                                  : '朗读',
                               icon: AppIcon(
                                 tts.status == TtsStatus.playing
                                     ? AppIcons.pause
@@ -119,21 +118,20 @@ extension _ReaderChromeLayer on _ReaderScreenState {
                               onPressed: () {
                                 if (!ttsPlatformSupported()) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('当前平台暂不支持朗读'),
-                                    ),
+                                    const SnackBar(content: Text('当前平台暂不支持朗读')),
                                   );
                                   return;
                                 }
-                                final ctrl =
-                                    ref.read(ttsControllerProvider.notifier);
+                                final ctrl = ref.read(
+                                  ttsControllerProvider.notifier,
+                                );
                                 if (tts.status == TtsStatus.playing) {
                                   ctrl.pause();
                                 } else if (tts.status == TtsStatus.paused) {
                                   ctrl.resume();
                                 } else {
                                   ctrl.start(
-                                    widget.content,
+                                    speechText,
                                     onNextChapter: widget.onNextChapter,
                                   );
                                 }
@@ -147,8 +145,9 @@ extension _ReaderChromeLayer on _ReaderScreenState {
                                   color: fg,
                                   size: 18,
                                 ),
-                                onPressed: () =>
-                                    ref.read(ttsControllerProvider.notifier).stop(),
+                                onPressed: () => ref
+                                    .read(ttsControllerProvider.notifier)
+                                    .stop(),
                               ),
                           ],
                         );
@@ -197,10 +196,7 @@ extension _ReaderChromeLayer on _ReaderScreenState {
                             value: 'reload',
                             child: Text('重载本章'),
                           ),
-                        const PopupMenuItem(
-                          value: 'copy',
-                          child: Text('复制本章'),
-                        ),
+                        const PopupMenuItem(value: 'copy', child: Text('复制本章')),
                         PopupMenuItem(
                           value: 'auto',
                           child: Text(_auto == null ? '自动翻页' : '停止自动'),
@@ -209,10 +205,7 @@ extension _ReaderChromeLayer on _ReaderScreenState {
                           value: 'theme',
                           child: Text('日间 / 夜间'),
                         ),
-                        const PopupMenuItem(
-                          value: 'keys',
-                          child: Text('快捷键'),
-                        ),
+                        const PopupMenuItem(value: 'keys', child: Text('快捷键')),
                       ],
                     ),
                   ],
@@ -246,49 +239,68 @@ extension _ReaderChromeLayer on _ReaderScreenState {
                       icon: AppIcon(AppIcons.skipPrevious, color: fg, size: 18),
                     ),
                     Expanded(
-                      child: Column(
-                        children: [
-                          SliderTheme(
-                            data: SliderTheme.of(context).copyWith(
-                              trackHeight: 2,
-                              activeTrackColor: fg,
-                              inactiveTrackColor: fg.withValues(alpha: 0.22),
-                              thumbColor: fg,
-                              thumbShape: const RoundSliderThumbShape(
-                                enabledThumbRadius: 5,
-                              ),
-                              overlayShape: const RoundSliderOverlayShape(
-                                overlayRadius: 12,
-                              ),
-                            ),
-                            child: Slider(
-                              value: isScroll
-                                  ? _progress
-                                  : (total <= 1 ? 0 : _page / (total - 1)),
-                              onChanged: (v) {
-                                if (isScroll && _scroll.hasClients) {
-                                  _scroll.jumpTo(
-                                    v * _scroll.position.maxScrollExtent,
-                                  );
-                                  setState(() {});
-                                } else {
-                                  final p = (v * (total - 1)).round();
-                                  setState(() => _page = p);
-                                }
-                              },
-                            ),
-                          ),
-                          Text(
-                            isScroll
-                                ? '滚动 · $pct% · 全书 $bookPct%'
-                                : '${_page + 1} / $total · $pct% · 全书 $bookPct%',
-                            style: (theme.textTheme.labelSmall ?? metaStyle)
-                                .copyWith(
-                                  color: fg.withValues(alpha: 0.55),
-                                  letterSpacing: mono ? 0.8 : 0.4,
+                      child: ValueListenableBuilder<double>(
+                        valueListenable: scrollProgress,
+                        builder: (context, currentScrollProgress, _) {
+                          final currentPct = isScroll
+                              ? (currentScrollProgress * 100).round()
+                              : pct;
+                          final currentBookPct =
+                              isScroll && widget.chapters.isNotEmpty
+                              ? (((widget.chapterIndex +
+                                                currentScrollProgress) /
+                                            widget.chapters.length) *
+                                        100)
+                                    .clamp(0, 100)
+                                    .round()
+                              : bookPct;
+                          return Column(
+                            children: [
+                              SliderTheme(
+                                data: SliderTheme.of(context).copyWith(
+                                  trackHeight: 2,
+                                  activeTrackColor: fg,
+                                  inactiveTrackColor: fg.withValues(
+                                    alpha: 0.22,
+                                  ),
+                                  thumbColor: fg,
+                                  thumbShape: const RoundSliderThumbShape(
+                                    enabledThumbRadius: 5,
+                                  ),
+                                  overlayShape: const RoundSliderOverlayShape(
+                                    overlayRadius: 12,
+                                  ),
                                 ),
-                          ),
-                        ],
+                                child: Slider(
+                                  value: isScroll
+                                      ? currentScrollProgress
+                                      : (total <= 1 ? 0 : _page / (total - 1)),
+                                  onChanged: (v) {
+                                    if (isScroll && _scroll.hasClients) {
+                                      _scroll.jumpTo(
+                                        v * _scroll.position.maxScrollExtent,
+                                      );
+                                      scrollProgress.value = v;
+                                    } else {
+                                      final p = (v * (total - 1)).round();
+                                      setState(() => _page = p);
+                                    }
+                                  },
+                                ),
+                              ),
+                              Text(
+                                isScroll
+                                    ? '滚动 · $currentPct% · 全书 $currentBookPct%'
+                                    : '${_page + 1} / $total · $currentPct% · 全书 $currentBookPct%',
+                                style: (theme.textTheme.labelSmall ?? metaStyle)
+                                    .copyWith(
+                                      color: fg.withValues(alpha: 0.55),
+                                      letterSpacing: mono ? 0.8 : 0.4,
+                                    ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                     IconButton(

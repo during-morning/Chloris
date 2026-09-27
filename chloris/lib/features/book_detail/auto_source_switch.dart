@@ -4,7 +4,7 @@ import 'package:chloris_engine/chloris_engine.dart';
 import '../../application/online/online_reading_use_cases.dart';
 import '../../core/search/source_fanout.dart';
 import '../../app/providers.dart';
-import '../../core/search/search_match.dart';
+import '../../core/search/source_switch_service.dart';
 import '../search/search_provider.dart';
 import '../../core/search/search_schedule.dart';
 import '../sources/source_library_provider.dart';
@@ -13,31 +13,12 @@ import '../sources/source_library_provider.dart';
 /// 按与换源面板相同的相关性打分挑最优候选，并**实取目录验证**，
 /// 通过后才交给调用方执行切换。
 class AutoSourceHit {
-  const AutoSourceHit(this.source, this.searchBook, this.score);
+  const AutoSourceHit(this.source, this.searchBook, this.score, this.decision);
 
   final BookSource source;
   final SearchBook searchBook;
   final double score;
-}
-
-double autoSourceScore(SearchBook b, String bookName, String bookAuthor) {
-  final byName = searchMatchScore(b, bookName).toDouble();
-  if (byName >= 300) return byName;
-  if (searchMatchRatio(b, bookName) >= 0.5) return 400;
-  final author = bookAuthor.trim();
-  if (author.length >= 2) {
-    final byAuthor = searchMatchScore(b, author).toDouble();
-    if (byAuthor >= 520 &&
-        normalizeSearchText(b.name).contains(normalizeSearchText(bookName))) {
-      return byAuthor;
-    }
-  }
-  return byName;
-}
-
-bool autoSourceAccept(SearchBook b, String bookName, String bookAuthor) {
-  if (!isUsableSearchBook(b, query: bookName)) return false;
-  return autoSourceScore(b, bookName, bookAuthor) >= 300;
+  final SourceSwitchDecision decision;
 }
 
 /// 搜索全部可用源并返回**已验证目录非空**的最优候选；找不到返回 null。
@@ -52,23 +33,74 @@ Future<AutoSourceHit?> findVerifiedAlternativeSource(
   required String currentBookUrl,
   required SearchBook seedBook,
   required LoadOnlineCatalogUseCase catalog,
-  int maxVerify = 5,
+  LoadOnlineChapterContentUseCase? content,
+  int? maxVerify,
   bool Function()? isCancelled,
 }) async {
   final cancelled = isCancelled ?? () => false;
-  final hits = <AutoSourceHit>[];
+  final candidates = <SourceSwitchCandidate>[];
+  final service = SourceSwitchService(
+    verify: (candidate) async {
+      final seed = candidate.book.toBook();
+      if (seed.tocUrl.isEmpty) {
+        seed.tocUrl = candidate.book.tocUrl.isNotEmpty
+            ? candidate.book.tocUrl
+            : candidate.book.bookUrl;
+      }
+      final chapters = await catalog(
+        source: candidate.source,
+        seed: seed,
+        cacheKey: candidate.book.bookUrl,
+        maxPages: 1,
+      );
+      if (chapters.length < 2) {
+        return SourceVerification(
+          level: SourceVerificationLevel.none,
+          chapterCount: chapters.length,
+          failureCode: 'toc_empty',
+        );
+      }
+      if (content != null) {
+        try {
+          final text = await content(
+            source: candidate.source,
+            book: seed,
+            chapter: chapters.first,
+            nextChapterUrl: chapters.length > 1 ? chapters[1].url : null,
+          );
+          return SourceVerification(
+            level: text.trim().isEmpty
+                ? SourceVerificationLevel.none
+                : SourceVerificationLevel.l2Content,
+            chapterCount: chapters.length,
+            contentLength: text.trim().length,
+            failureCode: text.trim().isEmpty ? 'content_empty' : null,
+          );
+        } catch (_) {
+          return SourceVerification(
+            level: SourceVerificationLevel.none,
+            chapterCount: chapters.length,
+            failureCode: 'content_empty',
+          );
+        }
+      }
+      return SourceVerification(
+        level: SourceVerificationLevel.l1Catalog,
+        chapterCount: chapters.length,
+      );
+    },
+  );
 
   void consider(BookSource s, SearchBook b) {
     if (s.bookSourceUrl == currentSourceUrl) return;
     if (b.bookUrl == currentBookUrl) return;
-    if (!autoSourceAccept(b, bookName, bookAuthor)) return;
-    final sc = autoSourceScore(b, bookName, bookAuthor);
-    final i = hits.indexWhere((e) => e.source.bookSourceUrl == s.bookSourceUrl);
-    if (i >= 0) {
-      if (sc > hits[i].score) hits[i] = AutoSourceHit(s, b, sc);
-      return;
-    }
-    hits.add(AutoSourceHit(s, b, sc));
+    final candidate = service.candidate(
+      s,
+      b,
+      bookName: bookName,
+      bookAuthor: bookAuthor,
+    );
+    if (candidate != null) candidates.add(candidate);
   }
 
   final all = await ref.read(allSourcesProvider.future);
@@ -78,6 +110,7 @@ Future<AutoSourceHit?> findVerifiedAlternativeSource(
       .toList(growable: false);
   await SourceLatencyStore.ensureLoaded();
   SourceLatencyStore.applyTo(enabled);
+  await SearchHitCache.ensureLoaded();
 
   final byUrl = <String, BookSource>{for (final s in all) s.bookSourceUrl: s};
   for (final origin in seedBook.origins) {
@@ -87,7 +120,7 @@ Future<AutoSourceHit?> findVerifiedAlternativeSource(
     consider(src, _copyForOrigin(seedBook, src, url));
   }
   for (final s in enabled) {
-    final cached = SearchHitCache.instance.take(bookName, 1, s.bookSourceUrl);
+    final cached = SearchHitCache.instance.takeForSource(s, bookName);
     if (cached == null) continue;
     for (final b in cached) {
       consider(s, b);
@@ -96,7 +129,7 @@ Future<AutoSourceHit?> findVerifiedAlternativeSource(
 
   final already = <String>{
     currentSourceUrl,
-    for (final h in hits) h.source.bookSourceUrl,
+    for (final h in service.rank(candidates)) h.source.bookSourceUrl,
   };
   final queue = orderSearchSources(
     enabled.where((s) => !already.contains(s.bookSourceUrl)).toList(),
@@ -120,30 +153,18 @@ Future<AutoSourceHit?> findVerifiedAlternativeSource(
   );
   if (cancelled()) return null;
 
-  hits.sort((a, b) => b.score.compareTo(a.score));
-  // 逐个实取目录验证，最多 [maxVerify] 个。
-  for (final hit in hits.take(maxVerify)) {
-    if (cancelled()) return null;
-    try {
-      final seed = hit.searchBook.toBook();
-      if (seed.tocUrl.isEmpty) {
-        seed.tocUrl = hit.searchBook.tocUrl.isNotEmpty
-            ? hit.searchBook.tocUrl
-            : hit.searchBook.bookUrl;
-      }
-      final chapters = await catalog(
-        source: hit.source,
-        seed: seed,
-        cacheKey: hit.searchBook.bookUrl,
-        maxPages: 1,
-      );
-      if (chapters.length >= 2) return hit;
-    } catch (_) {
-      // 该候选目录取不到，试下一个。
-      continue;
-    }
-  }
-  return null;
+  final selected = await service.select(
+    candidates,
+    maxVerify: maxVerify ?? candidates.length,
+    isCancelled: cancelled,
+  );
+  if (selected == null) return null;
+  return AutoSourceHit(
+    selected.candidate.source,
+    selected.candidate.book,
+    selected.candidate.score.toDouble(),
+    selected.decision,
+  );
 }
 
 SearchBook _copyForOrigin(SearchBook b, BookSource src, String url) {

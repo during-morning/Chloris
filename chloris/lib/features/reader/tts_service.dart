@@ -22,6 +22,7 @@ class TtsState {
     this.status = TtsStatus.stopped,
     this.index = 0,
     this.total = 0,
+    this.currentSentence = '',
   });
 
   /// 当前正在朗读（或暂停时停留）的句子下标。
@@ -30,12 +31,19 @@ class TtsState {
 
   /// 本章句子总数。
   final int total;
+  final String currentSentence;
 
-  TtsState copyWith({TtsStatus? status, int? index, int? total}) => TtsState(
-        status: status ?? this.status,
-        index: index ?? this.index,
-        total: total ?? this.total,
-      );
+  TtsState copyWith({
+    TtsStatus? status,
+    int? index,
+    int? total,
+    String? currentSentence,
+  }) => TtsState(
+    status: status ?? this.status,
+    index: index ?? this.index,
+    total: total ?? this.total,
+    currentSentence: currentSentence ?? this.currentSentence,
+  );
 
   /// 当前朗读进度（0~1）。
   double get progress => total <= 0 ? 0.0 : (index + 1) / total;
@@ -61,8 +69,9 @@ List<String> _splitSentences(String text) {
   return parts;
 }
 
-final ttsControllerProvider =
-    NotifierProvider<TtsController, TtsState>(TtsController.new);
+final ttsControllerProvider = NotifierProvider<TtsController, TtsState>(
+  TtsController.new,
+);
 
 /// 系统 TTS 朗读控制器（对齐 legado 系统朗读，不含后台服务）。
 ///
@@ -111,7 +120,11 @@ class TtsController extends Notifier<TtsState> {
     }
     final next = state.index + 1;
     if (next < _sentences.length) {
-      state = state.copyWith(index: next, status: TtsStatus.playing);
+      state = state.copyWith(
+        index: next,
+        status: TtsStatus.playing,
+        currentSentence: _sentences[next],
+      );
       _speak(_sentences[next]);
     } else {
       // 本章读尽：复位并回调翻章。
@@ -145,6 +158,7 @@ class TtsController extends Notifier<TtsState> {
       status: TtsStatus.playing,
       index: 0,
       total: _sentences.length,
+      currentSentence: _sentences[0],
     );
     _speak(_sentences[0]);
   }

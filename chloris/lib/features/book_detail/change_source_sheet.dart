@@ -7,8 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/online/online_reading_use_cases.dart';
 import '../../core/search/source_fanout.dart';
 import '../../app/providers.dart';
+import 'book_detail_provider.dart';
 import '../search/search_provider.dart';
 import '../../core/search/search_schedule.dart';
+import '../../core/search/source_switch_service.dart';
 import '../sources/source_library_provider.dart';
 
 class ChangeSourceSheet extends ConsumerStatefulWidget {
@@ -33,6 +35,7 @@ class ChangeSourceSheet extends ConsumerStatefulWidget {
 
 class _ChangeSourceSheetState extends ConsumerState<ChangeSourceSheet> {
   bool _loading = true;
+  bool _selecting = false;
   String? _error;
   var _done = 0;
   var _total = 0;
@@ -57,27 +60,90 @@ class _ChangeSourceSheetState extends ConsumerState<ChangeSourceSheet> {
   }
 
   int _score(SearchBook b) {
-    final byName = searchMatchScore(b, widget.bookName);
-    if (byName >= 300) return byName;
-    if (searchMatchRatio(b, widget.bookName) >= 0.5) {
-      return 400;
-    }
-    final author = widget.bookAuthor.trim();
-    if (author.length >= 2) {
-      final byAuthor = searchMatchScore(b, author);
-      if (byAuthor >= 520 &&
-          normalizeSearchText(
-            b.name,
-          ).contains(normalizeSearchText(widget.bookName))) {
-        return byAuthor;
-      }
-    }
-    return byName;
+    return SourceSwitchService.score(
+      b,
+      bookName: widget.bookName,
+      bookAuthor: widget.bookAuthor,
+    );
   }
 
   bool _accept(SearchBook b) {
-    if (!isUsableSearchBook(b, query: widget.bookName)) return false;
-    return _score(b) >= 300;
+    return SourceSwitchService.accepts(
+      b,
+      bookName: widget.bookName,
+      bookAuthor: widget.bookAuthor,
+    );
+  }
+
+  Future<void> _pick(BookSource source, SearchBook book) async {
+    // Results remain actionable while the background scan is still running.
+    // `_loading` describes the scan only; selection has its own guard.
+    if (_selecting || !mounted) return;
+    setState(() => _selecting = true);
+    final catalog = ref.read(loadOnlineCatalogUseCaseProvider);
+    final content = ref.read(loadOnlineChapterContentUseCaseProvider);
+    final service = SourceSwitchService(
+      verify: (candidate) async {
+        final seed = candidate.book.toBook();
+        if (seed.tocUrl.isEmpty) {
+          seed.tocUrl = candidate.book.tocUrl.isNotEmpty
+              ? candidate.book.tocUrl
+              : candidate.book.bookUrl;
+        }
+        final chapters = await catalog(
+          source: candidate.source,
+          seed: seed,
+          cacheKey: candidate.book.bookUrl,
+          maxPages: 1,
+        );
+        if (chapters.length < 2) {
+          return SourceVerification(
+            level: SourceVerificationLevel.none,
+            chapterCount: chapters.length,
+            failureCode: 'toc_empty',
+          );
+        }
+        try {
+          final text = await content(
+            source: candidate.source,
+            book: seed,
+            chapter: chapters.first,
+            nextChapterUrl: chapters.length > 1 ? chapters[1].url : null,
+          );
+          return SourceVerification(
+            level: text.trim().isEmpty
+                ? SourceVerificationLevel.none
+                : SourceVerificationLevel.l2Content,
+            chapterCount: chapters.length,
+            contentLength: text.trim().length,
+            failureCode: text.trim().isEmpty ? 'content_empty' : null,
+          );
+        } catch (_) {
+          return SourceVerification(
+            // A valid catalog is enough to switch; body probing upgrades the
+            // confidence level but should not make an otherwise usable source
+            // impossible to select.
+            level: SourceVerificationLevel.l1Catalog,
+            chapterCount: chapters.length,
+            failureCode: 'content_probe_failed',
+          );
+        }
+      },
+    );
+    final candidate = service.candidate(
+      source,
+      book,
+      bookName: widget.bookName,
+      bookAuthor: widget.bookAuthor,
+    );
+    if (candidate == null) {
+      if (mounted) setState(() => _selecting = false);
+      return;
+    }
+    final selected = await service.select([candidate], maxVerify: 1);
+    if (!mounted) return;
+    setState(() => _selecting = false);
+    if (selected != null) Navigator.of(context).pop((source, book));
   }
 
   SearchBook _copyForOrigin(SearchBook b, BookSource src, String url) {
@@ -131,6 +197,7 @@ class _ChangeSourceSheetState extends ConsumerState<ChangeSourceSheet> {
           .toList(growable: false);
       await SourceLatencyStore.ensureLoaded();
       SourceLatencyStore.applyTo(enabled);
+      await SearchHitCache.ensureLoaded();
 
       final byUrl = <String, BookSource>{
         for (final s in all) s.bookSourceUrl: s,
@@ -153,10 +220,9 @@ class _ChangeSourceSheetState extends ConsumerState<ChangeSourceSheet> {
         }
       }
       for (final s in enabled) {
-        final cached = SearchHitCache.instance.take(
+        final cached = SearchHitCache.instance.takeForSource(
+          s,
           widget.bookName,
-          1,
-          s.bookSourceUrl,
         );
         if (cached == null) continue;
         for (final b in cached) {
@@ -332,7 +398,8 @@ class _ChangeSourceSheetState extends ConsumerState<ChangeSourceSheet> {
                         trailing: sc >= 800
                             ? const Text('精确')
                             : Text(sc.toString()),
-                        onTap: () => Navigator.of(context).pop((s, b)),
+                        enabled: !_selecting,
+                        onTap: () => _pick(s, b),
                       );
                     },
                   ),

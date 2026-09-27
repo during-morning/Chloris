@@ -73,13 +73,18 @@ Future<void> main() async {
   // hydrate mirrors the encrypted vault into KvSettings, while migrateFromPrefs
   // reads plaintext SharedPreferences and writes them into the vault. Neither
   // reads from the other, so run them together.
+  // Start the settings handle at the same time.  `KvSettings.ready()` owns
+  // the idempotent schema gate, so this removes one full SharedPreferences /
+  // migration round trip from cold start while preserving the ordering below
+  // (all reads still happen after both vault jobs have completed).
+  final prefsFuture = KvSettings.ready();
   await Future.wait([
     hydratePrefsFromVault(),
     CredentialStore.migrateFromPrefs(),
   ]);
   // Run the schema boundary before any provider or feature reads settings.
   // This keeps startup and feature writes on the same migration path.
-  final prefs = await KvSettings.ready();
+  final prefs = await prefsFuture;
   // 书源级 java.put/java.get 变量的持久层：此后所有 BookSource 实例
   // （fromJson 或手动构造）自动带持久存储，重启后变量仍在。
   BookSource.defaultVarStore = PrefsKvPort(prefs);
@@ -108,16 +113,20 @@ Future<void> main() async {
     'dark' => ThemeMode.dark,
     'light' => ThemeMode.light,
     'system' => ThemeMode.system,
-    _ => ThemeMode.light, // Meow paper is the default look
+    _ => ThemeMode.system,
   };
   final rawUiStyle = prefs.getString('uiStyle');
-  final uiStyle = AppUiStyle.byId(rawUiStyle);
+  final uiStyle = rawUiStyle == null || rawUiStyle.isEmpty
+      ? AppUiStyle.absolutely
+      : AppUiStyle.byId(rawUiStyle);
   // One-shot migration: the Absolutely theme used to be persisted under the
   // id 'claude'. byId still accepts it; write the new id back so the legacy
   // value disappears from storage after the first launch.
   if (rawUiStyle == 'claude') {
     unawaited(
-      prefs.setString('uiStyle', 'absolutely').then((_) => syncVaultFromPrefs()),
+      prefs
+          .setString('uiStyle', 'absolutely')
+          .then((_) => syncVaultFromPrefs()),
     );
   }
   final lang = prefs.getString('locale') ?? 'zh';

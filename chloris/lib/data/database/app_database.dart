@@ -48,6 +48,7 @@ class Books extends Table {
 /// 时从这里挑。Chloris 之前把两者混在 KV 的 `onlineShelf` 里，语义上更接近本表
 /// 而不是 `books`。
 @TableIndex(name: 'search_books_origin', columns: {#origin})
+@TableIndex(name: 'search_books_book_url', columns: {#bookUrl})
 class SearchBooks extends Table {
   TextColumn get bookUrl => text()();
   TextColumn get origin => text().customConstraint(
@@ -71,7 +72,11 @@ class SearchBooks extends Table {
   IntColumn get respondTime => integer().withDefault(const Constant(-1))();
 
   @override
-  Set<Column> get primaryKey => {bookUrl};
+  /// A URL is only unique within one source. Different sources commonly use
+  /// different URLs for the same title, and the same source can legitimately
+  /// expose aliases. Keeping `origin` in the key prevents one candidate from
+  /// overwriting another during an upsert.
+  Set<Column> get primaryKey => {bookUrl, origin};
 }
 
 /// 书源（对应 legado `BookSource`，规则以大 JSON 文本存储，由引擎解析）。
@@ -355,7 +360,7 @@ class AppDatabase extends _$AppDatabase {
         ));
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -433,6 +438,14 @@ class AppDatabase extends _$AppDatabase {
         // 动列。幂等由 `from < 6` 守卫保证——每段升级只跑一次，不会重复建索引。
         await m.createIndex(booksLastRead);
         await m.createIndex(booksGroup);
+      }
+      if (from < 7) {
+        // SearchBooks used to be keyed only by book_url. Rebuild it with the
+        // source URL in the key so candidates from different sources can
+        // coexist. Existing rows have unique book_url values under the old
+        // schema, therefore the copy is lossless; the new secondary index
+        // keeps direct URL lookups efficient for legacy call sites.
+        await m.alterTable(TableMigration(searchBooks));
       }
     },
   );

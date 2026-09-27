@@ -15,8 +15,9 @@ class _FakeBackend implements ServerBackend {
   bool refreshRequested = false;
 
   @override
-  Future<List<Map<String, dynamic>>> bookshelf() async =>
-      [for (final b in saved.values) b];
+  Future<List<Map<String, dynamic>>> bookshelf() async => [
+    for (final b in saved.values) b,
+  ];
 
   @override
   Future<void> saveBook(Map<String, dynamic> book) async {
@@ -57,12 +58,43 @@ class _FakeBackend implements ServerBackend {
   };
 
   @override
+  Future<List<Map<String, dynamic>>> search(
+    String sourceUrl,
+    String query, {
+    int page = 1,
+  }) async => throw const DomainError(
+    code: 'capability_missing',
+    stage: DomainErrorStage.search,
+    message: '搜索功能未装配',
+  );
+
+  @override
+  Future<List<Map<String, dynamic>>> explore(
+    String sourceUrl,
+    String url, {
+    int page = 1,
+  }) async => throw const DomainError(
+    code: 'capability_missing',
+    stage: DomainErrorStage.search,
+    message: '发现功能未装配',
+  );
+
+  @override
+  Future<Map<String, dynamic>> bookInfo(
+    String sourceUrl,
+    Map<String, dynamic> book,
+  ) async => throw const DomainError(
+    code: 'capability_missing',
+    stage: DomainErrorStage.detail,
+    message: '书籍详情功能未装配',
+  );
+
+  @override
   Future<Uint8List?> cover(String bookUrl) async =>
       Uint8List.fromList([0xff, 0xd8, 0xff]);
 
   @override
-  Future<Uint8List?> image(String url) async =>
-      Uint8List.fromList([1, 2, 3]);
+  Future<Uint8List?> image(String url) async => Uint8List.fromList([1, 2, 3]);
 }
 
 void main() {
@@ -141,10 +173,7 @@ void main() {
       expect(envelope['isSuccess'], isTrue);
       final info = envelope['data'] as Map<String, dynamic>;
       expect(info['apiVersion'], chlorisApiVersion);
-      expect(
-        (info['capabilities'] as Map)['bookshelf'],
-        isTrue,
-      );
+      expect((info['capabilities'] as Map)['bookshelf'], isTrue);
     });
 
     test('capabilities report what is actually wired', () async {
@@ -152,8 +181,7 @@ void main() {
       await start();
 
       final (_, body) = await get('/version');
-      final info =
-          (jsonDecode(body) as Map<String, dynamic>)['data'] as Map;
+      final info = (jsonDecode(body) as Map<String, dynamic>)['data'] as Map;
       final caps = info['capabilities'] as Map;
       expect(caps['bookshelf'], isFalse);
       // Proxy and book sources exist regardless of the backend.
@@ -246,8 +274,9 @@ void main() {
     });
 
     test('getBookContent parses book and index', () async {
-      final (code, body) =
-          await get('/getBookContent?url=https://b.test/1&index=3');
+      final (code, body) = await get(
+        '/getBookContent?url=https://b.test/1&index=3',
+      );
       expect(code, 200);
       final data = (jsonDecode(body) as Map)['data'] as Map;
       expect(data['index'], 3);
@@ -295,12 +324,14 @@ void main() {
       expect((jsonDecode(body) as Map)['sourceName'], '订阅');
     });
 
-    test('saving without a sourceUrl is ignored rather than stored empty',
-        () async {
-      await post('/saveRssSources', {'sourceName': 'no url'});
-      final (_, list) = await get('/getRssSources');
-      expect(jsonDecode(list), hasLength(1));
-    });
+    test(
+      'saving without a sourceUrl is ignored rather than stored empty',
+      () async {
+        await post('/saveRssSources', {'sourceName': 'no url'});
+        final (_, list) = await get('/getRssSources');
+        expect(jsonDecode(list), hasLength(1));
+      },
+    );
   });
 
   group('replace rule writes', () {
@@ -345,6 +376,35 @@ class _ThrowingBackend implements ServerBackend {
   }) async => const [];
   @override
   Future<Map<String, dynamic>> bookContent(String bookUrl, int i) async => {};
+  @override
+  Future<List<Map<String, dynamic>>> search(
+    String sourceUrl,
+    String query, {
+    int page = 1,
+  }) async => throw const DomainError(
+    code: 'capability_missing',
+    stage: DomainErrorStage.search,
+    message: '搜索功能未装配',
+  );
+  @override
+  Future<List<Map<String, dynamic>>> explore(
+    String sourceUrl,
+    String url, {
+    int page = 1,
+  }) async => throw const DomainError(
+    code: 'capability_missing',
+    stage: DomainErrorStage.search,
+    message: '发现功能未装配',
+  );
+  @override
+  Future<Map<String, dynamic>> bookInfo(
+    String sourceUrl,
+    Map<String, dynamic> book,
+  ) async => throw const DomainError(
+    code: 'capability_missing',
+    stage: DomainErrorStage.detail,
+    message: '书籍详情功能未装配',
+  );
   @override
   Future<Uint8List?> cover(String bookUrl) async => null;
   @override

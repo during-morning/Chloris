@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:chloris_engine/chloris_engine.dart';
+
 /// Everything the HTTP API needs from the application layer.
 ///
 /// The server owns sockets and JSON; it must not reach into Riverpod, the
@@ -45,6 +47,35 @@ abstract interface class ServerBackend {
       code: 'capability_missing',
       stage: DomainErrorStage.search,
       message: '搜索功能未装配',
+      recoverable: false,
+      retryable: false,
+    );
+  }
+
+  /// Server-side discovery and book detail are optional capabilities so old
+  /// embedders can keep serving catalogue/content while upgrading.
+  Future<List<Map<String, dynamic>>> explore(
+    String sourceUrl,
+    String url, {
+    int page = 1,
+  }) async {
+    throw DomainError(
+      code: 'capability_missing',
+      stage: DomainErrorStage.search,
+      message: '发现功能未装配',
+      recoverable: false,
+      retryable: false,
+    );
+  }
+
+  Future<Map<String, dynamic>> bookInfo(
+    String sourceUrl,
+    Map<String, dynamic> book,
+  ) async {
+    throw DomainError(
+      code: 'capability_missing',
+      stage: DomainErrorStage.detail,
+      message: '书籍详情功能未装配',
       recoverable: false,
       retryable: false,
     );

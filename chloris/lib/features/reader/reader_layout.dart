@@ -77,17 +77,15 @@ extension _ReaderLayout on _ReaderScreenState {
     final pad = settings.pagePadding.toDouble();
     final mq = MediaQuery.of(context);
     final topInset = readerVerticalInset(
-      // The menu is an overlay: it must not change pagination geometry, so the
-      // measured reading area always uses the hidden-chrome insets.
-      menuVisible: false,
+      menuVisible: _menu,
       pagePadding: pad,
-      safePadding: mq.padding.top,
+      safePadding: mq.viewPadding.top,
       top: true,
     );
     final bottomInset = readerVerticalInset(
-      menuVisible: false,
+      menuVisible: _menu,
       pagePadding: pad,
-      safePadding: mq.padding.bottom,
+      safePadding: mq.viewPadding.bottom,
       top: false,
     );
     final readW = readerColumnWidth(
@@ -105,7 +103,7 @@ extension _ReaderLayout on _ReaderScreenState {
         : (restH - headingH).clamp(80.0, restH);
     final readH = restH;
     final layoutKey = ReaderLayoutKey(
-      contentHash: Object.hash(body),
+      contentHash: Object.hashAll([body]),
       chapterTitle: widget.chapterTitle,
       bookTitle: widget.bookTitle ?? '',
       bookAuthor: widget.bookAuthor,

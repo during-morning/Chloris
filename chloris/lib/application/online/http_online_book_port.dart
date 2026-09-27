@@ -1,6 +1,7 @@
 import 'package:chloris_engine/chloris_engine.dart';
 
 import '../../core/http/channel_ws_port.dart';
+import '../../services/web/api_client.dart';
 import 'online_book_port.dart';
 
 /// [OnlineBookPort] backed by a Chloris server instead of the local engine.
@@ -10,9 +11,10 @@ import 'online_book_port.dart';
 /// Nothing above this class changes — the UI already depends on the port, not
 /// on the engine — which is the payoff of the existing layering.
 class HttpOnlineBookPort implements OnlineBookPort {
-  const HttpOnlineBookPort(this._client);
+  const HttpOnlineBookPort(this._client, {this.serverToken = ''});
 
   final ChlorisApiClient _client;
+  final String serverToken;
 
   static DomainError _unsupported(String what) => DomainError(
     code: 'capability_missing',
@@ -20,12 +22,12 @@ class HttpOnlineBookPort implements OnlineBookPort {
     message: '$what 尚未在服务端契约中提供',
     recoverable: false,
     retryable: false,
-    suggestedAction: '当前契约只覆盖目录与正文；搜索/详情需要新增服务端路由',
+    suggestedAction: '检查服务端 capability matrix，或切换到本地引擎',
   );
 
-  /// Not in the contract yet: Legado exposes search over a WebSocket
-  /// (`/searchBook`), which A2 has not ported. Failing loudly beats returning
-  /// an empty result list, which a user would read as "no books found".
+  /// The WebSocket endpoint needs the same token as the HTTP API when the
+  /// source URL points at the local Chloris server. Third-party Legado
+  /// endpoints are still sent no headers unless a token was configured.
   @override
   Future<List<SearchBook>> search(
     BookSource source,
@@ -42,6 +44,12 @@ class HttpOnlineBookPort implements OnlineBookPort {
       query: query,
       page: page,
       filter: filter,
+      headers: serverToken.isEmpty
+          ? const {}
+          : {
+              'Authorization': 'Bearer $serverToken',
+              'X-Chloris-Token': serverToken,
+            },
     );
   }
 
@@ -50,11 +58,15 @@ class HttpOnlineBookPort implements OnlineBookPort {
     BookSource source,
     String url, {
     int page = 1,
-  }) async => throw _unsupported('发现');
+  }) async {
+    final books = await _client.explore(source.bookSourceUrl, url, page: page);
+    return books;
+  }
 
   @override
-  Future<Book> loadBookInfo(BookSource source, Book book) async =>
-      throw _unsupported('书籍详情');
+  Future<Book> loadBookInfo(BookSource source, Book book) async {
+    return _client.bookInfo(source.bookSourceUrl, book);
+  }
 
   @override
   Future<List<BookChapter>> loadChapterList(

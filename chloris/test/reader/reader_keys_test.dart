@@ -44,7 +44,7 @@ void main() {
     );
   });
 
-  test('hidden chrome uses page pad so text can refill the column', () {
+  test('hidden chrome removes bottom page gap and keeps heading inset', () {
     expect(
       readerVerticalInset(
         menuVisible: false,
@@ -52,7 +52,25 @@ void main() {
         safePadding: 0,
         top: true,
       ),
-      28,
+      32,
+    );
+    expect(
+      readerVerticalInset(
+        menuVisible: false,
+        pagePadding: 24,
+        safePadding: 0,
+        top: false,
+      ),
+      0,
+    );
+    expect(
+      readerVerticalInset(
+        menuVisible: false,
+        pagePadding: 24,
+        safePadding: 16,
+        top: false,
+      ),
+      16,
     );
     expect(
       readerVerticalInset(

@@ -17,7 +17,6 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
   bool _legal = false;
-  bool _age = false;
 
   Future<void> _accept() async {
     final p = await KvSettings.ready();
@@ -35,7 +34,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     final ext = theme.extension<AppStyleExtension>();
     final mono = ext?.mono ?? false;
     final absolutely = ext?.style == AppUiStyle.absolutely;
-    final can = _legal && _age;
+    final can = _legal;
     return Scaffold(
       appBar: AppBar(leading: const BackButton(), title: const Text('新手引导')),
       body: Center(
@@ -90,12 +89,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 value: _legal,
                 onChanged: (v) => setState(() => _legal = v ?? false),
                 title: const Text('已阅读免责声明：使用第三方书源的风险由用户自行承担。'),
-                controlAffinity: ListTileControlAffinity.leading,
-              ),
-              CheckboxListTile(
-                value: _age,
-                onChanged: (v) => setState(() => _age = v ?? false),
-                title: const Text('已满 18 周岁，同意隐私政策（数据仅保存在本机）。'),
                 controlAffinity: ListTileControlAffinity.leading,
               ),
               const SizedBox(height: 16),

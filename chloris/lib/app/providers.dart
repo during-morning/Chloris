@@ -100,6 +100,7 @@ final onlineBookPortProvider = Provider<OnlineBookPort>((ref) {
         ),
         token: connection.token,
       ),
+      serverToken: connection.token,
     );
   }
   return EngineOnlineBookAdapter(ref.watch(engineFacadeProvider));

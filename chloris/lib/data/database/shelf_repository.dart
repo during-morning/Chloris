@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app_database.dart' as db;
 import '../../core/persist/app_db.dart';
+import '../../core/search/search_match.dart';
 
 /// One shelved book and the per-source candidates that back it.
 class ShelfEntry {
@@ -49,12 +50,12 @@ class ShelfRepository {
 
   /// Identity key used to join a shelf row with its candidates.
   ///
-  /// The join is by (name, author), *not* by bookUrl: candidates of the same
-  /// book deliberately carry different URLs — that is what makes them
-  /// candidates for different sources. Joining on bookUrl would report a single
-  /// candidate and hide the rest.
+  /// The join is by the normalized (name, author) identity, *not* by bookUrl:
+  /// candidates of the same book deliberately carry different URLs — that is
+  /// what makes them candidates for different sources. Joining on bookUrl
+  /// would report a single candidate and hide the rest.
   static String _identity(String name, String author) =>
-      '$name\u0000$author';
+      '${normalizeSearchText(name)}\u0000${normalizeSearchText(author)}';
 
   Future<List<ShelfEntry>> load() async {
     final books = await (_db.select(_db.books)
@@ -86,51 +87,85 @@ class ShelfRepository {
   /// another source this is the *existing* row, which is the whole point of the
   /// alignment.
   Future<String> addCandidate(BookSource source, SearchBook book) async {
-    // The candidate has a foreign key into `book_sources`, so the source row
-    // has to exist before the candidate can be written.
-    await _ensureSource(source);
+    // Source, candidate and identity must be committed together. Otherwise a
+    // crash between the candidate insert and identity insert leaves an
+    // unreferenced row that cannot be rendered by the shelf.
+    return _db.transaction(() async {
+      // The candidate has a foreign key into `book_sources`, so the source row
+      // has to exist before the candidate can be written.
+      await _ensureSource(source);
 
-    await _db
-        .into(_db.searchBooks)
-        .insertOnConflictUpdate(
-          db.SearchBooksCompanion.insert(
-            bookUrl: book.bookUrl,
-            origin: source.bookSourceUrl,
-            originName: Value(source.bookSourceName),
-            name: Value(book.name),
-            author: Value(book.author),
-            kind: Value(book.kind),
-            coverUrl: Value(book.coverUrl),
-            intro: Value(book.intro),
-            latestChapterTitle: Value(book.latestChapterTitle),
-            tocUrl: Value(book.tocUrl),
-            time: Value(DateTime.now().millisecondsSinceEpoch),
-            originOrder: Value(book.originOrder),
-            respondTime: Value(source.respondTime),
-          ),
-        );
+      await _db.into(_db.searchBooks).insertOnConflictUpdate(
+            db.SearchBooksCompanion.insert(
+              bookUrl: book.bookUrl,
+              origin: source.bookSourceUrl,
+              originName: Value(source.bookSourceName),
+              name: Value(book.name),
+              author: Value(book.author),
+              kind: Value(book.kind),
+              coverUrl: Value(book.coverUrl),
+              intro: Value(book.intro),
+              latestChapterTitle: Value(book.latestChapterTitle),
+              tocUrl: Value(book.tocUrl),
+              time: Value(DateTime.now().millisecondsSinceEpoch),
+              originOrder: Value(book.originOrder),
+              respondTime: Value(source.respondTime),
+            ),
+          );
 
-    final existing = await (_db.select(_db.books)
-          ..where((t) => t.name.equals(book.name) & t.author.equals(book.author))
+      var existing = await _findIdentity(book.name, book.author);
+      if (existing != null) {
+        // Adding a candidate is also the user's source choice. Persist the
+        // selected origin on the identity row so a restart does not silently
+        // switch back to the source that created the book originally.
+        await (_db.update(_db.books)
+              ..where((t) => t.bookUrl.equals(existing!.bookUrl)))
+            .write(
+              db.BooksCompanion(
+                origin: Value(source.bookSourceUrl),
+                originName: Value(source.bookSourceName),
+                latestChapterTitle: Value(book.latestChapterTitle),
+                lastUpdateTime: Value(DateTime.now().millisecondsSinceEpoch),
+              ),
+            );
+        return existing.bookUrl;
+      }
+
+      // INSERT OR IGNORE makes the identity creation safe if another queued
+      // add wins the unique (name, author) race while this transaction is
+      // waiting on SQLite's write lock.
+      await _db.into(_db.books).insert(
+            db.BooksCompanion.insert(
+              bookUrl: book.bookUrl,
+              name: book.name,
+              author: Value(book.author),
+              origin: Value(source.bookSourceUrl),
+              originName: Value(source.bookSourceName),
+              kind: Value(book.kind),
+              coverUrl: Value(book.coverUrl),
+              intro: Value(book.intro),
+              latestChapterTitle: Value(book.latestChapterTitle),
+              lastUpdateTime: Value(DateTime.now().millisecondsSinceEpoch),
+            ),
+            mode: InsertMode.insertOrIgnore,
+          );
+      existing = await _findIdentity(book.name, book.author);
+      return existing?.bookUrl ?? book.bookUrl;
+    });
+  }
+
+  Future<db.Book?> _findIdentity(String name, String author) async {
+    final exact = await (_db.select(_db.books)
+          ..where((t) => t.name.equals(name) & t.author.equals(author))
           ..limit(1))
         .getSingleOrNull();
-    if (existing != null) return existing.bookUrl;
-
-    await _db.into(_db.books).insert(
-          db.BooksCompanion.insert(
-            bookUrl: book.bookUrl,
-            name: book.name,
-            author: Value(book.author),
-            origin: Value(source.bookSourceUrl),
-            originName: Value(source.bookSourceName),
-            kind: Value(book.kind),
-            coverUrl: Value(book.coverUrl),
-            intro: Value(book.intro),
-            latestChapterTitle: Value(book.latestChapterTitle),
-            lastUpdateTime: Value(DateTime.now().millisecondsSinceEpoch),
-          ),
-        );
-    return book.bookUrl;
+    if (exact != null) return exact;
+    final key = _identity(name, author);
+    final books = await _db.select(_db.books).get();
+    for (final book in books) {
+      if (_identity(book.name, book.author) == key) return book;
+    }
+    return null;
   }
 
   Future<void> _ensureSource(BookSource source) async {
@@ -161,20 +196,24 @@ class ShelfRepository {
         .getSingleOrNull();
     if (book == null) return;
 
-    final urls = await (_db.selectOnly(_db.searchBooks)
-          ..addColumns([_db.searchBooks.bookUrl])
-          ..where(
-            _db.searchBooks.name.equals(book.name) &
-                _db.searchBooks.author.equals(book.author),
-          ))
-        .map((r) => r.read(_db.searchBooks.bookUrl))
-        .get();
-    for (final url in urls) {
-      if (url == null) continue;
-      await (_db.delete(_db.searchBooks)..where((t) => t.bookUrl.equals(url)))
+    await _db.transaction(() async {
+      // SearchBooks is keyed by (bookUrl, origin), so deleting by URL alone
+      // would be both inefficient and easy to get wrong when aliases exist.
+      final identity = _identity(book.name, book.author);
+      final candidates = await _db.select(_db.searchBooks).get();
+      for (final candidate in candidates) {
+        if (_identity(candidate.name, candidate.author) != identity) continue;
+        await (_db.delete(_db.searchBooks)
+              ..where(
+                (t) =>
+                    t.bookUrl.equals(candidate.bookUrl) &
+                    t.origin.equals(candidate.origin),
+              ))
+            .go();
+      }
+      await (_db.delete(_db.books)..where((t) => t.bookUrl.equals(bookUrl)))
           .go();
-    }
-    await (_db.delete(_db.books)..where((t) => t.bookUrl.equals(bookUrl))).go();
+    });
   }
 
   /// Moves a book to the front of the manual ordering.

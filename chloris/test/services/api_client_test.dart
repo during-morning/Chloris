@@ -15,23 +15,25 @@ class _FakeTransport {
     String path,
     Map<String, String>? query,
     Object? body,
-  ) responder;
+  )
+  responder;
 
   final calls = <({String method, String path, Map<String, String>? query})>[];
 
-  ApiTransport get transport =>
-      (method, path, {query, body}) async {
-        calls.add((method: method, path: path, query: query));
-        return responder(method, path, query, body);
-      };
+  ApiTransport get transport => (method, path, {query, body}) async {
+    calls.add((method: method, path: path, query: query));
+    return responder(method, path, query, body);
+  };
 }
 
-String envelope(Object? data, {bool success = true, String? errorMsg}) =>
-    jsonEncode({
-      'isSuccess': success,
-      'errorMsg': errorMsg,
-      if (data != null) 'data': data,
-    });
+String envelope(Object? data, {bool success = true, String? errorMsg}) {
+  final payload = <String, Object?>{
+    'isSuccess': success,
+    'errorMsg': errorMsg,
+  };
+  if (data != null) payload['data'] = data;
+  return jsonEncode(payload);
+}
 
 final _source = BookSource(
   bookSourceUrl: 'https://src.test',
@@ -44,44 +46,51 @@ BookChapter _chapter(int i) =>
 void main() {
   group('ChlorisApiClient', () {
     test('unwraps the envelope', () async {
-      final t = _FakeTransport((m, p, q, b) async => (
-            status: 200,
-            body: envelope([
-              {'url': 'u', 'title': 't', 'index': 0},
-            ]),
-          ));
+      final t = _FakeTransport(
+        (m, p, q, b) async => (
+          status: 200,
+          body: envelope([
+            {'url': 'u', 'title': 't', 'index': 0},
+          ]),
+        ),
+      );
       final client = ChlorisApiClient(transport: t.transport);
       final list = await client.bookshelf();
       expect(list, hasLength(1));
     });
 
-    test('a failure envelope becomes a DomainError with its metadata', () async {
-      final t = _FakeTransport(
-        (m, p, q, b) async => (
-          status: 500,
-          body: jsonEncode({
-            'isSuccess': false,
-            'errorMsg': '目录抓取失败',
-            'stage': 'toc',
-            'retryable': true,
-            'suggestedAction': '重试',
-          }),
-        ),
-      );
-      final client = ChlorisApiClient(transport: t.transport);
-      try {
-        await client.chapterList('u');
-        fail('should have thrown');
-      } on DomainError catch (e) {
-        expect(e.message, '目录抓取失败');
-        expect(e.stage, DomainErrorStage.toc);
-        expect(e.retryable, isTrue);
-        expect(e.suggestedAction, '重试');
-      }
-    });
+    test(
+      'a failure envelope becomes a DomainError with its metadata',
+      () async {
+        final t = _FakeTransport(
+          (m, p, q, b) async => (
+            status: 500,
+            body: jsonEncode({
+              'isSuccess': false,
+              'errorMsg': '目录抓取失败',
+              'stage': 'toc',
+              'retryable': true,
+              'suggestedAction': '重试',
+            }),
+          ),
+        );
+        final client = ChlorisApiClient(transport: t.transport);
+        try {
+          await client.chapterList('u');
+          fail('should have thrown');
+        } on DomainError catch (e) {
+          expect(e.message, '目录抓取失败');
+          expect(e.stage, DomainErrorStage.toc);
+          expect(e.retryable, isTrue);
+          expect(e.suggestedAction, '重试');
+        }
+      },
+    );
 
     test('non-JSON output is reported as a protocol mismatch', () async {
-      final t = _FakeTransport((m, p, q, b) async => (status: 200, body: '<html>'));
+      final t = _FakeTransport(
+        (m, p, q, b) async => (status: 200, body: '<html>'),
+      );
       final client = ChlorisApiClient(transport: t.transport);
       await expectLater(
         client.bookshelf(),
@@ -96,7 +105,9 @@ void main() {
     });
 
     test('a JSON body that is not an envelope is rejected', () async {
-      final t = _FakeTransport((m, p, q, b) async => (status: 200, body: '[1,2]'));
+      final t = _FakeTransport(
+        (m, p, q, b) async => (status: 200, body: '[1,2]'),
+      );
       final client = ChlorisApiClient(transport: t.transport);
       await expectLater(
         client.bookshelf(),
@@ -114,7 +125,11 @@ void main() {
       final t = _FakeTransport(
         (m, p, q, b) async => (
           status: 500,
-          body: jsonEncode({'isSuccess': false, 'errorMsg': 'x', 'stage': 'nope'}),
+          body: jsonEncode({
+            'isSuccess': false,
+            'errorMsg': 'x',
+            'stage': 'nope',
+          }),
         ),
       );
       final client = ChlorisApiClient(transport: t.transport);
@@ -149,7 +164,9 @@ void main() {
     });
 
     test('refresh goes to the refresh route', () async {
-      final t = _FakeTransport((m, p, q, b) async => (status: 200, body: envelope([])));
+      final t = _FakeTransport(
+        (m, p, q, b) async => (status: 200, body: envelope([])),
+      );
       final client = ChlorisApiClient(transport: t.transport);
       await client.chapterList('u', refresh: true);
       expect(t.calls.single.path, '/refreshToc');
@@ -157,10 +174,8 @@ void main() {
 
     test('bookContent returns title and body', () async {
       final t = _FakeTransport(
-        (m, p, q, b) async => (
-          status: 200,
-          body: envelope({'title': '第一章', 'content': '正文'}),
-        ),
+        (m, p, q, b) async =>
+            (status: 200, body: envelope({'title': '第一章', 'content': '正文'})),
       );
       final client = ChlorisApiClient(transport: t.transport);
       final r = await client.bookContent('https://b.test/1', 3);
@@ -214,30 +229,36 @@ void main() {
   });
 
   group('HttpOnlineBookPort', () {
-    test('loadChapterList returns server chapters and reports them once',
-        () async {
-      final t = _FakeTransport(
-        (m, p, q, b) async => (
-          status: 200,
-          body: envelope([
-            {'url': 'c1', 'title': '一', 'index': 0},
-            {'url': 'c2', 'title': '二', 'index': 1},
-          ]),
-        ),
-      );
-      final port = HttpOnlineBookPort(ChlorisApiClient(transport: t.transport));
-      var partialCalls = 0;
-      final chapters = await port.loadChapterList(
-        _source,
-        _book,
-        onPartial: (_) => partialCalls++,
-      );
-      expect(chapters, hasLength(2));
-      expect(partialCalls, 1);
-    });
+    test(
+      'loadChapterList returns server chapters and reports them once',
+      () async {
+        final t = _FakeTransport(
+          (m, p, q, b) async => (
+            status: 200,
+            body: envelope([
+              {'url': 'c1', 'title': '一', 'index': 0},
+              {'url': 'c2', 'title': '二', 'index': 1},
+            ]),
+          ),
+        );
+        final port = HttpOnlineBookPort(
+          ChlorisApiClient(transport: t.transport),
+        );
+        var partialCalls = 0;
+        final chapters = await port.loadChapterList(
+          _source,
+          _book,
+          onPartial: (_) => partialCalls++,
+        );
+        expect(chapters, hasLength(2));
+        expect(partialCalls, 1);
+      },
+    );
 
     test('an empty catalogue is an error, not an empty list', () async {
-      final t = _FakeTransport((m, p, q, b) async => (status: 200, body: envelope([])));
+      final t = _FakeTransport(
+        (m, p, q, b) async => (status: 200, body: envelope([])),
+      );
       final port = HttpOnlineBookPort(ChlorisApiClient(transport: t.transport));
       await expectLater(
         port.loadChapterList(_source, _book),
@@ -247,10 +268,8 @@ void main() {
 
     test('blank content is an error, not an empty chapter', () async {
       final t = _FakeTransport(
-        (m, p, q, b) async => (
-          status: 200,
-          body: envelope({'title': 't', 'content': '   '}),
-        ),
+        (m, p, q, b) async =>
+            (status: 200, body: envelope({'title': 't', 'content': '   '})),
       );
       final port = HttpOnlineBookPort(ChlorisApiClient(transport: t.transport));
       await expectLater(
@@ -263,20 +282,17 @@ void main() {
 
     test('content is returned when present', () async {
       final t = _FakeTransport(
-        (m, p, q, b) async => (
-          status: 200,
-          body: envelope({'title': 't', 'content': '正文'}),
-        ),
+        (m, p, q, b) async =>
+            (status: 200, body: envelope({'title': 't', 'content': '正文'})),
       );
       final port = HttpOnlineBookPort(ChlorisApiClient(transport: t.transport));
-      expect(
-        await port.loadChapterContent(_source, _book, _chapter(2)),
-        '正文',
-      );
+      expect(await port.loadChapterContent(_source, _book, _chapter(2)), '正文');
     });
 
     test('routes the contract does not cover fail loudly', () async {
-      final t = _FakeTransport((m, p, q, b) async => (status: 200, body: envelope({})));
+      final t = _FakeTransport(
+        (m, p, q, b) async => (status: 200, body: envelope({})),
+      );
       final port = HttpOnlineBookPort(ChlorisApiClient(transport: t.transport));
       for (final call in <Future<Object?> Function()>[
         () => port.search(_source, 'key'),

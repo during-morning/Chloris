@@ -118,6 +118,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
         eyebrow: '探索',
         title: '探索',
         subtitle: '按书源发现分类浏览。',
+        fullBleedBody: true,
         actions: [
           MeowGhostButton(
             icon: AppIcons.copy,

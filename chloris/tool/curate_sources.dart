@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:chloris_engine/chloris_engine.dart';
-import 'package:chloris/features/sources/source_unify.dart';
+import 'package:chloris/application/sources/source_unify.dart';
 
 const probeWords = ['的', '我', '你'];
 const novelQueries = ['斗破苍穹', '凡人修仙传', '诡秘之主'];
@@ -16,7 +16,10 @@ const concurrency = 28;
 const perHost = 6;
 
 const originFiles = <(String, int)>[
-  ('/Volumes/Software/ChlorisA/reference/开源阅读/书源管理/【最推荐】超级精选书源（强烈推荐！）最强.json', 40),
+  (
+    '/Volumes/Software/ChlorisA/reference/开源阅读/书源管理/【最推荐】超级精选书源（强烈推荐！）最强.json',
+    40,
+  ),
   ('/Volumes/Software/ChlorisA/reference/开源阅读/书源管理/data.json', 25),
   ('/Volumes/Software/ChlorisA/reference/开源阅读/书源管理/【阅读】轻小说书源@小霖子.json', 20),
   ('/Volumes/Software/ChlorisA/reference/开源阅读/书源管理/国内小说网文整合@小霖子.json', 15),
@@ -80,8 +83,9 @@ Future<List<(BookSource, int)>> loadOrigins() async {
   return ranked;
 }
 
-String _jsonOf(List<BookSource> list) => const JsonEncoder.withIndent('  ')
-    .convert(list.map((s) => s.toJson()).toList());
+String _jsonOf(List<BookSource> list) => const JsonEncoder.withIndent(
+  '  ',
+).convert(list.map((s) => s.toJson()).toList());
 
 Future<void> writeAssets(List<BookSource> all, List<BookSource> enabled) async {
   final allOut = File('tool/archive/default_book_sources.all.json');
@@ -115,9 +119,7 @@ Future<void> main(List<String> args) async {
   );
   final staticPick = applyGroupQuotas(
     pickBestPerHost(
-      merged
-          .where((s) => s.hasCompleteRules && isHttpSearch(s))
-          .toList(),
+      merged.where((s) => s.hasCompleteRules && isHttpSearch(s)).toList(),
       perHost: perHost,
     ),
   );
@@ -125,8 +127,9 @@ Future<void> main(List<String> args) async {
     for (final s in merged) {
       s.enabled = false;
     }
-    await File('tool/archive/default_book_sources.all.json')
-        .writeAsString(_jsonOf(merged));
+    await File(
+      'tool/archive/default_book_sources.all.json',
+    ).writeAsString(_jsonOf(merged));
     stdout.writeln('merge-only wrote all=${merged.length}');
     return;
   }
@@ -180,7 +183,8 @@ Future<void> main(List<String> args) async {
       done++;
       source.respondTime = elapsed <= 0 ? 180000 : elapsed;
       if (hitCount > 0) {
-        source.weight = 40 +
+        source.weight =
+            40 +
             (source.hasCompleteRules ? 30 : 0) +
             (isHttpSearch(source) ? 15 : 0) +
             (hitCount > 20 ? 20 : hitCount);
@@ -190,7 +194,9 @@ Future<void> main(List<String> args) async {
           'S1 OK ${elapsed}ms n=$hitCount q=$word [${source.bookSourceGroup}] ${source.bookSourceName}',
         );
       } else {
-        log.writeln('S1 FAIL [${source.bookSourceGroup}] ${source.bookSourceName}');
+        log.writeln(
+          'S1 FAIL [${source.bookSourceGroup}] ${source.bookSourceName}',
+        );
       }
       if (done % 40 == 0 || done == candidates.length) {
         stdout.writeln('S1 $done/${candidates.length} alive=${s1.length}');
@@ -336,8 +342,7 @@ Future<void> main(List<String> args) async {
     for (final s in s3) s.bookSourceUrl: s,
   };
   if (pickedSet.length < 80) {
-    final fill = [...s2, ...s1]
-      ..sort((a, b) => b.weight.compareTo(a.weight));
+    final fill = [...s2, ...s1]..sort((a, b) => b.weight.compareTo(a.weight));
     for (final s in fill) {
       if (pickedSet.length >= 160) break;
       if (!s.hasCompleteRules || !isHttpSearch(s)) continue;
@@ -345,7 +350,10 @@ Future<void> main(List<String> args) async {
     }
   }
 
-  final hostPicked = pickBestPerHost(pickedSet.values.toList(), perHost: perHost);
+  final hostPicked = pickBestPerHost(
+    pickedSet.values.toList(),
+    perHost: perHost,
+  );
   final enabled = applyGroupQuotas(hostPicked);
   for (final s in merged) {
     final hit = enabled.where((e) => e.bookSourceUrl == s.bookSourceUrl);
@@ -369,7 +377,9 @@ Future<void> main(List<String> args) async {
   report
     ..writeln('enabled=${enabled.length}')
     ..writeln('groups $counts');
-  await File('${logDir.path}/curate_report.md').writeAsString(report.toString());
+  await File(
+    '${logDir.path}/curate_report.md',
+  ).writeAsString(report.toString());
   await log.flush();
   await log.close();
   stdout.writeln('picked=${enabled.length} groups $counts');

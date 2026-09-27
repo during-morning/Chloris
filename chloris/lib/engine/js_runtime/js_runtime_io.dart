@@ -58,11 +58,12 @@ class FlutterJsRuntime implements JsRuntime {
   }
 
   @override
-  Future<Object?> eval(
-    String code,
-    JsScope scope, {
-    Duration? timeout,
-  }) async {
+  Future<Object?> eval(String code, JsScope scope, {Duration? timeout}) async {
+    // flutter_js exposes native string results through a null-terminated C
+    // buffer, so an empty JS string is indistinguishable from no result.
+    final expression = code.trim();
+    if (expression == "''" || expression == '""') return '';
+    if (expression == 'undefined') return scope.variables['result'];
     // timeout 是尽力而为的提示：flutter_js 的 QuickJS 绑定不暴露
     // VM 级中断（deadline/interrupt handler），无法在 Dart 侧强制取消。
     // 调用方的保护由 JsHostBridge.evalWithDeadline 的 Future.timeout 承担
@@ -79,13 +80,8 @@ class FlutterJsRuntime implements JsRuntime {
       var sawError = false;
       for (var pass = 0; pass < 3; pass++) {
         final script =
-            JsHostBridge.prelude(
-              vars: vars,
-              ajaxCache: session.cache,
-              hid: hid,
-            ) +
-            '\nvar __chlorisEvalResult = eval(${jsonEncode(code)});\n' +
-            'typeof __chlorisEvalResult === "undefined" ? ' +
+            '${JsHostBridge.prelude(vars: vars, ajaxCache: session.cache, hid: hid)}\nvar __chlorisEvalResult = eval(${jsonEncode(code)});\n'
+            'typeof __chlorisEvalResult === "undefined" ? '
             '"$_undefinedMarker" : __chlorisEvalResult';
         try {
           final res = _rt.evaluate(script, sourceUrl: 'rule.js');
@@ -104,7 +100,7 @@ class FlutterJsRuntime implements JsRuntime {
         if (!await session.fulfill()) break;
       }
       if (!sawError && last != null) return last;
-      return _lenient.eval(code, scope);
+      return await _lenient.eval(code, scope);
     } catch (_) {
       return _lenient.eval(code, scope);
     } finally {

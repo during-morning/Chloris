@@ -5,12 +5,13 @@ import 'package:chloris_engine/chloris_engine.dart';
 import 'api_contract.dart';
 
 /// One HTTP round trip, as the client needs it.
-typedef ApiTransport = Future<({int status, String body})> Function(
-  String method,
-  String path, {
-  Map<String, String>? query,
-  Object? body,
-});
+typedef ApiTransport =
+    Future<({int status, String body})> Function(
+      String method,
+      String path, {
+      Map<String, String>? query,
+      Object? body,
+    });
 
 /// Client for the [ChlorisApiRoute] contract.
 ///
@@ -155,10 +156,50 @@ class ChlorisApiClient {
     );
   }
 
-  Future<void> saveProgress(BookProgressBody progress) => _call(
-    ChlorisApiRoute.saveBookProgress,
-    body: progress.toJson(),
-  );
+  Future<List<SearchBook>> explore(
+    String sourceUrl,
+    String url, {
+    int page = 1,
+  }) async {
+    final data = await _call(
+      ChlorisApiRoute.exploreBooks,
+      body: OnlineBookRequest(
+        sourceUrl: sourceUrl,
+        url: url,
+        page: page,
+      ).toJson(),
+    );
+    if (data is! List) {
+      throw const DomainError(
+        code: 'capability_missing',
+        stage: DomainErrorStage.search,
+        message: '服务端尚未提供在线探索能力',
+        recoverable: false,
+      );
+    }
+    return [for (final raw in _mapList(data)) SearchBook.fromJson(raw)];
+  }
+
+  Future<Book> bookInfo(String sourceUrl, Book book) async {
+    final data = await _call(
+      ChlorisApiRoute.getBookInfo,
+      body: OnlineBookRequest(sourceUrl: sourceUrl, book: book).toJson(),
+    );
+    if (data is! Map ||
+        (data['bookUrl']?.toString().trim().isEmpty ?? true) &&
+            (data['name']?.toString().trim().isEmpty ?? true)) {
+      throw const DomainError(
+        code: 'capability_missing',
+        stage: DomainErrorStage.detail,
+        message: '服务端尚未提供书籍详情能力',
+        recoverable: false,
+      );
+    }
+    return Book.fromJson(Map<String, dynamic>.from(data));
+  }
+
+  Future<void> saveProgress(BookProgressBody progress) =>
+      _call(ChlorisApiRoute.saveBookProgress, body: progress.toJson());
 
   static List<Map<String, dynamic>> _mapList(Object? data) {
     if (data is! List) return const [];

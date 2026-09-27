@@ -99,7 +99,10 @@ class ReaderSettingsSheet extends ConsumerWidget {
                           ? cs.onSurface
                           : Color(t.background),
                     ),
-                    label: Text(t.followApp ? '跟随应用' : t.label),
+                    label: Text(
+                      t.followApp ? '跟随应用' : t.label,
+                      style: TextStyle(color: cs.onSurface),
+                    ),
                     selected: !eink && s.paletteId == t.id,
                     onSelected: (_) async {
                       if (eink) await applyThemeFamily(ref, family.id);
@@ -121,7 +124,10 @@ class ReaderSettingsSheet extends ConsumerWidget {
                   for (final f in AppThemeFamily.all)
                     ChoiceChip(
                       avatar: CircleAvatar(backgroundColor: f.seed),
-                      label: Text(f.label),
+                      label: Text(
+                        f.label,
+                        style: TextStyle(color: cs.onSurface),
+                      ),
                       selected:
                           !eink && family.id == f.id && s.palette.followApp,
                       onSelected: (_) async {
@@ -130,7 +136,7 @@ class ReaderSettingsSheet extends ConsumerWidget {
                       },
                     ),
                   ChoiceChip(
-                    label: const Text('墨水屏'),
+                    label: Text('墨水屏', style: TextStyle(color: cs.onSurface)),
                     selected: eink,
                     onSelected: (_) async {
                       n.setPalette(ReaderPalette.follow);

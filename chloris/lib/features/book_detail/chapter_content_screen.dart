@@ -1,12 +1,81 @@
+import '../media/music_chapter_view.dart';
+import 'dart:convert';
+
 import 'package:chloris_engine/chloris_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/providers.dart';
 import '../library/reading_progress_provider.dart';
 import '../media/media_player_screen.dart';
+import '../media/media_resource.dart';
 import '../reader/comic_reader.dart';
 import '../reader/reader_screen.dart';
 import 'book_detail_provider.dart';
+
+final _chapterMediaProvider = FutureProvider.autoDispose
+    .family<MediaResource?, (BookSource, Book, BookChapter, String)>((
+      ref,
+      args,
+    ) async {
+      final (source, book, chapter, content) = args;
+      // A refreshed TOC can replace the chapter instance while the content
+      // provider retains its URL identity. Hydrate media metadata onto this
+      // exact chapter instance as well as onto a prefetched instance.
+      await ref.read(loadOnlineChapterContentUseCaseProvider)(
+        source: source,
+        book: book,
+        chapter: chapter,
+      );
+      final base = chapter.baseUrl.isEmpty ? chapter.url : chapter.baseUrl;
+      var headers = const <String, String>{};
+      try {
+        final saved = jsonDecode(chapter.getVariable('_mediaHeaders'));
+        if (saved is Map)
+          headers = saved.map<String, String>(
+            (key, value) => MapEntry(key.toString(), value.toString()),
+          );
+      } catch (_) {}
+      final media = parseMediaResource(
+        headers.isEmpty ? content : (chapter.resourceUrl ?? content),
+        baseUrl: base,
+        resourceUrl: chapter.resourceUrl,
+        headers: headers,
+      );
+      if (media == null) return null;
+      final prepared = await ref.read(sourceMediaRequestProvider)(
+        media.ruleUrl ?? media.url,
+        source: source,
+        book: book,
+        chapter: chapter,
+        headers: media.headers,
+      );
+      final resolver = MediaResourceResolver(http: ref.read(httpPortProvider));
+      final resource = await resolver.resolveResource(
+        media.copyWith(url: prepared.url, headers: prepared.headers),
+      );
+      final playbackRequest = resource.url == prepared.url
+          ? prepared
+          : await ref.read(sourceMediaRequestProvider)(
+              resource.ruleUrl ?? resource.url,
+              source: source,
+              book: book,
+              chapter: chapter,
+              headers: resource.headers,
+            );
+      final resolved = MediaResource(
+        url: playbackRequest.url,
+        headers: playbackRequest.headers,
+        title: chapter.title,
+        artist: book.author,
+        coverUrl: book.coverUrl,
+        lyric: chapter.getVariable('lyric').isEmpty
+            ? resource.lyric
+            : chapter.getVariable('lyric'),
+        lyricUrl: resource.lyricUrl,
+      );
+      return resolved;
+    });
 
 String _contentLoadError(Object e) {
   if (e is DomainError) {
@@ -97,6 +166,7 @@ class _ChapterContentScreenState extends ConsumerState<ChapterContentScreen> {
         );
     setState(() {
       openAtEnd = from >= 0 && j < from;
+      _shownText = null;
       chapter = chapters[j];
     });
   }
@@ -180,8 +250,10 @@ class _ChapterContentScreenState extends ConsumerState<ChapterContentScreen> {
     if (s != null) return s;
     return SearchBook(
       bookUrl: book.bookUrl,
-      origin: book.origin ?? source.bookSourceUrl,
-      originName: book.originName ?? source.bookSourceName,
+      origin: book.origin.isEmpty ? source.bookSourceUrl : book.origin,
+      originName: book.originName.isEmpty
+          ? source.bookSourceName
+          : book.originName,
       name: book.name,
       author: book.author,
       coverUrl: book.coverUrl,
@@ -215,9 +287,9 @@ class _ChapterContentScreenState extends ConsumerState<ChapterContentScreen> {
       );
       if (!mounted) return;
       if (r == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('没有找到可用的其它源，可稍后手动换源')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('没有找到可用的其它源，可稍后手动换源')));
         return;
       }
       final nextIdx = r.alignedChapterIndex.clamp(0, r.chapters.length - 1);
@@ -233,9 +305,9 @@ class _ChapterContentScreenState extends ConsumerState<ChapterContentScreen> {
       });
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('自动换源失败，可稍后手动换源')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('自动换源失败，可稍后手动换源')));
       }
     } finally {
       _autoSwitching = false;
@@ -255,22 +327,51 @@ class _ChapterContentScreenState extends ConsumerState<ChapterContentScreen> {
             : null,
       );
     }
-    if (book.isAudio || book.isVideo) {
-      final url = playableUrlFromContent(text);
-      if (url != null) {
-        return Scaffold(
-          appBar: AppBar(title: Text(chapter.title)),
-          body: MediaPlayerView(
-            url: url,
-            title: chapter.title,
-            isVideo: book.isVideo,
-            hasPrev: idx > 0,
-            hasNext: idx >= 0 && idx < chapters.length - 1,
-            onPrev: () => go(idx - 1),
-            onNext: () => go(idx + 1),
-          ),
-        );
-      }
+    if(book.isAudio) return Scaffold(appBar:AppBar(title:Text(chapter.title)),
+      body:MusicChapterView(source:source,book:book,chapter:chapter,chapters:chapters,content:text));
+    if (book.isVideo) {
+      final media = ref.watch(
+        _chapterMediaProvider((source, book, chapter, text)),
+      );
+      return Scaffold(
+        appBar: AppBar(title: Text(chapter.title)),
+        body: media.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) =>
+              Center(child: Text('音频解析失败：${_contentLoadError(error)}')),
+          data: (resource) => resource == null
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('没有解析到可播放的媒体地址'),
+                      TextButton(
+                        onPressed: () =>
+                            ref.invalidate(chapterContentProvider(contentArgs)),
+                        child: const Text('重新解析'),
+                      ),
+                    ],
+                  ),
+                )
+              : MediaPlayerView(
+                  url: resource.url,
+                  headers: resource.headers,
+                  lyric: resource.lyric ?? '',
+                  artist: resource.artist ?? '',
+                  coverUrl: resource.coverUrl,
+                  title: chapter.title,
+                  isVideo: book.isVideo,
+                  hasPrev: idx > 0,
+                  hasNext: idx >= 0 && idx < chapters.length - 1,
+                  onPrev: () {
+                    if (mounted) go(idx - 1);
+                  },
+                  onNext: () {
+                    if (mounted) go(idx + 1);
+                  },
+                ),
+        ),
+      );
     }
     if (isMangaContent(text)) {
       return ComicReader(

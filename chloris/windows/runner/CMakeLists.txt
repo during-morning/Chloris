@@ -8,6 +8,8 @@ project(runner LANGUAGES CXX)
 # Any new source files that you add to the application should be added here.
 add_executable(${BINARY_NAME} WIN32
   "flutter_window.cpp"
+  "music_media_session.cpp"
+  "music_browser.cpp"
   "main.cpp"
   "utils.cpp"
   "win32_window.cpp"
@@ -33,8 +35,22 @@ target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
 # Add dependency libraries and include directories. Add any application-specific
 # dependencies here.
 target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
-target_link_libraries(${BINARY_NAME} PRIVATE "dwmapi.lib")
+target_link_libraries(${BINARY_NAME} PRIVATE "dwmapi.lib" "windowsapp.lib" "comctl32.lib")
 target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
 
 # Run the Flutter tool portions of the build. This must not be removed.
 add_dependencies(${BINARY_NAME} flutter_assemble)
+
+# Pin the official WebView2 SDK. The runtime is detected at execution time.
+include(FetchContent)
+FetchContent_Declare(webview2_sdk URL https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/1.0.4258.31/microsoft.web.webview2.1.0.4258.31.nupkg)
+FetchContent_MakeAvailable(webview2_sdk)
+if(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+  set(CHLORIS_WEBVIEW_ARCH arm64)
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+  set(CHLORIS_WEBVIEW_ARCH x86)
+else()
+  set(CHLORIS_WEBVIEW_ARCH x64)
+endif()
+target_include_directories(${BINARY_NAME} PRIVATE "${webview2_sdk_SOURCE_DIR}/build/native/include")
+target_link_libraries(${BINARY_NAME} PRIVATE "${webview2_sdk_SOURCE_DIR}/build/native/${CHLORIS_WEBVIEW_ARCH}/WebView2LoaderStatic.lib")

@@ -1,3 +1,4 @@
+import '../features/media/music_workspace.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,7 @@ import '../features/book_detail/download_auto_resume.dart';
 import '../features/settings/welcome_screen.dart';
 import '../services/deeplink/deep_link_listener.dart';
 import 'router.dart';
+import 'widgets/startup_shell.dart';
 import 'theme/app_style_shell.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_provider.dart';
@@ -105,21 +107,20 @@ class _ChlorisAppState extends ConsumerState<ChlorisApp> {
     if (_accepted == true) {
       ref.watch(downloadAutoResumeProvider);
     }
+    if (_accepted == null) return const StartupShell();
     if (_accepted != true) {
       return MaterialApp(
-        title: 'Chloris',
+        title: 'Cholris',
         debugShowCheckedModeBanner: false,
         theme: light,
         darkTheme: dark,
         themeMode: effectiveMode,
-        home: _accepted == null
-            ? const Scaffold(body: Center(child: CircularProgressIndicator()))
-            : WelcomeScreen(onAccepted: () => setState(() => _accepted = true)),
+        home: WelcomeScreen(onAccepted: () => setState(() => _accepted = true)),
       );
     }
     return DeepLinkListener(
       child: MaterialApp.router(
-        title: 'Chloris',
+        title: 'Cholris',
         debugShowCheckedModeBanner: false,
         theme: light,
         darkTheme: dark,
@@ -147,7 +148,37 @@ class _ChlorisAppState extends ConsumerState<ChlorisApp> {
               highContrast: hc || mq.highContrast,
               boldText: bold || mq.boldText,
             ),
-            child: AppStyleShell(child: child ?? const SizedBox.shrink()),
+            child: AppStyleShell(
+              child: AnimatedBuilder(
+                animation: Listenable.merge([
+                  appRouter.routeInformationProvider,
+                  readerMusicControlsVisible,
+                ]),
+                builder: (context, _) {
+                  final path =
+                      appRouter.routeInformationProvider.value.uri.path;
+                  final home = const [
+                    '/library',
+                    '/search',
+                    '/explore',
+                    '/music',
+                    '/settings',
+                    '/sources',
+                    '/rss',
+                  ].contains(path);
+                  final show =
+                      !home &&
+                      path != '/music/player' &&
+                      (path != '/reader' || readerMusicControlsVisible.value);
+                  return Column(
+                    children: [
+                      Expanded(child: child ?? const SizedBox.shrink()),
+                      if (show) const MusicMiniPlayer(),
+                    ],
+                  );
+                },
+              ),
+            ),
           );
         },
       ),

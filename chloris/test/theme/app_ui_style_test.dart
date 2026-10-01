@@ -106,7 +106,7 @@ void main() {
   });
 
   test('every nav destination has a two-level monochrome pair', () {
-    expect(AppIcons.navPairs, hasLength(4));
+    expect(AppIcons.navPairs, hasLength(5));
     for (final pair in AppIcons.navPairs) {
       expect(pair.resolve(active: false), pair.outline);
       expect(pair.resolve(active: true), pair.filled);

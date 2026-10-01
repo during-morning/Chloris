@@ -87,7 +87,7 @@ class ExportService {
   }
 
   static String _opf(String title, String manifest, String spine) =>
-      '<?xml version="1.0" encoding="utf-8"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="bookid">chloris-book</dc:identifier><dc:title>${_escape(title)}</dc:title><dc:creator>Chloris</dc:creator><dc:language>zh</dc:language></metadata><manifest><item id="nav" href="nav.xhtml" properties="nav" media-type="application/xhtml+xml"/>$manifest</manifest><spine>$spine</spine></package>';
+      '<?xml version="1.0" encoding="utf-8"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="bookid">chloris-book</dc:identifier><dc:title>${_escape(title)}</dc:title><dc:creator>Cholris</dc:creator><dc:language>zh</dc:language></metadata><manifest><item id="nav" href="nav.xhtml" properties="nav" media-type="application/xhtml+xml"/>$manifest</manifest><spine>$spine</spine></package>';
   static String _navXhtml(String title, String items) =>
       '<?xml version="1.0" encoding="utf-8"?><html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"><head><title>${_escape(title)}</title></head><body><nav epub:type="toc"><h1>${_escape(title)}</h1><ol>$items</ol></nav></body></html>';
   static String _escape(String value) => value

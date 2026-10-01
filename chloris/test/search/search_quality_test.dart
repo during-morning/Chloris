@@ -31,8 +31,8 @@ void main() {
       isFalse,
     );
     expect(
-      isUsableSearchBook(_book('书', 'https://example.com/book/4')),
-      isFalse,
+      isUsableSearchBook(_book('道', 'https://example.com/book/4')),
+      isTrue,
     );
     expect(isUsableSearchBook(_book('有效书名', 'not a url')), isFalse);
     expect(

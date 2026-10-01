@@ -4,7 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 class NotificationService {
   const NotificationService();
 
-  Future<void> showTest() => _show('Chloris', '这是一条测试通知');
+  Future<void> showTest() => _show('Cholris', '这是一条测试通知');
 
   Future<void> _show(String title, String body) async {
     final plugin = FlutterLocalNotificationsPlugin();

@@ -64,7 +64,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
               SizedBox(height: absolutely ? AppTokens.space24 : 20),
               Text(
-                mono ? '[ 欢迎使用 Chloris ]' : '欢迎使用 Chloris',
+                mono ? '[ 欢迎使用 Cholris ]' : '欢迎使用 Cholris',
                 textAlign: TextAlign.center,
                 // Absolutely: the welcome hero uses the display serif.
                 style: absolutely
@@ -95,7 +95,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               if (absolutely) ...[
                 // Clay poster moment — the trailer 字卡 grammar, one per flow.
                 AbsolutelyBannerCard(
-                  title: 'Chloris',
+                  title: 'Cholris',
                   subtitle: '你的阅读空间，由你自己定义。',
                 ),
                 const SizedBox(height: 16),

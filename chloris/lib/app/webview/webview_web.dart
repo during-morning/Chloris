@@ -3,6 +3,10 @@ import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:ui_web' as ui_web;
+import 'package:http/http.dart' as http;
+import '../../services/web/server_connection.dart';
+import '../../core/http/http_session.dart';
+import 'native_browser_script.dart';
 
 import 'package:chloris_engine/chloris_engine.dart';
 import 'package:flutter/material.dart';
@@ -18,75 +22,75 @@ external String _jsonStringify(JSAny? value);
 
 int _seq = 0;
 
-Future<WebViewResult?> evaluateInBrowser(WebViewRequest request) async {
-  final html = request.html?.trim() ?? '';
-  if (html.isEmpty) return null;
-  final id = 'ev${++_seq}${DateTime.now().microsecondsSinceEpoch}';
-  final doc = prepareWebViewDocument(
-    html: html,
-    baseUrl: request.url,
-    javaScript: request.javaScript,
-    sourceRegex: request.sourceRegex,
-    proxyImages: true,
-    messageId: id,
-  );
-  final iframe = _document.callMethod('createElement'.toJS, 'iframe'.toJS);
-  if (iframe == null) return null;
-  final node = iframe as JSObject;
-  node.setProperty('srcdoc'.toJS, doc.toJS);
-  final styleAny = node.getProperty('style'.toJS);
-  if (styleAny != null) {
-    final style = styleAny as JSObject;
-    style.setProperty('position'.toJS, 'fixed'.toJS);
-    style.setProperty('left'.toJS, '-9999px'.toJS);
-    style.setProperty('width'.toJS, '1px'.toJS);
-    style.setProperty('height'.toJS, '1px'.toJS);
-    style.setProperty('opacity'.toJS, '0'.toJS);
-    style.setProperty('pointer-events'.toJS, 'none'.toJS);
-  }
-  final bodyAny = _document.getProperty('body'.toJS);
-  if (bodyAny == null) return null;
-  final body = bodyAny as JSObject;
-  final completer = Completer<WebViewResult?>();
-  late final JSFunction handler;
-  void onMessage(JSAny event) {
-    if (completer.isCompleted) return;
-    try {
-      final data = (event as JSObject).getProperty('data'.toJS);
-      final raw = _jsonStringify(data);
-      final map = jsonDecode(raw);
-      if (map is! Map) return;
-      if (map['type'] != 'chloris-wv-done') return;
-      if (map['id']?.toString() != id) return;
-      completer.complete(
-        WebViewResult(
-          body: map['body']?.toString() ?? '',
-          url: map['url']?.toString() ?? request.url,
-          cookie: map['cookie']?.toString(),
-        ),
-      );
-    } catch (_) {}
-  }
+final _browserAborts = <String, Completer<void>>{};
+Future<void> cancelBrowserSession(String id) async {
+  final pending = _browserAborts.remove(id);
+  if (pending != null && !pending.isCompleted) pending.complete();
+  final connection = await ServerConnection.load();
+  final base = connection.isConfigured
+      ? Uri.parse(connection.normalizedBaseUrl)
+      : Uri.base;
+  await http
+      .delete(
+        base.resolve('/api/music/v1/browser/$id'),
+        headers: {
+          if (connection.token.isNotEmpty)
+            'authorization': 'Bearer ${connection.token}',
+        },
+      )
+      .timeout(const Duration(seconds: 2))
+      .catchError((Object _) => http.Response('', 503));
+}
 
-  handler = onMessage.toJS;
-  _window.callMethod('addEventListener'.toJS, 'message'.toJS, handler);
-  body.callMethod('appendChild'.toJS, node);
+Future<WebViewResult?> evaluateInBrowser(WebViewRequest request) async {
+  final connection = await ServerConnection.load();
+  final base = connection.isConfigured
+      ? Uri.parse(connection.normalizedBaseUrl)
+      : Uri.base;
+  final id =
+      HttpSession.current ??
+      'browser-${++_seq}-${DateTime.now().microsecondsSinceEpoch}';
+  final abort = Completer<void>();
+  _browserAborts[id] = abort;
+  final client = http.Client();
   try {
-    return await completer.future.timeout(
-      const Duration(seconds: 18),
-      onTimeout: () => null,
+    final message =
+        http.AbortableRequest(
+            'POST',
+            base.resolve('/api/music/v1/browser'),
+            abortTrigger: abort.future,
+          )
+          ..headers.addAll({
+            'content-type': 'application/json',
+            if (connection.token.isNotEmpty)
+              'authorization': 'Bearer ${connection.token}',
+          })
+          ..body = jsonEncode({
+            'id': id,
+            'url': request.url,
+            'html': request.html,
+            'headers': request.headers,
+            'capture': browserCaptureScript(),
+            'script': browserResultScript(request),
+            'timeoutMs': 20000,
+          });
+    final response = await client
+        .send(message)
+        .then(http.Response.fromStream)
+        .timeout(const Duration(seconds: 21));
+    if (response.statusCode != 200)
+      throw UnsupportedError('动态解析服务不可用，请连接已安装 Chromium worker 的 Chloris 服务');
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    if (data['error'] != null) throw StateError('${data['error']}');
+    return WebViewResult(
+      body: '${data['body'] ?? ''}',
+      url: '${data['url'] ?? request.url}',
+      cookie: data['cookie'] as String?,
     );
   } finally {
-    try {
-      _window.callMethod('removeEventListener'.toJS, 'message'.toJS, handler);
-    } catch (_) {}
-    try {
-      node.callMethod('remove'.toJS);
-    } catch (_) {
-      try {
-        body.callMethod('removeChild'.toJS, node);
-      } catch (_) {}
-    }
+    _browserAborts.remove(id);
+    client.close();
+    await cancelBrowserSession(id);
   }
 }
 

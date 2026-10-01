@@ -4,6 +4,9 @@ import 'dart:js_interop_unsafe';
 
 import 'package:chloris_engine/chloris_engine.dart';
 
+JsRuntime createPlatformJsRuntime() => FlutterJsRuntime();
+void disposePlatformJsRuntime(JsRuntime runtime) {}
+
 @JS('eval')
 external JSAny? _browserEval(String code);
 
@@ -64,11 +67,7 @@ class FlutterJsRuntime implements JsRuntime {
   }
 
   @override
-  Future<Object?> eval(
-    String code,
-    JsScope scope, {
-    Duration? timeout,
-  }) async {
+  Future<Object?> eval(String code, JsScope scope, {Duration? timeout}) async {
     // timeout 为尽力而为提示：浏览器 eval 无法从外部中断；保护由
     // JsHostBridge.evalWithDeadline 的 Future.timeout 承担。此处忽略。
     _ensureHook();

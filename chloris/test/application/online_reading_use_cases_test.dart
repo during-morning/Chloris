@@ -5,6 +5,31 @@ import 'package:chloris/application/online/online_book_port.dart';
 import 'package:chloris/application/online/online_reading_use_cases.dart';
 
 void main() {
+  test('音频章节再次打开从缓存恢复歌词与资源地址', () async {
+    final port = _FakeOnlineBookPort()..content = 'https://cdn.example/a.mp3';
+    final store = _FakeContentStore();
+    final loader = LoadOnlineChapterContentUseCase(port, store);
+    final source = BookSource(bookSourceUrl: 'https://source.example');
+    final book = Book(
+      bookUrl: 'https://source.example/book',
+      type: BookType.audio,
+    );
+    final chapter = BookChapter(
+      url: 'https://source.example/chapter',
+      variable: '{"lyric":"[00:01]歌词","token":"x"}',
+      resourceUrl: 'https://cdn.example/a.mp3',
+    );
+    await loader(source: source, book: book, chapter: chapter);
+    final reopened = BookChapter(url: chapter.url);
+    expect(
+      await loader(source: source, book: book, chapter: reopened),
+      port.content,
+    );
+    expect(reopened.getVariable('lyric'), '[00:01]歌词');
+    expect(reopened.getVariable('token'), 'x');
+    expect(reopened.resourceUrl, chapter.resourceUrl);
+    expect(port.contentCalls, 1);
+  });
   test(
     'search use case classifies transport failures at the search stage',
     () async {
@@ -70,34 +95,37 @@ void main() {
     expect(chapters.map((e) => e.title), ['第一章', '第二章']);
   });
 
-  test('background TOC expand skips sources without a next-page rule', () async {
-    final port = _FakeOnlineBookPort()
-      ..chapters = [
-        BookChapter(url: 'a', title: '第一章'),
-        BookChapter(url: 'b', title: '第二章'),
-      ];
-    final useCase = LoadOnlineCatalogUseCase(port, _FakeCatalogStore());
-    final source = BookSource(bookSourceUrl: 'https://source.example');
-    final book = Book(
-      bookUrl: 'https://source.example/book',
-      origin: source.bookSourceUrl,
-    );
+  test(
+    'background TOC expand skips sources without a next-page rule',
+    () async {
+      final port = _FakeOnlineBookPort()
+        ..chapters = [
+          BookChapter(url: 'a', title: '第一章'),
+          BookChapter(url: 'b', title: '第二章'),
+        ];
+      final useCase = LoadOnlineCatalogUseCase(port, _FakeCatalogStore());
+      final source = BookSource(bookSourceUrl: 'https://source.example');
+      final book = Book(
+        bookUrl: 'https://source.example/book',
+        origin: source.bookSourceUrl,
+      );
 
-    await useCase.expandInBackground(
-      source: source,
-      seed: book,
-      currentLength: 2,
-    );
-    expect(port.catalogCalls, 0);
+      await useCase.expandInBackground(
+        source: source,
+        seed: book,
+        currentLength: 2,
+      );
+      expect(port.catalogCalls, 0);
 
-    source.ruleToc = TocRule(nextTocUrl: 'class.next@href');
-    await useCase.expandInBackground(
-      source: source,
-      seed: book,
-      currentLength: 2,
-    );
-    expect(port.catalogCalls, 1);
-  });
+      source.ruleToc = TocRule(nextTocUrl: 'class.next@href');
+      await useCase.expandInBackground(
+        source: source,
+        seed: book,
+        currentLength: 2,
+      );
+      expect(port.catalogCalls, 1);
+    },
+  );
 
   test(
     'chapter content use case reads cache and rejects empty content',

@@ -1,11 +1,11 @@
 {
-    "name": "Chloris",
-    "short_name": "Chloris",
+    "name": "Cholris",
+    "short_name": "Cholris",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Cholris 跨平台阅读与音乐播放器",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

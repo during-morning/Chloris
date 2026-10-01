@@ -20,7 +20,7 @@ class EngineOnlineBookAdapter implements OnlineBookPort {
     int page = 1,
     bool Function(String name, String author, String? kind)? filter,
   }) => HttpSession.bind(
-    'search',
+    HttpSession.current ?? 'search',
     () => _facade.search(source, query, page: page, filter: filter),
   );
 
@@ -30,7 +30,7 @@ class EngineOnlineBookAdapter implements OnlineBookPort {
     String url, {
     int page = 1,
   }) => HttpSession.bind(
-    'explore',
+    HttpSession.current ?? 'explore',
     () => _facade.explore(source, url, page: page),
   );
 
@@ -64,7 +64,7 @@ class EngineOnlineBookAdapter implements OnlineBookPort {
     String? nextChapterUrl,
     int maxHops = 32,
   }) => HttpSession.bind(
-    'content:' + chapter.url,
+    HttpSession.current ?? 'content:' + chapter.url,
     () => _facade.content(
       source,
       book,

@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/persist/kv_settings.dart';
+import 'core/persist/app_db.dart';
+import 'core/startup_metrics.dart';
 import 'core/persist/settings_migrations.dart';
 import 'engine/prefs_kv_port.dart';
 
@@ -10,20 +12,26 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'app/app.dart';
+import 'app/widgets/startup_shell.dart';
 import 'app/l10n/locale_provider.dart';
 import 'app/theme/theme_provider.dart';
 import 'app/theme/app_theme.dart';
 import 'services/persist/credentials.dart';
 import 'services/persist/vault_sync.dart';
 import 'features/sources/source_library_provider.dart';
-import 'services/media_session/media_session_factory.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Render an explicit bootstrap state while storage and platform adapters
   // initialise. Without this first frame Safari shows a blank document until
   // every startup future completes (or hangs on an unavailable capability).
-  runApp(const _StartupShell());
+  runApp(const StartupShell());
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    StartupMetrics.mark('first_frame');
+  });
+  // Open SQLite after the first frame so it is ready by the time shelf/cache
+  // providers need it, without delaying the bootstrap UI.
+  unawaited(AppDb.open());
   FlutterError.onError = (details) {
     DebugLog.error('flutter', details.exceptionAsString());
     FlutterError.presentError(details);
@@ -208,35 +216,4 @@ Future<void> main() async {
       child: const ChlorisApp(),
     ),
   );
-  // The OS media session only registers playback controls; it does not feed any
-  // startup setting and is not required for the first frame, so initialise it
-  // after the app is already on screen.
-  unawaited(
-    initMediaSession().catchError((error, stack) {
-      DebugLog.error('mediaSession', error.toString());
-    }),
-  );
-}
-
-class _StartupShell extends StatelessWidget {
-  const _StartupShell();
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('正在加载 Chloris…'),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

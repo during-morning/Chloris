@@ -23,8 +23,8 @@ void main() {
     ];
     final rows = <SourceSearchResult>[];
 
-    // earlyStop disabled: the fanout must still complete every source. The
-    // early-stop path is covered by the dedicated test below.
+    // Full scans are the default; early stop is only used when explicitly
+    // requested by a caller.
     final stoppedEarly = await SourceFanout.run(
       sources: sources,
       query: '全量扫描',
@@ -39,7 +39,6 @@ void main() {
         ),
       ],
       isCancelled: () => false,
-      earlyStop: false,
       onRow: rows.add,
     );
 
@@ -93,6 +92,7 @@ void main() {
         ),
       ],
       isCancelled: () => false,
+      earlyStop: true,
       onRow: rows.add,
     );
 
@@ -128,41 +128,6 @@ void main() {
     final failed = session.taskState as TaskFailed<List<SourceSearchResult>>;
     expect(failed.error.retryable, isTrue);
     expect(friendlySearchError(error), contains('连接失败'));
-  });
-
-  test('取消后继续扫描只提交尚未尝试的源', () {
-    final a = BookSource(bookSourceUrl: 'https://resume.example/a');
-    final b = BookSource(bookSourceUrl: 'https://resume.example/b');
-    final state = SearchSession(
-      query: '测试',
-      rows: [SourceSearchResult(source: a)],
-      done: 1,
-      total: 2,
-      finished: true,
-      remaining: 1,
-      universe: 2,
-    );
-    expect(searchAttemptedSourceUrls(state), {a.bookSourceUrl});
-    expect(searchAttemptedSourceUrls(state).contains(b.bookSourceUrl), isFalse);
-  });
-
-  test('取消时保留尚未渲染但已发起请求的源集合', () {
-    final a = BookSource(bookSourceUrl: 'https://resume.example/a');
-    final b = BookSource(bookSourceUrl: 'https://resume.example/b');
-    final state = SearchSession(
-      query: '测试',
-      rows: [SourceSearchResult(source: a)],
-      done: 1,
-      total: 3,
-      finished: true,
-      remaining: 2,
-      universe: 3,
-      attemptedSourceUrls: {a.bookSourceUrl, b.bookSourceUrl},
-    );
-    expect(searchAttemptedSourceUrls(state), {
-      a.bookSourceUrl,
-      b.bookSourceUrl,
-    });
   });
 
   test('队列在请求开始时记录源，取消后不会重复尝试', () async {

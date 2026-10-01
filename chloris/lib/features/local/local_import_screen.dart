@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:chloris_engine/chloris_engine.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -42,21 +46,56 @@ class _LocalImportScreenState extends ConsumerState<LocalImportScreen> {
         return;
       }
       final rules = await ref.read(tocRulesProvider.future);
-      final service = LocalBookService(tocRules: rules);
       final name = file.name.toLowerCase();
-      final LocalBookBundle bundle;
-      if (name.endsWith('.umd')) {
-        bundle = service.parseUmd(bytes, fileName: file.name);
-      } else if (name.endsWith('.mobi') || name.endsWith('.azw3')) {
-        bundle = service.parseMobi(bytes, fileName: file.name);
-      } else if (name.endsWith('.pdf')) {
-        bundle = service.parsePdf(bytes, fileName: file.name);
-      } else if (name.endsWith('.epub')) {
-        bundle = service.parseEpub(bytes, fileName: file.name);
-      } else {
-        bundle = service.parseTxt(bytes, fileName: file.name);
-      }
-      ref.read(localShelfProvider.notifier).add(bundle);
+      final kind = name.endsWith('.umd')
+          ? 'umd'
+          : (name.endsWith('.mobi') || name.endsWith('.azw3'))
+          ? 'mobi'
+          : name.endsWith('.pdf')
+          ? 'pdf'
+          : name.endsWith('.epub')
+          ? 'epub'
+          : 'txt';
+      final parsed = await compute(parseLocalDocumentWorker, {
+        'bytes': bytes,
+        'kind': kind,
+        'fileName': file.name,
+        'tocRules': rules.map((rule) => rule.toJson()).toList(growable: false),
+      });
+      final book = Book.fromJson(
+        Map<String, dynamic>.from(parsed['book']! as Map),
+      );
+      final chapters = (parsed['chapters']! as List<dynamic>)
+          .whereType<Map>()
+          .map((entry) {
+            final chapter = BookChapter.fromJson(
+              Map<String, dynamic>.from(entry),
+            );
+            chapter.bookUrl = book.bookUrl;
+            return chapter;
+          })
+          .toList(growable: false);
+      final contents = Map<String, dynamic>.from(
+        parsed['contents']! as Map,
+      ).map((key, value) => MapEntry(key, value?.toString() ?? ''));
+      final bundle = LocalBookBundle(
+        book: book,
+        chapters: chapters,
+        document: null,
+        rawBytes: bytes,
+        chapterContent: contents,
+        isPdf: parsed['isPdf'] == true,
+        isUmd: kind == 'umd',
+        htmlDocument: parsed['isHtml'] == true,
+        format: switch (kind) {
+          'pdf' => LocalDocumentFormat.pdf,
+          'epub' => LocalDocumentFormat.epub,
+          'mobi' => LocalDocumentFormat.mobi,
+          'txt' => LocalDocumentFormat.txt,
+          _ => null,
+        },
+      );
+      await ref.read(localShelfProvider.notifier).addAndPersist(bundle);
       setState(() => _error = null);
     } catch (e) {
       setState(() => _error = '导入失败：' + e.toString());
@@ -190,7 +229,7 @@ void openLocalReader(
   );
 }
 
-class LocalChapterReader extends StatefulWidget {
+class LocalChapterReader extends ConsumerStatefulWidget {
   const LocalChapterReader({
     super.key,
     required this.bundle,
@@ -203,12 +242,53 @@ class LocalChapterReader extends StatefulWidget {
   final int index;
 
   @override
-  State<LocalChapterReader> createState() => _LocalChapterReaderState();
+  ConsumerState<LocalChapterReader> createState() => _LocalChapterReaderState();
 }
 
-class _LocalChapterReaderState extends State<LocalChapterReader> {
+class _LocalChapterReaderState extends ConsumerState<LocalChapterReader> {
   late BookChapter chapter = widget.chapter;
   late int index = widget.index;
+  String _content = '';
+  Uint8List? _pdfBytes;
+  Object? _loadError;
+  bool _loading = true;
+  int _loadToken = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadCurrent());
+  }
+
+  Future<void> _loadCurrent() async {
+    final token = ++_loadToken;
+    setState(() {
+      _loading = true;
+      _loadError = null;
+      _content = '';
+    });
+    try {
+      final shelf = ref.read(localShelfProvider.notifier);
+      final bytes = widget.bundle.isPdf
+          ? await shelf.readOriginal(widget.bundle)
+          : null;
+      final text = widget.bundle.isPdf
+          ? ''
+          : await shelf.readChapter(widget.bundle, chapter);
+      if (!mounted || token != _loadToken) return;
+      setState(() {
+        _pdfBytes = bytes;
+        _content = text;
+        _loading = false;
+      });
+    } catch (error) {
+      if (!mounted || token != _loadToken) return;
+      setState(() {
+        _loadError = error;
+        _loading = false;
+      });
+    }
+  }
 
   void _open(int j) {
     if (j < 0 || j >= widget.bundle.chapters.length) return;
@@ -224,18 +304,40 @@ class _LocalChapterReaderState extends State<LocalChapterReader> {
       chapter = ch;
       index = j;
     });
+    unawaited(_loadCurrent());
   }
 
   @override
   Widget build(BuildContext context) {
     final bundle = widget.bundle;
-    if (bundle.isPdf && bundle.rawBytes != null) {
+    if (_loading) {
       return Scaffold(
         appBar: AppBar(title: Text(bundle.book.name)),
-        body: PdfViewer(bytes: bundle.rawBytes!, name: bundle.book.name),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
-    final text = bundle.content(chapter);
+    if (_loadError != null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(bundle.book.name)),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('无法读取本地书籍'),
+              const SizedBox(height: 8),
+              FilledButton(onPressed: _loadCurrent, child: const Text('重试')),
+            ],
+          ),
+        ),
+      );
+    }
+    if (bundle.isPdf && _pdfBytes != null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(bundle.book.name)),
+        body: PdfViewer(bytes: _pdfBytes!, name: bundle.book.name),
+      );
+    }
+    final text = _content;
     if (bundle.isHtml) {
       return ReaderScreen(
         content: text,

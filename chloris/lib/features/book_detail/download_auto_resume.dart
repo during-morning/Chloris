@@ -12,6 +12,7 @@ final downloadAutoResumeProvider = FutureProvider<int>((ref) async {
   await jobs.restored;
   if (jobs.pendingJobs.isEmpty) return 0;
   return jobs.resumePending(
+    includeCancelled: false,
     resolve: (job) async => resolvePersistedDownloadJob(
       metadata: job.metadata,
       bookName: job.bookName,

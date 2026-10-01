@@ -45,13 +45,14 @@ class SourceFanout {
     /// [EngineLimits.searchEarlyStopHits]. Set to `false` to always scan every
     /// source regardless of hits (used by change-source, which ranks
     /// alternatives by score and benefits from scanning all candidates).
-    bool earlyStop = true,
+    bool earlyStop = false,
   }) async {
     if (sources.isEmpty) return false;
     final cacheReady = SearchHitCache.ensureLoaded();
     final healthReady = SourceHealthStore.ensureLoaded();
     if (waitForCache) await cacheReady;
     final claimed = List<bool>.filled(sources.length, false);
+    final sourceHosts = sources.map(searchSourceHost).toList(growable: false);
     final inFlightHost = <String, int>{};
     final hostCap = EngineLimits.searchHostCap;
     final cap = EngineLimits.searchPool;
@@ -94,7 +95,7 @@ class SourceFanout {
         var idx = -1;
         for (var i = 0; i < sources.length; i++) {
           if (claimed[i]) continue;
-          final host = searchSourceHost(sources[i]);
+          final host = sourceHosts[i];
           if (hostCap > 0 && (inFlightHost[host] ?? 0) >= hostCap) continue;
           claimed[i] = true;
           if (hostCap > 0) {
@@ -118,7 +119,7 @@ class SourceFanout {
           query: query,
           page: page,
         );
-        final host = searchSourceHost(source);
+        final host = sourceHosts[idx];
         final sw = Stopwatch()..start();
         var failed = false;
         var fromCache = false;

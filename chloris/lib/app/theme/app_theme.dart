@@ -1548,7 +1548,12 @@ abstract final class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           shape: boxStrong,
           elevation: 0,
-          textStyle: textTheme.labelLarge,
+          textStyle: WidgetStateTextStyle.resolveWith((states) {
+            final color = states.contains(WidgetState.disabled)
+                ? scheme.onSurfaceVariant
+                : scheme.onInverseSurface;
+            return textTheme.labelLarge!.copyWith(color: color);
+          }),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(

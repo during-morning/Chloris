@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import '../audio_focus.dart';
 
 /// Web 视频播放（video_player）。
 class VideoEngineView extends StatefulWidget {
@@ -18,14 +19,23 @@ class _VideoEngineViewState extends State<VideoEngineView> {
   void initState() {
     super.initState();
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url));
-    _controller.initialize().then((_) {
-      _controller.play();
-      if (mounted) setState(() => _ready = true);
-    }).catchError((_) {});
+    AudioFocusCoordinator.instance.register('video', _controller.pause);
+    _controller
+        .initialize()
+        .then((_) async {
+          if (!mounted ||
+              !await AudioFocusCoordinator.instance.acquire('video')) {
+            return;
+          }
+          _controller.play();
+          if (mounted) setState(() => _ready = true);
+        })
+        .catchError((_) {});
   }
 
   @override
   void dispose() {
+    AudioFocusCoordinator.instance.unregister('video');
     _controller.dispose();
     super.dispose();
   }
@@ -34,7 +44,9 @@ class _VideoEngineViewState extends State<VideoEngineView> {
   Widget build(BuildContext context) {
     if (!_ready) return const Center(child: CircularProgressIndicator());
     return AspectRatio(
-      aspectRatio: _controller.value.aspectRatio > 0 ? _controller.value.aspectRatio : 16 / 9,
+      aspectRatio: _controller.value.aspectRatio > 0
+          ? _controller.value.aspectRatio
+          : 16 / 9,
       child: VideoPlayer(_controller),
     );
   }

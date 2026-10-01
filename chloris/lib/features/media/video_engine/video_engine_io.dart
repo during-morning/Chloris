@@ -1,3 +1,5 @@
+import 'dart:async';
+import '../audio_focus.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -21,11 +23,19 @@ class _VideoEngineViewState extends State<VideoEngineView> {
     MediaKit.ensureInitialized();
     _player = Player();
     _controller = VideoController(_player);
-    _player.open(Media(widget.url));
+    AudioFocusCoordinator.instance.register('video', () async {
+      await _player.pause();
+    });
+    unawaited(
+      AudioFocusCoordinator.instance.acquire('video').then((granted) async {
+        if (granted && mounted) await _player.open(Media(widget.url));
+      }),
+    );
   }
 
   @override
   void dispose() {
+    AudioFocusCoordinator.instance.unregister('video');
     _player.dispose();
     super.dispose();
   }

@@ -1,11 +1,54 @@
+import 'dart:convert';
+import 'package:flutter/services.dart';
+import '../../core/http/http_session.dart';
+import 'native_browser_script.dart';
 import 'package:chloris_engine/chloris_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart' as html_parser;
 
 import '../widgets/meow.dart';
 
+const nativeBrowserChannel = MethodChannel('chloris/browser');
+Future<void> cancelBrowserSession(String id) => nativeBrowserChannel
+    .invokeMethod<void>('close', {'id': id})
+    .catchError((Object _) {});
 Future<WebViewResult?> evaluateInBrowser(WebViewRequest request) async {
-  return null;
+  final id =
+      HttpSession.current ?? 'browser-${DateTime.now().microsecondsSinceEpoch}';
+  try {
+    final result = await nativeBrowserChannel
+        .invokeMethod<Object>('run', {
+          'id': id,
+          'url': request.url,
+          'html': request.html,
+          'headers': request.headers,
+          'capture': browserCaptureScript(),
+          'script': browserResultScript(request),
+          'timeoutMs': 20000,
+        })
+        .timeout(const Duration(seconds: 20));
+    if (result == null) return null;
+    var data = result is String ? jsonDecode(result) : result;
+    if (data is Map && data['serialized'] is String) {
+      final nativeCookie = data['nativeCookie'];
+      data = jsonDecode(data['serialized'] as String);
+      if (data is Map && nativeCookie != null) data['cookie'] = nativeCookie;
+    }
+    if (data is! Map) return null;
+    return WebViewResult(
+      body: data['body']?.toString() ?? '',
+      url: Uri.tryParse(data['url']?.toString() ?? '')?.hasAuthority == true
+          ? data['url'].toString()
+          : request.url,
+      cookie: data['cookie']?.toString(),
+    );
+  } on MissingPluginException {
+    throw UnsupportedError('此平台动态解析环境未安装');
+  } finally {
+    await nativeBrowserChannel
+        .invokeMethod<void>('close', {'id': id})
+        .catchError((Object _) {});
+  }
 }
 
 class LoginWebEmbed extends StatefulWidget {

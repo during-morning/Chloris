@@ -1,10 +1,13 @@
 import 'dart:collection';
 
+import 'package:flutter/painting.dart';
+
 /// Stable inputs that affect chapter pagination. Menu visibility is deliberately
 /// absent because the reader menu is an overlay, not part of the text geometry.
 final class ReaderLayoutKey {
   const ReaderLayoutKey({
     required this.contentHash,
+    this.content,
     required this.chapterTitle,
     required this.bookTitle,
     required this.bookAuthor,
@@ -20,6 +23,8 @@ final class ReaderLayoutKey {
     required this.letterSpacing,
     required this.fontFamily,
     required this.textScaler,
+    this.scaler,
+    this.textStyle,
     required this.paragraphSpacing,
     required this.doublePage,
   });
@@ -27,6 +32,10 @@ final class ReaderLayoutKey {
   static const algorithmVersion = 2;
 
   final int contentHash;
+
+  /// Retaining the immutable chapter string makes equality collision-safe;
+  /// the hash remains as a quick discriminator and for older callers.
+  final String? content;
   final String chapterTitle;
   final String bookTitle;
   final String bookAuthor;
@@ -42,6 +51,8 @@ final class ReaderLayoutKey {
   final int letterSpacing;
   final String? fontFamily;
   final int textScaler;
+  final TextScaler? scaler;
+  final TextStyle? textStyle;
   final int paragraphSpacing;
   final bool doublePage;
 
@@ -49,6 +60,7 @@ final class ReaderLayoutKey {
   bool operator ==(Object other) =>
       other is ReaderLayoutKey &&
       other.contentHash == contentHash &&
+      other.content == content &&
       other.chapterTitle == chapterTitle &&
       other.bookTitle == bookTitle &&
       other.bookAuthor == bookAuthor &&
@@ -64,13 +76,16 @@ final class ReaderLayoutKey {
       other.letterSpacing == letterSpacing &&
       other.fontFamily == fontFamily &&
       other.textScaler == textScaler &&
+      other.scaler == scaler &&
+      other.textStyle == textStyle &&
       other.paragraphSpacing == paragraphSpacing &&
       other.doublePage == doublePage;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     algorithmVersion,
     contentHash,
+    content,
     chapterTitle,
     bookTitle,
     bookAuthor,
@@ -86,9 +101,11 @@ final class ReaderLayoutKey {
     letterSpacing,
     fontFamily,
     textScaler,
+    scaler,
+    textStyle,
     paragraphSpacing,
     doublePage,
-  );
+  ]);
 }
 
 class ReaderLayoutCache<T> {

@@ -1,6 +1,6 @@
-# chloris
+# Cholris
 
-Chloris Flutter 应用（跨平台阅读器）。规则引擎见 `../packages/chloris_engine`。
+Cholris Flutter 应用（跨平台阅读与音乐播放器）。规则引擎见 `../packages/chloris_engine`。
 
 ## 运行
 ```bash

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chloris_engine/chloris_engine.dart';
 
 import 'online_book_port.dart';
@@ -173,6 +175,24 @@ class LoadOnlineChapterContentUseCase {
   final OnlineBookPort _port;
   final ChapterContentStore _store;
 
+  static const _mediaCachePrefix = '\u0000media-chapter-v1:';
+
+  String _restoreCachedChapter(String cached, BookChapter chapter) {
+    if (!cached.startsWith(_mediaCachePrefix)) return cached;
+    try {
+      final data = jsonDecode(cached.substring(_mediaCachePrefix.length));
+      if (data is Map && data['content'] is String) {
+        if (data['variable'] is String) chapter.variable = data['variable'];
+        if (data['resourceUrl'] is String) {
+          chapter.resourceUrl = data['resourceUrl'];
+        }
+        return data['content'] as String;
+      }
+    } catch (_) {}
+    // A damaged metadata envelope should be refetched, never shown as text.
+    return '';
+  }
+
   Future<String> call({
     required BookSource source,
     required Book book,
@@ -183,8 +203,21 @@ class LoadOnlineChapterContentUseCase {
   }) async {
     await _store.ensureLoaded();
     if (useCache) {
-      final cached = _store.get(source.bookSourceUrl, chapter.url);
-      if (cached != null && cached.trim().isNotEmpty) return cached;
+      final cached = _store is AsyncChapterContentStore
+          ? await (_store as AsyncChapterContentStore).read(
+              source.bookSourceUrl,
+              chapter.url,
+            )
+          : _store.get(source.bookSourceUrl, chapter.url);
+      final needsMediaMetadata =
+          book.isAudio &&
+          (source.getContentRule().subContent ?? '').isNotEmpty &&
+          chapter.getVariable('lyric').isEmpty &&
+          cached?.startsWith(_mediaCachePrefix) != true;
+      if (cached != null && !needsMediaMetadata) {
+        final content = _restoreCachedChapter(cached, chapter);
+        if (content.trim().isNotEmpty) return content;
+      }
     }
     _validateChapterIdentity(source, book, chapter);
     try {
@@ -207,7 +240,13 @@ class LoadOnlineChapterContentUseCase {
           suggestedAction: '请重试、重新登录或更换书源',
         );
       }
-      await _store.put(source.bookSourceUrl, chapter.url, content);
+      // Lyrics are produced while loading content, after the catalog was
+      // cached. Persist them alongside audio content so reopening a chapter
+      // or using a prefetched chapter does not lose subContent metadata.
+      final cached = book.isAudio || book.isVideo
+          ? '$_mediaCachePrefix${jsonEncode({'content': content, 'variable': chapter.variable, 'resourceUrl': chapter.resourceUrl})}'
+          : content;
+      await _store.put(source.bookSourceUrl, chapter.url, cached);
       return content;
     } catch (error) {
       throw DomainError.from(

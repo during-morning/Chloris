@@ -20,11 +20,7 @@ class WebViewRequest {
 }
 
 class WebViewResult {
-  const WebViewResult({
-    required this.body,
-    required this.url,
-    this.cookie,
-  });
+  const WebViewResult({required this.body, required this.url, this.cookie});
 
   final String body;
   final String url;
@@ -75,7 +71,8 @@ String prepareWebViewDocument({
       (m) => '<html${m.group(1)}><head>$baseTag</head>',
     );
   } else {
-    body = '<!DOCTYPE html><html><head>$baseTag</head><body>$body</body></html>';
+    body =
+        '<!DOCTYPE html><html><head>$baseTag</head><body>$body</body></html>';
   }
   if (proxyImages) {
     body = body.replaceAllMapped(
@@ -184,3 +181,8 @@ String _interactiveBoot(String id) {
 
 String _jsString(String s) =>
     "'${s.replaceAll(r'\', r'\\').replaceAll("'", r"\'")}'";
+
+/// Optional lifecycle control for headless browser sessions.
+abstract interface class SessionAwareWebView {
+  void cancelSession(String id);
+}

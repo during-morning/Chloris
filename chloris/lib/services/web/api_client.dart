@@ -131,10 +131,16 @@ class ChlorisApiClient {
     ];
   }
 
-  Future<({String title, String content})> bookContent(
-    String bookUrl,
-    int chapterIndex,
-  ) async {
+  Future<
+    ({
+      String title,
+      String content,
+      String? resourceUrl,
+      String? variable,
+      Map<String, String> mediaHeaders,
+    })
+  >
+  bookContent(String bookUrl, int chapterIndex) async {
     final data = await _call(
       ChlorisApiRoute.getBookContent,
       query: BookContentQuery(
@@ -153,6 +159,13 @@ class ChlorisApiClient {
     return (
       title: data['title']?.toString() ?? '',
       content: data['content']?.toString() ?? '',
+      resourceUrl: data['resourceUrl']?.toString(),
+      variable: data['variable']?.toString(),
+      mediaHeaders: data['mediaHeaders'] is Map
+          ? (data['mediaHeaders'] as Map).map<String, String>(
+              (key, value) => MapEntry(key.toString(), value.toString()),
+            )
+          : const <String, String>{},
     );
   }
 

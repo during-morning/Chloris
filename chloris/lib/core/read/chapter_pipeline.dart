@@ -113,7 +113,7 @@ class ChapterPipeline {
       stripLeadingTitle(chapterTitle, htmlToPlain(text)),
       paragraphGap: '\n\n',
       indent: paragraphIndent,
-    );
+    ).replaceAll(RegExp(r'\r\n?'), '\n');
   }
 
   static String htmlToPlain(String raw) {
@@ -125,7 +125,8 @@ class ChapterPipeline {
     for (final e in doc.querySelectorAll('p,div,li,h1,h2,h3,blockquote')) {
       e.append(html_dom.Text('\n\n'));
     }
-    final plain = doc.body?.text
+    final plain =
+        doc.body?.text
             .replaceAll(_lineSeparators, '\n')
             .replaceAll(RegExp(r'\n{3,}'), '\n\n')
             .trim() ??

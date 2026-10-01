@@ -1,3 +1,5 @@
+import '../features/media/music_workspace.dart';
+import '../features/media/music_source_screens.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,7 +16,7 @@ import '../features/settings/settings_screen.dart';
 import '../features/sources/sources_screen.dart';
 import 'route_args.dart';
 
-const _homePaths = ['/library', '/search', '/explore', '/settings'];
+const _homePaths = ['/library', '/search', '/explore', '/music', '/settings'];
 const bookDetailRoute = '/book/detail';
 const readerRoute = '/reader';
 const readerTocRoute = '/reader/toc';
@@ -29,11 +31,14 @@ final GoRouter appRouter = GoRouter(
   redirect: (context, state) async {
     if (_homeRestored) return null;
     _homeRestored = true;
-    if (!_homePaths.contains(state.uri.path)) return null;
+    if (state.uri.path != '/library') return null;
     try {
       final p = await KvSettings.ready();
-      final i = (p.getInt('homeBranch') ?? 0).clamp(0, _homePaths.length - 1);
-      final want = _homePaths[i];
+      final saved = p.getString('homeDestination');
+      final legacy = (p.getInt('homeBranch') ?? 0).clamp(0, 3);
+      final want = saved != null && _homePaths.contains(saved)
+          ? saved
+          : const ['/library', '/search', '/explore', '/settings'][legacy];
       if (want != state.uri.path) return want;
     } catch (_) {}
     return null;
@@ -92,7 +97,31 @@ final GoRouter appRouter = GoRouter(
             ),
           ],
         ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/music',
+              builder: (context, state) => const MusicWorkspace(),
+            ),
+          ],
+        ),
       ],
+    ),
+    GoRoute(
+      path: '/music/player',
+      builder: (context, state) => const MusicFullPlayer(),
+    ),
+    GoRoute(
+      path: '/music/search',
+      builder: (context, state) => const MusicSearchScreen(),
+    ),
+    GoRoute(
+      path: '/music/resolve',
+      builder: (context, state) => const MusicResolveScreen(),
+    ),
+    GoRoute(
+      path: '/music/settings',
+      builder: (context, state) => const MusicSettingsScreen(),
     ),
     GoRoute(
       path: bookDetailRoute,

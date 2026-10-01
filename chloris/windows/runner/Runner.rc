@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.during" "\0"
-            VALUE "FileDescription", "Chloris" "\0"
+            VALUE "FileDescription", "Cholris" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "chloris" "\0"
+            VALUE "InternalName", "Cholris" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.during. All rights reserved." "\0"
-            VALUE "OriginalFilename", "chloris.exe" "\0"
-            VALUE "ProductName", "Chloris" "\0"
+            VALUE "OriginalFilename", "Cholris.exe" "\0"
+            VALUE "ProductName", "Cholris" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'dart:io';
+import 'package:flutter/services.dart';
 
 import 'package:chloris_engine/chloris_engine.dart';
 import 'package:chloris/engine/engine_facade.dart';
@@ -45,6 +47,17 @@ class _ChangeSourceFacade extends EngineFacade {
   }
 }
 
+class _MemoryContentStore implements ChapterContentStore {
+  @override
+  Future<void> ensureLoaded() async {}
+  @override
+  String? get(String source, String chapter) => null;
+  @override
+  Future<void> put(String source, String chapter, String content) async {}
+  @override
+  Future<void> remove(String source, String chapter) async {}
+}
+
 class _MemoryCatalogStore implements ChapterCatalogStore {
   _MemoryCatalogStore(this.bookUrl, this.chapters);
 
@@ -75,6 +88,7 @@ class _MemoryCatalogStore implements ChapterCatalogStore {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUp((){TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('plugins.flutter.io/path_provider'),(call) async=>Directory.systemTemp.path);});
 
   testWidgets('详情页先画搜索书信息，目录区 skeleton，加入书架可用', (tester) async {
     SharedPreferences.setMockInitialValues({});
@@ -104,16 +118,19 @@ void main() {
         index: 1,
       ),
     ];
-    await ChapterTextCache.instance.clear();
-    await ChapterTextCache.instance.put(
-      source.bookSourceUrl,
-      chapters.first.url,
-      'cached',
+    await tester.runAsync(() => ChapterTextCache.instance.clear());
+    await tester.runAsync(
+      () => ChapterTextCache.instance.put(
+        source.bookSourceUrl,
+        chapters.first.url,
+        'cached',
+      ),
     );
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          chapterContentStoreProvider.overrideWithValue(_MemoryContentStore()),
           engineFacadeProvider.overrideWithValue(
             EngineFacade(http: _SilentHttp()),
           ),
@@ -150,7 +167,7 @@ void main() {
       find.widgetWithText(FilledButton, '开始阅读'),
     );
     expect(started.onPressed, isNotNull);
-    await ChapterTextCache.instance.clear();
+    await tester.runAsync(() => ChapterTextCache.instance.clear());
   });
 
   testWidgets('换源用已有源立刻列出，点选后在当前页切换', (tester) async {
@@ -192,6 +209,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          chapterContentStoreProvider.overrideWithValue(_MemoryContentStore()),
           engineFacadeProvider.overrideWithValue(_ChangeSourceFacade()),
           chapterCatalogStoreProvider.overrideWithValue(
             _MemoryCatalogStore('https://b.com/xianni', chapters),
@@ -280,6 +298,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          chapterContentStoreProvider.overrideWithValue(_MemoryContentStore()),
           engineFacadeProvider.overrideWithValue(facade),
           allSourcesProvider.overrideWith((ref) async => [sourceA, sourceB]),
           enabledSourcesProvider.overrideWith(

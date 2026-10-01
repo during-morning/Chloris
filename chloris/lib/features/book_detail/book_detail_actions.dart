@@ -82,9 +82,7 @@ extension _BookDetailActions on _BookDetailScreenState {
       if (oldBookUrl != null) oldBookUrl,
       _searchBook.bookUrl,
     };
-    await Future.wait([
-      for (final url in stale) catalog.invalidate(url),
-    ]);
+    await Future.wait([for (final url in stale) catalog.invalidate(url)]);
     ref
         .read(onlineShelfProvider.notifier)
         .replaceBook(_searchBook.bookUrl, src, sb);
@@ -123,9 +121,9 @@ extension _BookDetailActions on _BookDetailScreenState {
       );
       if (!mounted) return;
       if (hit == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('没有找到可用的其它源，可稍后手动换源')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('没有找到可用的其它源，可稍后手动换源')));
         return;
       }
       await _applySourceSwitch(hit.source, hit.searchBook);
@@ -196,23 +194,42 @@ extension _BookDetailActions on _BookDetailScreenState {
     Book book,
     List<BookChapter> chapters,
   ) async {
-    final from = await showDialog<int>(
+    final action = await showDialog<String>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        title: const Text('下载范围'),
+        title: const Text('下载'),
         children: [
           SimpleDialogOption(
-            onPressed: () => Navigator.pop(ctx, book.durChapterIndex),
+            onPressed: () => Navigator.pop(ctx, 'current'),
             child: const Text('本章及之后'),
           ),
           SimpleDialogOption(
-            onPressed: () => Navigator.pop(ctx, 0),
+            onPressed: () => Navigator.pop(ctx, 'all'),
             child: const Text('全部章节'),
+          ),
+          const Divider(height: 8),
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(ctx, 'local'),
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const AppIcon(AppIcons.open),
+              title: Text(bookExportLabel),
+              subtitle: Text(
+                bookExportUsesOtherApps
+                    ? '生成完整 TXT，选择其他阅读应用'
+                    : '并行获取章节，导出完整 TXT 文件',
+              ),
+            ),
           ),
         ],
       ),
     );
-    if (from == null || !context.mounted) return;
+    if (action == null || !context.mounted) return;
+    if (action == 'local') {
+      await _exportBook(context, book, chapters);
+      return;
+    }
+    final from = action == 'current' ? book.durChapterIndex : 0;
     Future<void> fetchChapter(int i) async {
       await fetchChapterTextFor(
         ref,
@@ -251,6 +268,129 @@ extension _BookDetailActions on _BookDetailScreenState {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('已加入缓存队列')));
+    }
+  }
+
+  Future<void> _exportBook(
+    BuildContext context,
+    Book book,
+    List<BookChapter> chapters,
+  ) async {
+    if (chapters.isEmpty) return;
+    final progress = ValueNotifier<int>(0);
+    var cancelled = false;
+    final session = 'download.export-${DateTime.now().microsecondsSinceEpoch}';
+    final engine = ref.read(engineFacadeProvider);
+    final scheduler = ChapterDownloadScheduler.instance;
+    final anchor = context.findRenderObject();
+    final shareRect = anchor is RenderBox
+        ? anchor.localToGlobal(Offset.zero) & anchor.size
+        : null;
+    var dialogClosed = false;
+    final dialog = showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          title: Text(bookExportLabel),
+          content: ValueListenableBuilder<int>(
+            valueListenable: progress,
+            builder: (context, done, _) => Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LinearProgressIndicator(value: done / chapters.length),
+                const SizedBox(height: 12),
+                Text('并行获取章节 $done / ${chapters.length}'),
+                const SizedBox(height: 8),
+                const Text('优先复用已有缓存，保持目录顺序'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                cancelled = true;
+                scheduler.cancelPending();
+                engine.cancelSession(session);
+              },
+              child: const Text('取消'),
+            ),
+          ],
+        ),
+      ),
+    ).whenComplete(() => dialogClosed = true);
+    try {
+      final contents = List<String>.filled(chapters.length, '');
+      var cursor = 0;
+      Future<void> worker() async {
+        while (!cancelled && cursor < chapters.length) {
+          final index = cursor++, chapter = chapters[index];
+          final text = await scheduler.run(
+            host: Uri.tryParse(chapter.url)?.host ?? _source.bookSourceUrl,
+            cancelled: () => cancelled,
+            action: () => HttpSession.bind(
+              session,
+              () => fetchChapterTextFor(
+                ref,
+                _source,
+                book,
+                chapter,
+                nextChapterUrl: index + 1 < chapters.length
+                    ? chapters[index + 1].url
+                    : null,
+              ),
+            ),
+          );
+          if (cancelled) return;
+          if (text.trim().isEmpty)
+            throw FormatException('「${chapter.title}」正文为空，请更换书源后导出');
+          contents[index] = text;
+          progress.value++;
+        }
+      }
+
+      await Future.wait(
+        List.generate(
+          chapters.length.clamp(1, EngineLimits.downloadPool.clamp(1, 16)),
+          (_) => worker(),
+        ),
+        eagerError: true,
+      );
+      if (cancelled) return;
+      final bytes = await compute(buildDownloadedBook, <String, Object>{
+        'name': book.name,
+        'author': book.author,
+        'titles': chapters.map((c) => c.title).toList(),
+        'contents': contents,
+      });
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
+      dialogClosed = true;
+      await dialog;
+      await exportDownloadedBook(
+        bytes,
+        book.name,
+        book.author,
+        sharePositionOrigin: shareRect,
+      );
+    } catch (e) {
+      if (!cancelled && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('导出失败：${e.toString().split('\n').first}')),
+        );
+      }
+    } finally {
+      cancelled = true;
+      scheduler.cancelPending();
+      engine.cancelSession(session);
+      // Only close our progress dialog; a platform share sheet may have opened.
+      if (context.mounted && !dialogClosed) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+      await dialog;
+      progress.dispose();
     }
   }
 }

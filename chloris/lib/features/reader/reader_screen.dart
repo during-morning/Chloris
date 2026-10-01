@@ -1,4 +1,6 @@
+import '../media/music_workspace.dart' show readerMusicControlsVisible;
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -102,6 +104,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   bool? _lastDoublePage;
   String _plain = '';
   Object? _pipeKey;
+  List<ReplaceRule>? _fingerprintedRules;
+  String _rulesFingerprint = '';
   int _pipeToken = 0;
   int _screenPrefsToken = 0;
   DateTime _lastScrollUi = DateTime.fromMillisecondsSinceEpoch(0);
@@ -165,6 +169,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
   @override
   void dispose() {
+    readerMusicControlsVisible.value = true;
     ++_screenPrefsToken;
     _auto?.cancel();
     _hideMenu?.cancel();
@@ -491,6 +496,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if(readerMusicControlsVisible.value!=_menu) {
+      WidgetsBinding.instance.addPostFrameCallback((_) { if(mounted)readerMusicControlsVisible.value=_menu; });
+    }
     final settings = ref.watch(readerSettingsProvider);
     // 常亮/方向设置变更即时生效。
     ref.listen<ReaderSettings>(readerSettingsProvider, (prev, next) {

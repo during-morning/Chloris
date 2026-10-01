@@ -1,3 +1,4 @@
+import '../read/book_validation.dart';
 import 'package:chloris_engine/chloris_engine.dart';
 
 import 'search_models.dart';
@@ -90,7 +91,9 @@ int sourceCandidateScore(
   if (author.length >= 2) {
     final byAuthor = searchMatchScore(book, author);
     if (byAuthor >= 520 &&
-        normalizeSearchText(book.name).contains(normalizeSearchText(bookName))) {
+        normalizeSearchText(
+          book.name,
+        ).contains(normalizeSearchText(bookName))) {
       return byAuthor;
     }
   }
@@ -103,11 +106,7 @@ bool isAcceptableSourceCandidate(
   String bookAuthor = '',
 }) =>
     isUsableSearchBook(book, query: bookName) &&
-    sourceCandidateScore(
-          book,
-          bookName: bookName,
-          bookAuthor: bookAuthor,
-        ) >=
+    sourceCandidateScore(book, bookName: bookName, bookAuthor: bookAuthor) >=
         300;
 
 double _coverRatio(String text, String query) {
@@ -211,7 +210,7 @@ List<(BookSource, SearchBook)> mergeSearchRows(
 bool isUsableSearchBook(SearchBook book, {String query = ''}) {
   final name = book.name.trim();
   final url = book.bookUrl.trim();
-  if (name.length < 2 || url.isEmpty) return false;
+  if (bookIdentityError(name: name, url: url) != null) return false;
   final lower = name.toLowerCase();
   const placeholders = {
     '未知书籍',
@@ -226,7 +225,7 @@ bool isUsableSearchBook(SearchBook book, {String query = ''}) {
   };
   if (placeholders.contains(lower) ||
       lower.contains('验证码') ||
-      lower.contains('登录') ||
+      const {'登录', '用户登录', '请登录', '登录页面', '登录后继续阅读'}.contains(lower) ||
       lower.contains('词典') ||
       lower.contains('字典') ||
       isChromeBookName(name) ||

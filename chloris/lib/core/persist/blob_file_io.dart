@@ -45,12 +45,26 @@ class BlobFileBackend {
   Future<bool> write(String rel, Uint8List bytes) async {
     final path = await _resolve(rel);
     if (path == null) return false;
+    File? temp;
     try {
       final f = File(path);
       await f.parent.create(recursive: true);
-      await f.writeAsBytes(bytes, flush: true);
+      temp = File('$path.${pid}.${DateTime.now().microsecondsSinceEpoch}.tmp');
+      await temp.writeAsBytes(bytes, flush: true);
+      try {
+        await temp.rename(path);
+      } on FileSystemException {
+        // Some Windows filesystems do not replace an existing target on
+        // rename. The temp file remains on the same volume, so this fallback
+        // still avoids exposing a partially written document.
+        if (await f.exists()) await f.delete();
+        await temp.rename(path);
+      }
       return true;
     } catch (_) {
+      try {
+        if (temp != null && await temp.exists()) await temp.delete();
+      } catch (_) {}
       return false;
     }
   }

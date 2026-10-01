@@ -46,5 +46,6 @@ flutter {
 }
 
 dependencies {
+    implementation("androidx.webkit:webkit:1.16.0")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

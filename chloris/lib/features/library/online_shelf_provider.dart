@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:chloris_engine/chloris_engine.dart';
 import '../../core/persist/kv_settings.dart';
 import '../../core/persist/persist_queue.dart';
+import '../../core/startup_metrics.dart';
 import '../../core/search/search_match.dart';
 import '../../data/database/shelf_repository.dart';
 
@@ -18,6 +19,7 @@ class OnlineShelfItem {
 
   final BookSource source;
   final SearchBook searchBook;
+
   /// URL of the deduplicated identity row in `books`.
   final String? identityBookUrl;
 
@@ -28,12 +30,21 @@ class OnlineShelfItem {
 
   String get candidateBookUrl => searchBook.bookUrl;
 
+  /// Book identity used by the library is distinct from the active candidate
+  /// URL used for scraping. Keeping the identity here lets delete, pin and
+  /// progress actions address the same row that the shelf repository owns.
+  Book toShelfBook() {
+    final book = searchBook.toBook();
+    book.bookUrl = bookUrl;
+    return book;
+  }
+
   Map<String, dynamic> toJson() => {
-        'source': source.toJson(),
-        'book': searchBook.toJson(),
-        if (identityBookUrl != null && identityBookUrl!.isNotEmpty)
-          'identityBookUrl': identityBookUrl,
-      };
+    'source': source.toJson(),
+    'book': searchBook.toJson(),
+    if (identityBookUrl != null && identityBookUrl!.isNotEmpty)
+      'identityBookUrl': identityBookUrl,
+  };
 
   static OnlineShelfItem? fromJson(Map<String, dynamic> json) {
     final s = json['source'];
@@ -49,8 +60,8 @@ class OnlineShelfItem {
 
 final onlineShelfProvider =
     NotifierProvider<OnlineShelfNotifier, List<OnlineShelfItem>>(
-  OnlineShelfNotifier.new,
-);
+      OnlineShelfNotifier.new,
+    );
 
 class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
   @override
@@ -112,6 +123,7 @@ class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
         final entries = await repo.load();
         if (entries.isNotEmpty) {
           state = [for (final e in entries) _toItem(e)];
+          StartupMetrics.mark('shelf_available');
           return;
         }
       } catch (_) {
@@ -121,7 +133,10 @@ class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
 
     final p = await KvSettings.ready();
     final raw = p.getString(legacyShelfKey);
-    if (raw == null || raw.isEmpty) return;
+    if (raw == null || raw.isEmpty) {
+      StartupMetrics.mark('shelf_available');
+      return;
+    }
     try {
       final list = jsonDecode(raw) as List<dynamic>;
       final items = <OnlineShelfItem>[];
@@ -133,6 +148,7 @@ class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
       }
       if (items.isNotEmpty) state = items;
     } catch (_) {}
+    StartupMetrics.mark('shelf_available');
   }
 
   /// Writes the legacy blob.
@@ -179,8 +195,7 @@ class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
         ),
       ];
     }
-    final queueKey =
-        'shelf.add.${source.bookSourceUrl}|${searchBook.bookUrl}';
+    final queueKey = 'shelf.add.${source.bookSourceUrl}|${searchBook.bookUrl}';
     PersistQueue.instance.schedule(queueKey, () async {
       final repo = await ref.read(shelfRepositoryProvider.future);
       if (repo == null) {
@@ -273,6 +288,7 @@ class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
       await repo.top(bookUrl);
     });
   }
+
   bool contains(String bookUrl) => state.any((e) => e.bookUrl == bookUrl);
 
   static String _identityKey(String name, String author) =>

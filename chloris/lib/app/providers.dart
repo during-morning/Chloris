@@ -11,6 +11,7 @@ import '../application/online/online_book_port.dart';
 import '../application/online/online_reading_use_cases.dart';
 import 'router.dart';
 import '../core/persist/kv_settings.dart';
+import '../core/startup_metrics.dart';
 import '../application/sources/source_unify.dart';
 import '../engine/engine_facade.dart';
 import '../engine/file_port/file_port_factory.dart';
@@ -24,7 +25,19 @@ import 'webview/app_webview_port.dart';
 
 /// 引擎所需 HTTP 端口。Web 走同源服务端代理，避免 CORS。
 final httpPortProvider = Provider<HttpPort>((ref) {
-  final HttpPort port = kIsWeb ? ProxyHttpPort() : PackageHttpPort();
+  final HttpPort port = kIsWeb
+      ? ProxyHttpPort(
+          connection: () async {
+            final server = await ServerConnection.load();
+            return (
+              origin: server.isConfigured
+                  ? server.normalizedBaseUrl
+                  : Uri.base.origin,
+              token: server.token,
+            );
+          },
+        )
+      : PackageHttpPort();
   ref.onDispose(port.cancelInFlight);
   return port;
 });
@@ -66,9 +79,10 @@ final engineFacadeProvider = Provider<EngineFacade>((ref) {
   final http = ref.watch(httpPortProvider);
   final cookies = ref.watch(cookieStoreProvider);
   final hostEnvironment = AppHostEnvironment();
+  final jsRuntime = createPlatformJsRuntime();
   final facade = EngineFacade(
     http: http,
-    jsRuntime: FlutterJsRuntime(),
+    jsRuntime: jsRuntime,
     cookieStore: cookies,
     filePort: createFilePort(),
     hostEnvironment: hostEnvironment,
@@ -79,6 +93,7 @@ final engineFacadeProvider = Provider<EngineFacade>((ref) {
     ),
   );
   ref.onDispose(facade.cancelInFlight);
+  ref.onDispose(() => disposePlatformJsRuntime(jsRuntime));
   ref.onDispose(hostEnvironment.dispose);
   return facade;
 });
@@ -162,25 +177,44 @@ class EngineImageLoader {
   }) => _facade.loadImage(url, source: source, book: book, isCover: isCover);
 }
 
+final sourceMediaRequestProvider = Provider<SourceMediaRequest>((ref) {
+  return SourceMediaRequest(ref.watch(engineFacadeProvider));
+});
+
+class SourceMediaRequest {
+  const SourceMediaRequest(this._facade);
+  final EngineFacade _facade;
+
+  Future<({String url, Map<String, String> headers})> call(
+    String url, {
+    required BookSource source,
+    required Book book,
+    required BookChapter chapter,
+    Map<String, String> headers = const {},
+  }) => _facade.prepareMediaRequest(
+    url,
+    source: source,
+    book: book,
+    chapter: chapter,
+    headers: headers,
+  );
+}
+
 /// 默认书源：从打包资产加载并解析为 [BookSource] 列表。
 /// 不同平台用 rootBundle 读取资产。
 final defaultSourcesProvider = FutureProvider<List<BookSource>>((ref) async {
   final raw = await ref
       .read(assetLoaderProvider)
       .load('assets/sources/default_book_sources.json');
-  await Future<void>.delayed(Duration.zero);
-  final decoded = jsonDecode(raw) as List<dynamic>;
-  final out = <BookSource>[];
-  const chunk = 80;
-  for (var i = 0; i < decoded.length; i += chunk) {
-    final end = i + chunk > decoded.length ? decoded.length : i + chunk;
-    out.addAll(_parseSourcesList(decoded.sublist(i, end)));
-    if (end < decoded.length) {
-      await Future<void>.delayed(Duration.zero);
-    }
-  }
-  return out;
+  final sources = kIsWeb
+      ? _parseSourcesList(jsonDecode(raw) as List<dynamic>)
+      : await compute(_decodeBookSources, raw);
+  StartupMetrics.mark('sources_available');
+  return sources;
 });
+
+List<BookSource> _decodeBookSources(String raw) =>
+    _parseSourcesList(jsonDecode(raw) as List<dynamic>);
 
 /// 可注入的资产读取器，便于测试替换。
 final assetLoaderProvider = Provider<AssetLoader>(

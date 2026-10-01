@@ -3,8 +3,14 @@ import 'dart:convert';
 
 import 'package:chloris_engine/chloris_engine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../application/download/downloaded_chapter_store.dart';
+import '../../core/download/chapter_download_scheduler.dart';
+import '../../core/http/http_session.dart';
+import '../../app/providers.dart';
 import '../../application/download/download_use_cases.dart';
 import '../../core/persist/kv_settings.dart';
+import 'chapter_text_cache.dart';
 
 enum CacheJobEventType {
   restored,
@@ -114,7 +120,8 @@ class CacheJob {
     }
   }
 
-  int get pendingCount => pendingIndexes.length;
+  int get pendingCount =>
+      (targetCount - completedIndexes.length).clamp(0, targetCount);
 
   bool get hasPending => pendingCount > 0;
 
@@ -248,6 +255,14 @@ class CacheJobsNotifier extends Notifier<List<CacheJob>> {
   final StreamController<CacheJobEvent> _events =
       StreamController<CacheJobEvent>.broadcast();
   Completer<void> _restoreDone = Completer<void>();
+  Timer? _persistTimer;
+  final _runs = <String, Future<void>>{};
+  void _schedulePersist() {
+    _persistTimer ??= Timer(const Duration(milliseconds: 250), () {
+      _persistTimer = null;
+      unawaited(_persist());
+    });
+  }
 
   Stream<CacheJobEvent> get events => _events.stream;
 
@@ -261,6 +276,7 @@ class CacheJobsNotifier extends Notifier<List<CacheJob>> {
   List<CacheJob> build() {
     _restoreDone = Completer<void>();
     ref.onDispose(() {
+      _persistTimer?.cancel();
       _events.close();
       if (!_restoreDone.isCompleted) _restoreDone.complete();
     });
@@ -356,7 +372,14 @@ class CacheJobsNotifier extends Notifier<List<CacheJob>> {
     required Future<void> Function(int i) fetchChapter,
     String Function(int i)? hostOf,
   }) async {
+    final previous = _runs[job.id];
+    if (previous != null) {
+      if (!job.cancelled) return;
+      await previous;
+    }
     if (job.running) return;
+    job.running =
+        true; // Reserve before the first await to avoid duplicate resumes.
     // A failed attempt is retryable on an explicit resume. Completed indexes
     // remain durable and are never fetched twice.
     job.failedIndexes.clear();
@@ -388,20 +411,43 @@ class CacheJobsNotifier extends Notifier<List<CacheJob>> {
       ),
     );
     var resumed = 0;
+    final tasks = <Future<void>>[];
     for (final job in candidates) {
       final handler = await resolve(job);
       if (handler == null) continue;
-      await resume(
-        job,
-        fetchChapter: handler.fetchChapter,
-        hostOf: handler.hostOf,
+      tasks.add(
+        resume(job, fetchChapter: handler.fetchChapter, hostOf: handler.hostOf),
       );
       resumed++;
     }
+    await Future.wait(tasks);
     return resumed;
   }
 
   Future<void> _runJob(
+    CacheJob job, {
+    required Future<void> Function(int i) fetchChapter,
+    String Function(int i)? hostOf,
+  }) {
+    final active = _runs[job.id];
+    if (active != null) return active;
+    final completion = Completer<void>();
+    _runs[job.id] = completion.future;
+    _executeJob(job, fetchChapter: fetchChapter, hostOf: hostOf).then(
+      (_) {
+        _runs.remove(job.id);
+        completion.complete();
+      },
+      onError: (Object error, StackTrace stack) {
+        job.running = false;
+        _runs.remove(job.id);
+        completion.completeError(error, stack);
+      },
+    );
+    return completion.future;
+  }
+
+  Future<void> _executeJob(
     CacheJob job, {
     required Future<void> Function(int i) fetchChapter,
     String Function(int i)? hostOf,
@@ -413,56 +459,32 @@ class CacheJobsNotifier extends Notifier<List<CacheJob>> {
     state = [...state];
     await _persist();
     _emit(job, CacheJobEventType.started);
-    // ParallelChapterFetch has no per-host cap; keep local workers.
-    final conc = EngineLimits.downloadPool;
-    final hostCap = EngineLimits.downloadHostCap;
-    final total = job.total;
-    final fromIndex = job.fromIndex;
-    final claimed = List<bool>.filled(total, false);
-    for (var i = 0; i < fromIndex && i < total; i++) {
-      claimed[i] = true;
-    }
-    // Failed indexes are intentionally left claimable. They are retried by an
-    // explicit resume, while successful indexes remain exactly-once.
-    for (final i in job.completedIndexes) {
-      if (i >= 0 && i < total) claimed[i] = true;
-    }
-    final inFlightHost = <String, int>{};
-
-    bool allClaimed() {
-      for (var i = fromIndex; i < total; i++) {
-        if (!claimed[i]) return false;
-      }
-      return true;
-    }
+    final conc = EngineLimits.downloadPool.clamp(1, 16);
+    final pendingIndexes = job.pendingIndexes.toList();
+    final chapters = {
+      for (final chapter
+          in job.metadata?.chapters ?? <BatchDownloadChapterRef>[])
+        chapter.index: chapter,
+    };
+    var cursor = 0;
+    final scheduler = ChapterDownloadScheduler.instance;
 
     Future<void> worker() async {
-      while (true) {
+      while (cursor < pendingIndexes.length) {
         if (job.cancelled) return;
-        var i = -1;
-        for (var c = fromIndex; c < total; c++) {
-          if (claimed[c]) continue;
-          final host = hostOf?.call(c) ?? '';
-          if (host.isNotEmpty && (inFlightHost[host] ?? 0) >= hostCap) {
-            continue;
-          }
-          claimed[c] = true;
-          if (host.isNotEmpty) {
-            inFlightHost[host] = (inFlightHost[host] ?? 0) + 1;
-          }
-          i = c;
-          break;
-        }
-        if (i < 0) {
-          if (allClaimed()) return;
-          await Future<void>.delayed(const Duration(milliseconds: 40));
-          continue;
-        }
+        final i = pendingIndexes[cursor++];
         var ok = false;
         for (var attempt = 0; attempt < 2 && !ok; attempt++) {
           if (job.cancelled) break;
           try {
-            await fetchChapter(i);
+            await scheduler.run(
+              host: hostOf?.call(i) ?? '',
+              cancelled: () => job.cancelled,
+              action: () =>
+                  HttpSession.bind('download.${job.id}', () => fetchChapter(i)),
+            );
+            if (job.cancelled) return;
+            await _persistDownloadedChapter(job, i, chapter: chapters[i]);
             ok = true;
           } catch (_) {
             if (attempt == 0) {
@@ -470,15 +492,7 @@ class CacheJobsNotifier extends Notifier<List<CacheJob>> {
             }
           }
         }
-        final host = hostOf?.call(i) ?? '';
-        if (host.isNotEmpty) {
-          final n = (inFlightHost[host] ?? 1) - 1;
-          if (n <= 0) {
-            inFlightHost.remove(host);
-          } else {
-            inFlightHost[host] = n;
-          }
-        }
+        if (job.cancelled) return;
         if (ok) {
           job.failedIndexes.remove(i);
           job.completedIndexes.add(i);
@@ -490,11 +504,11 @@ class CacheJobsNotifier extends Notifier<List<CacheJob>> {
         job.done = job.completedIndexes.length + job.failedIndexes.length;
         state = [...state];
         _emit(job, CacheJobEventType.progress, index: i);
-        unawaited(_persist());
+        _schedulePersist();
       }
     }
 
-    final pending = claimed.where((value) => !value).length;
+    final pending = pendingIndexes.length;
     if (pending == 0) {
       job.running = false;
       job.paused = false;
@@ -517,8 +531,41 @@ class CacheJobsNotifier extends Notifier<List<CacheJob>> {
     }
   }
 
+  Future<void> _persistDownloadedChapter(
+    CacheJob job,
+    int index, {
+    BatchDownloadChapterRef? chapter,
+  }) async {
+    final metadata = job.metadata;
+    if (metadata == null || metadata.sourceId.trim().isEmpty) return;
+    if (chapter == null)
+      for (final candidate in metadata.chapters) {
+        if (candidate.index == index) {
+          chapter = candidate;
+          break;
+        }
+      }
+    if (chapter == null || chapter.url.trim().isEmpty) return;
+    final content = await ChapterTextCache.instance.read(
+      metadata.sourceId,
+      chapter.url,
+    );
+    if (content == null || content.isEmpty) {
+      throw StateError('下载章节正文未进入缓存：${chapter.title}');
+    }
+    if (!await DownloadedChapterStore.instance.put(
+      metadata.sourceId,
+      chapter.url,
+      content,
+    )) {
+      throw StateError('无法持久保存下载章节：${chapter.title}');
+    }
+  }
+
   void cancel(CacheJob job) {
     job.cancelled = true;
+    ChapterDownloadScheduler.instance.cancelPending();
+    ref.read(onlineBookPortProvider).cancelSession('download.${job.id}');
     job.running = false;
     job.paused = false;
     state = [...state];
@@ -527,7 +574,7 @@ class CacheJobsNotifier extends Notifier<List<CacheJob>> {
   }
 
   void clearFinished() {
-    state = state.where((j) => j.running).toList();
+    state = state.where((j) => j.running || j.hasPending).toList();
     _persist();
   }
 }

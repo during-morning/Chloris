@@ -143,15 +143,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 setState(() => _draft = v.trim());
               },
               trailing: [
-                if (!session.finished)
-                  IconButton(
-                    tooltip: '停止',
-                    onPressed: () =>
-                        ref.read(searchControllerProvider.notifier).cancel(),
-                    icon: const AppIcon(AppIcons.close),
-                  ),
                 IconButton(
-                  icon: const AppIcon(AppIcons.forward),
+                  tooltip: session.finished ? '搜索' : '打断并重新搜索',
+                  icon: AppIcon(
+                    session.finished ? AppIcons.forward : AppIcons.restart,
+                  ),
                   onPressed: _submit,
                 ),
               ],
@@ -225,13 +221,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   .read(searchControllerProvider.notifier)
                                   .loadMore(),
                               child: Text(
-                                session.remaining > 0
-                                    ? '继续搜剩余 ' +
-                                          session.remaining.toString() +
-                                          ' 源（已按测速优先）'
-                                    : '加载更多 · 第' +
-                                          (session.page + 1).toString() +
-                                          '页',
+                                '加载更多 · 第${session.page + 1}页',
                               ),
                             ),
                           ),

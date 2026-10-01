@@ -26,7 +26,6 @@ class SearchSession {
     this.group = '',
     this.remaining = 0,
     this.universe = 0,
-    this.attemptedSourceUrls = const <String>{},
   });
 
   const SearchSession.empty()
@@ -38,8 +37,7 @@ class SearchSession {
       page = 1,
       group = '',
       remaining = 0,
-      universe = 0,
-      attemptedSourceUrls = const <String>{};
+      universe = 0;
 
   final String query;
   final List<SourceSearchResult> rows;
@@ -54,12 +52,6 @@ class SearchSession {
 
   /// All sources in this scope (e.g. 3643).
   final int universe;
-
-  /// Source URLs that returned a result (including a source error) in this scan.
-  ///
-  /// This is separate from [rows] because UI progress updates are throttled.
-  /// Cancelled in-flight requests are omitted so continuation retries them.
-  final Set<String> attemptedSourceUrls;
 
   /// Unique identities shown by the merged search view. Keep [rawHits] for
   /// diagnostics; source rows can contain the same book more than once.

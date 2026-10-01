@@ -1,0 +1,1 @@
+{"name":"chloris-browser-worker","private":true,"type":"module","version":"1.0.0","engines":{"node":">=20"},"dependencies":{"playwright":"1.63.0"},"scripts":{"install-browser":"playwright install chromium","test":"node --test worker.test.mjs"}}

@@ -10,6 +10,11 @@ import 'package:shelf_router/shelf_router.dart';
 
 import 'api_contract.dart';
 import 'server_backend.dart';
+import 'media_proxy_io.dart';
+import 'proxy_target_guard.dart';
+import 'browser_worker_io.dart';
+
+export 'proxy_target_guard.dart';
 
 /// Hosts that a proxy request may not reach by default.
 ///
@@ -18,46 +23,6 @@ import 'server_backend.dart';
 /// or a private range turns it into an SSRF gadget against whatever else is
 /// listening on the user's machine or LAN, so those targets are refused unless
 /// the caller explicitly opts in.
-bool isBlockedProxyHost(String host, {bool allowPrivate = false}) {
-  if (allowPrivate) return false;
-  final h = host.toLowerCase().replaceAll(RegExp(r'^\[|\]$'), '');
-  if (h.isEmpty) return true;
-  if (h == 'localhost' || h.endsWith('.localhost') || h.endsWith('.local')) {
-    return true;
-  }
-  final addr = InternetAddress.tryParse(h);
-  if (addr == null) return false; // A public DNS name; resolution is allowed.
-  if (addr.isLoopback) return true;
-  if (addr.type == InternetAddressType.IPv4) {
-    final b = addr.rawAddress;
-    if (b[0] == 10) return true;
-    if (b[0] == 172 && b[1] >= 16 && b[1] <= 31) return true;
-    if (b[0] == 192 && b[1] == 168) return true;
-    if (b[0] == 169 && b[1] == 254) return true; // link-local
-    if (b[0] == 0) return true;
-    if (b[0] >= 224) return true; // multicast / reserved
-  } else {
-    // fc00::/7 unique-local and fe80::/10 link-local.
-    final b = addr.rawAddress;
-    if ((b[0] & 0xfe) == 0xfc) return true;
-    if (b[0] == 0xfe && (b[1] & 0xc0) == 0x80) return true;
-  }
-  return false;
-}
-
-/// Validates a proxy target before the request is made.
-String? proxyTargetError(String url, {bool allowPrivate = false}) {
-  final uri = Uri.tryParse(url);
-  if (uri == null || !uri.hasScheme) return 'invalid url';
-  if (uri.scheme != 'http' && uri.scheme != 'https') {
-    return 'unsupported scheme: ${uri.scheme}';
-  }
-  if (isBlockedProxyHost(uri.host, allowPrivate: allowPrivate)) {
-    return 'target host is not routable: ${uri.host}';
-  }
-  return null;
-}
-
 /// True when an `Origin` header belongs to this machine.
 bool isLoopbackOrigin(String origin) {
   final uri = Uri.tryParse(origin);
@@ -117,6 +82,7 @@ class ChlorisServer {
 
   final bool allowPrivateProxyTargets;
 
+  final _browser = BrowserWorker();
   HttpServer? _http;
   HttpServer? _ws;
 
@@ -235,6 +201,61 @@ class ChlorisServer {
       if (blocked != null) return _json({'error': blocked, 'code': 400});
       return _json(await proxyBytes(body));
     });
+    router.post('/api/music/v1/resolve', (Request req) async {
+      final b = backend;
+      if (b is! MusicServerBackend) return _capabilityMissing('音频解析');
+      try {
+        final raw =
+            jsonDecode(await req.readAsString()) as Map<String, dynamic>;
+        return _json(await (b as MusicServerBackend).resolveAudio(raw));
+      } catch (e) {
+        return _json({'error': '$e'});
+      }
+    });
+    router.post('/api/music/v1/browser', (Request req) async {
+      try {
+        final body =
+            jsonDecode(await req.readAsString()) as Map<String, dynamic>;
+        if (utf8.encode(jsonEncode(body)).length > 3 * 1024 * 1024)
+          return Response(413);
+        final blocked = proxyTargetError(
+          body['url']?.toString() ?? '',
+          allowPrivate: allowPrivateProxyTargets,
+        );
+        if (blocked != null) return Response.badRequest(body: blocked);
+        return _json(
+          await _browser.run(body, allowPrivate: allowPrivateProxyTargets),
+        );
+      } catch (e) {
+        return _json({'error': '$e'});
+      }
+    });
+    router.delete('/api/music/v1/browser/<id>', (Request req, String id) {
+      _browser.cancel(id);
+      return _json({'ok': true});
+    });
+    router.post('/api/music/v1/playback', (req) async {
+      final body = jsonDecode(await req.readAsString()) as Map<String, dynamic>;
+      final blocked = proxyTargetError(
+        body['url']?.toString() ?? '',
+        allowPrivate: allowPrivateProxyTargets,
+      );
+      if (blocked != null)
+        return Response(400, body: jsonEncode({'error': blocked}));
+      return _json({'id': MediaPlaybackSessions.instance.create(body)});
+    });
+    router.delete('/api/music/v1/playback/<id>', (Request req, String id) {
+      MediaPlaybackSessions.instance.release(id);
+      return _json({'ok': true});
+    });
+    router.get(
+      '/proxy/media',
+      (req) => proxyMedia(req, allowPrivate: allowPrivateProxyTargets),
+    );
+    router.head(
+      '/proxy/media',
+      (req) => proxyMedia(req, allowPrivate: allowPrivateProxyTargets),
+    );
 
     // ---- state-dependent routes (need a ServerBackend) --------------------
 
@@ -412,7 +433,11 @@ class ChlorisServer {
         .addMiddleware(_securityHeaders())
         .addMiddleware(_corsMiddleware())
         .addMiddleware(_authMiddleware())
-        .addMiddleware(logRequests())
+        .addMiddleware((inner) {
+          final logged = logRequests()(inner);
+          return (req) =>
+              req.url.path == 'proxy/media' ? inner(req) : logged(req);
+        })
         .addHandler(router.call);
     final address = bindAddress ?? InternetAddress.loopbackIPv4;
     _http = await shelf_io.serve(handler, address, httpPort);
@@ -432,8 +457,9 @@ class ChlorisServer {
           if (closed) return;
           try {
             final data = jsonDecode(msg.toString());
-            if (data is! Map)
+            if (data is! Map) {
               throw const FormatException('request must be object');
+            }
             final source =
                 data['tag']?.toString() ?? data['source']?.toString() ?? '';
             final query =
@@ -511,7 +537,12 @@ class ChlorisServer {
         // Preflight carries no credentials by design; it is answered before
         // the token check and leaks no data.
         if (req.method == 'OPTIONS') return inner(req);
-        if (!_authorized(req)) {
+        if (!(req.url.path == 'proxy/media' &&
+                MediaPlaybackSessions.instance.take(
+                      req.url.queryParameters['sid'],
+                    ) !=
+                    null) &&
+            !_authorized(req)) {
           return Response(
             HttpStatus.unauthorized,
             body: jsonEncode({'error': 'unauthorized'}),
@@ -584,6 +615,7 @@ class ChlorisServer {
   );
 
   Future<void> stop() async {
+    await _browser.dispose();
     await _http?.close(force: true);
     await _ws?.close(force: true);
     _http = null;
@@ -677,10 +709,17 @@ Future<Map<String, dynamic>> proxyHttp(Map<String, dynamic> body) async {
         }
       }
       final res = await req.close();
-      final bytes = await res.fold<List<int>>(<int>[], (p, chunk) {
-        p.addAll(chunk);
-        return p;
-      });
+      final bytes = <int>[];
+      final max = (body['maxResponseBytes'] as num?)?.toInt();
+      await for (final chunk in res) {
+        if (max != null && bytes.length + chunk.length > max) {
+          if (body['allowTruncated'] != true)
+            throw const FormatException('响应超过允许大小');
+          bytes.addAll(chunk.take(max - bytes.length));
+          break;
+        }
+        bytes.addAll(chunk);
+      }
       final headerMap = <String, String>{};
       res.headers.forEach((name, values) {
         headerMap[name] = values.join(', ');

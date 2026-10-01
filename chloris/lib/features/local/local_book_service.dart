@@ -16,6 +16,10 @@ class LocalBookBundle {
     this.isPdf = false,
     this.umdTexts,
     this.htmlContent,
+    this.chapterContent,
+    this.format,
+    this.htmlDocument = false,
+    this.isUmd = false,
   });
 
   final Book book;
@@ -26,14 +30,21 @@ class LocalBookBundle {
   final Uint8List? rawBytes;
   final bool isPdf;
   final List<String>? umdTexts;
+
   /// 兼容旧 UI 的 HTML 标志；正文实际按当前章节从 canonical document 读取。
   final String? htmlContent;
+  final Map<String, String>? chapterContent;
+  final LocalDocumentFormat? format;
+  final bool htmlDocument;
+  final bool isUmd;
 
-  bool get isHtml => document?.isHtml ?? htmlContent != null;
+  bool get isHtml => document?.isHtml ?? (htmlDocument || htmlContent != null);
 
   String content(BookChapter chapter) {
     final canonical = document;
     if (canonical != null) return canonical.contentFor(chapter.url);
+    final stored = chapterContent?[chapter.url];
+    if (stored != null) return stored;
     if (umdTexts != null) {
       final i = chapters.indexWhere((c) => c.url == chapter.url);
       if (i >= 0 && i < umdTexts!.length) return umdTexts![i];
@@ -110,10 +121,12 @@ class LocalBookService {
     String? overrideName,
   }) {
     final umd = parseUmdBytes(bytes);
-    final name = overrideName ??
+    final name =
+        overrideName ??
         (umd.title.isNotEmpty ? umd.title : _stripExt(fileName ?? 'book.umd'));
     final book = Book(
-      bookUrl: 'local:${fileName ?? 'book.umd'}_${DateTime.now().millisecondsSinceEpoch}',
+      bookUrl:
+          'local:${fileName ?? 'book.umd'}_${DateTime.now().millisecondsSinceEpoch}',
       name: name,
       origin: BookType.localTag,
       originName: fileName ?? 'book.umd',
@@ -140,6 +153,7 @@ class LocalBookService {
       document: null,
       rawBytes: bytes,
       umdTexts: texts,
+      isUmd: true,
     );
   }
 
@@ -169,6 +183,8 @@ class LocalBookService {
       rawBytes: document.rawBytes,
       isPdf: isPdf || document.isPdf,
       htmlContent: htmlContent,
+      format: document.format,
+      htmlDocument: document.isHtml,
     );
   }
 
@@ -176,4 +192,68 @@ class LocalBookService {
     final dot = name.lastIndexOf('.');
     return dot > 0 ? name.substring(0, dot) : name;
   }
+}
+
+/// Isolate entry point used for file import and legacy shelf migration. Only
+/// JSON-safe metadata and chapter strings cross back to the UI isolate.
+Map<String, Object?> parseLocalDocumentWorker(Map<String, Object?> args) {
+  final kind = args['kind']?.toString() ?? 'txt';
+  final fileName = args['fileName']?.toString() ?? 'book.txt';
+  final overrideName = args['name']?.toString();
+  final bytes = args['bytes'] as Uint8List;
+  final rawRules = args['tocRules'];
+  final rules = rawRules is List
+      ? rawRules
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .map(TxtTocRule.fromJson)
+            .toList(growable: false)
+      : const <TxtTocRule>[];
+  final service = LocalBookService(tocRules: rules);
+  final LocalBookBundle bundle = switch (kind) {
+    'epub' => service.parseEpub(
+      bytes,
+      fileName: fileName,
+      overrideName: overrideName,
+    ),
+    'pdf' => service.parsePdf(
+      bytes,
+      fileName: fileName,
+      overrideName: overrideName,
+    ),
+    'mobi' => service.parseMobi(
+      bytes,
+      fileName: fileName,
+      overrideName: overrideName,
+    ),
+    'umd' => service.parseUmd(
+      bytes,
+      fileName: fileName,
+      overrideName: overrideName,
+    ),
+    _ => service.parseTxt(
+      bytes,
+      fileName: fileName,
+      overrideName: overrideName,
+    ),
+  };
+  final bookUrl = args['bookUrl']?.toString();
+  if (bookUrl != null && bookUrl.isNotEmpty) {
+    bundle.book.bookUrl = bookUrl;
+    for (final chapter in bundle.chapters) {
+      chapter.bookUrl = bookUrl;
+      if (kind == 'umd') chapter.url = '$bookUrl#umd${chapter.index}';
+    }
+  }
+  return {
+    'book': bundle.book.toJson(),
+    'kind': kind,
+    'isPdf': bundle.isPdf,
+    'isHtml': bundle.isHtml,
+    'chapters': [for (final chapter in bundle.chapters) chapter.toJson()],
+    'contents': {
+      for (final chapter in bundle.chapters)
+        chapter.url: bundle.content(chapter),
+    },
+  };
 }

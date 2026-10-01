@@ -31,10 +31,8 @@ class ShelfEntry {
     return candidates.isEmpty ? null : _asSource(candidates.first);
   }
 
-  static BookSource _asSource(db.SearchBook c) => BookSource(
-    bookSourceUrl: c.origin,
-    bookSourceName: c.originName,
-  );
+  static BookSource _asSource(db.SearchBook c) =>
+      BookSource(bookSourceUrl: c.origin, bookSourceName: c.originName);
 }
 
 /// The shelf, aligned with Legado.
@@ -58,16 +56,22 @@ class ShelfRepository {
       '${normalizeSearchText(name)}\u0000${normalizeSearchText(author)}';
 
   Future<List<ShelfEntry>> load() async {
-    final books = await (_db.select(_db.books)
-          ..orderBy([
-            (t) => OrderingTerm(expression: t.customOrder),
-            (t) => OrderingTerm(
-              expression: t.lastReadTime,
-              mode: OrderingMode.desc,
-            ),
-          ]))
-        .get();
-    final candidates = await _db.select(_db.searchBooks).get();
+    await _backfillIdentityKeys();
+    final books =
+        await (_db.select(_db.books)..orderBy([
+              (t) => OrderingTerm(expression: t.customOrder),
+              (t) => OrderingTerm(
+                expression: t.lastReadTime,
+                mode: OrderingMode.desc,
+              ),
+            ]))
+            .get();
+    final identities = books.map((book) => book.identityKey).toSet();
+    final candidates = identities.isEmpty
+        ? const <db.SearchBook>[]
+        : await (_db.select(
+            _db.searchBooks,
+          )..where((t) => t.identityKey.isIn(identities))).get();
     final byIdentity = <String, List<db.SearchBook>>{};
     for (final c in candidates) {
       byIdentity.putIfAbsent(_identity(c.name, c.author), () => []).add(c);
@@ -79,6 +83,39 @@ class ShelfRepository {
           candidates: byIdentity[_identity(b.name, b.author)] ?? const [],
         ),
     ];
+  }
+
+  /// Backfill the v8 normalized identity once. Subsequent shelf reads use the
+  /// indexed identity key and only fetch candidates for books on this shelf.
+  Future<void> _backfillIdentityKeys() async {
+    final books = await (_db.select(
+      _db.books,
+    )..where((t) => t.identityKey.equals(''))).get();
+    final candidates = await (_db.select(
+      _db.searchBooks,
+    )..where((t) => t.identityKey.equals(''))).get();
+    if (books.isEmpty && candidates.isEmpty) return;
+    await _db.transaction(() async {
+      for (final book in books) {
+        await (_db.update(_db.books)..where((t) => t.id.equals(book.id))).write(
+          db.BooksCompanion(
+            identityKey: Value(_identity(book.name, book.author)),
+          ),
+        );
+      }
+      for (final candidate in candidates) {
+        await (_db.update(_db.searchBooks)..where(
+              (t) =>
+                  t.bookUrl.equals(candidate.bookUrl) &
+                  t.origin.equals(candidate.origin),
+            ))
+            .write(
+              db.SearchBooksCompanion(
+                identityKey: Value(_identity(candidate.name, candidate.author)),
+              ),
+            );
+      }
+    });
   }
 
   /// Adds a candidate, shelving the book when its identity is new.
@@ -95,9 +132,12 @@ class ShelfRepository {
       // has to exist before the candidate can be written.
       await _ensureSource(source);
 
-      await _db.into(_db.searchBooks).insertOnConflictUpdate(
+      await _db
+          .into(_db.searchBooks)
+          .insertOnConflictUpdate(
             db.SearchBooksCompanion.insert(
               bookUrl: book.bookUrl,
+              identityKey: Value(_identity(book.name, book.author)),
               origin: source.bookSourceUrl,
               originName: Value(source.bookSourceName),
               name: Value(book.name),
@@ -118,26 +158,29 @@ class ShelfRepository {
         // Adding a candidate is also the user's source choice. Persist the
         // selected origin on the identity row so a restart does not silently
         // switch back to the source that created the book originally.
-        await (_db.update(_db.books)
-              ..where((t) => t.bookUrl.equals(existing!.bookUrl)))
-            .write(
-              db.BooksCompanion(
-                origin: Value(source.bookSourceUrl),
-                originName: Value(source.bookSourceName),
-                latestChapterTitle: Value(book.latestChapterTitle),
-                lastUpdateTime: Value(DateTime.now().millisecondsSinceEpoch),
-              ),
-            );
+        await (_db.update(
+          _db.books,
+        )..where((t) => t.bookUrl.equals(existing!.bookUrl))).write(
+          db.BooksCompanion(
+            origin: Value(source.bookSourceUrl),
+            originName: Value(source.bookSourceName),
+            latestChapterTitle: Value(book.latestChapterTitle),
+            lastUpdateTime: Value(DateTime.now().millisecondsSinceEpoch),
+          ),
+        );
         return existing.bookUrl;
       }
 
       // INSERT OR IGNORE makes the identity creation safe if another queued
       // add wins the unique (name, author) race while this transaction is
       // waiting on SQLite's write lock.
-      await _db.into(_db.books).insert(
+      await _db
+          .into(_db.books)
+          .insert(
             db.BooksCompanion.insert(
               bookUrl: book.bookUrl,
               name: book.name,
+              identityKey: Value(_identity(book.name, book.author)),
               author: Value(book.author),
               origin: Value(source.bookSourceUrl),
               originName: Value(source.bookSourceName),
@@ -155,25 +198,25 @@ class ShelfRepository {
   }
 
   Future<db.Book?> _findIdentity(String name, String author) async {
-    final exact = await (_db.select(_db.books)
-          ..where((t) => t.name.equals(name) & t.author.equals(author))
+    final exact =
+        await (_db.select(_db.books)
+              ..where((t) => t.name.equals(name) & t.author.equals(author))
+              ..limit(1))
+            .getSingleOrNull();
+    if (exact != null) return exact;
+    return (_db.select(_db.books)
+          ..where((t) => t.identityKey.equals(_identity(name, author)))
           ..limit(1))
         .getSingleOrNull();
-    if (exact != null) return exact;
-    final key = _identity(name, author);
-    final books = await _db.select(_db.books).get();
-    for (final book in books) {
-      if (_identity(book.name, book.author) == key) return book;
-    }
-    return null;
   }
 
   Future<void> _ensureSource(BookSource source) async {
     if (source.bookSourceUrl.isEmpty) return;
-    final hit = await (_db.select(_db.bookSources)
-          ..where((t) => t.bookSourceUrl.equals(source.bookSourceUrl))
-          ..limit(1))
-        .getSingleOrNull();
+    final hit =
+        await (_db.select(_db.bookSources)
+              ..where((t) => t.bookSourceUrl.equals(source.bookSourceUrl))
+              ..limit(1))
+            .getSingleOrNull();
     if (hit != null) return;
     await _db
         .into(_db.bookSources)
@@ -191,28 +234,20 @@ class ShelfRepository {
   /// is the point of the split), so deleting only the shelf row's own URL would
   /// leave the other sources' candidates orphaned.
   Future<void> remove(String bookUrl) async {
-    final book = await (_db.select(_db.books)
-          ..where((t) => t.bookUrl.equals(bookUrl)))
-        .getSingleOrNull();
+    await _backfillIdentityKeys();
+    final book = await (_db.select(
+      _db.books,
+    )..where((t) => t.bookUrl.equals(bookUrl))).getSingleOrNull();
     if (book == null) return;
 
     await _db.transaction(() async {
-      // SearchBooks is keyed by (bookUrl, origin), so deleting by URL alone
-      // would be both inefficient and easy to get wrong when aliases exist.
       final identity = _identity(book.name, book.author);
-      final candidates = await _db.select(_db.searchBooks).get();
-      for (final candidate in candidates) {
-        if (_identity(candidate.name, candidate.author) != identity) continue;
-        await (_db.delete(_db.searchBooks)
-              ..where(
-                (t) =>
-                    t.bookUrl.equals(candidate.bookUrl) &
-                    t.origin.equals(candidate.origin),
-              ))
-            .go();
-      }
-      await (_db.delete(_db.books)..where((t) => t.bookUrl.equals(bookUrl)))
-          .go();
+      await (_db.delete(
+        _db.searchBooks,
+      )..where((t) => t.identityKey.equals(identity))).go();
+      await (_db.delete(
+        _db.books,
+      )..where((t) => t.bookUrl.equals(bookUrl))).go();
     });
   }
 

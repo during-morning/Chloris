@@ -12,7 +12,9 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_static/shelf_static.dart';
 
-import '../lib/services/web/server_io.dart';
+import 'package:chloris/services/web/server_io.dart';
+import 'package:chloris/services/web/media_proxy_io.dart';
+import 'package:chloris/services/web/browser_worker_io.dart';
 
 /// CORS for a local development server.
 ///
@@ -24,7 +26,7 @@ Map<String, String> _corsFor(Request req) {
   if (origin == null || !isLoopbackOrigin(origin)) return const {};
   return {
     'Access-Control-Allow-Origin': origin,
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, HEAD, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Vary': 'Origin',
   };
@@ -80,6 +82,42 @@ Future<void> main(List<String> args) async {
       headers: {'content-type': 'application/json; charset=utf-8'},
     );
   });
+  final browser = BrowserWorker();
+  router.post('/api/music/v1/browser', (Request req) async {
+    try {
+      final body = jsonDecode(await req.readAsString()) as Map<String, dynamic>;
+      final blocked = blockedTarget(body['url']);
+      if (blocked != null) return blocked;
+      return Response.ok(
+        jsonEncode(await browser.run(body)),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.ok(
+        jsonEncode({'error': '$e'}),
+        headers: {'content-type': 'application/json'},
+      );
+    }
+  });
+  router.delete('/api/music/v1/browser/<id>', (Request req, String id) {
+    browser.cancel(id);
+    return Response.ok('{}');
+  });
+  router.post('/api/music/v1/playback', (Request req) async {
+    final body = jsonDecode(await req.readAsString()) as Map<String, dynamic>;
+    final blocked = blockedTarget(body['url']);
+    if (blocked != null) return blocked;
+    return Response.ok(
+      jsonEncode({'id': MediaPlaybackSessions.instance.create(body)}),
+      headers: {'content-type': 'application/json'},
+    );
+  });
+  router.delete('/api/music/v1/playback/<id>', (Request req, String id) {
+    MediaPlaybackSessions.instance.release(id);
+    return Response.ok('{}');
+  });
+  router.get('/proxy/media', (Request req) => proxyMedia(req));
+  router.head('/proxy/media', (Request req) => proxyMedia(req));
   router.get('/proxy/img', (Request req) async {
     final url = req.url.queryParameters['u'] ?? '';
     final blocked = blockedTarget(url);
@@ -101,7 +139,8 @@ Future<void> main(List<String> args) async {
     if (req.method == 'OPTIONS') {
       return Response.ok('', headers: _corsFor(req));
     }
-    if (req.url.path.startsWith('proxy/')) {
+    if (req.url.path.startsWith('proxy/') ||
+        req.url.path.startsWith('api/music/')) {
       return router.call(req);
     }
     return staticHandler(req);
@@ -132,5 +171,5 @@ Future<void> main(List<String> args) async {
 
   final server = await shelf_io.serve(cascade, address, port);
   final shown = bindAll ? '0.0.0.0' : '127.0.0.1';
-  stdout.writeln('Chloris web+proxy http://$shown:${server.port}/');
+  stdout.writeln('Cholris web+proxy http://$shown:${server.port}/');
 }

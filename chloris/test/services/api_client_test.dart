@@ -27,10 +27,7 @@ class _FakeTransport {
 }
 
 String envelope(Object? data, {bool success = true, String? errorMsg}) {
-  final payload = <String, Object?>{
-    'isSuccess': success,
-    'errorMsg': errorMsg,
-  };
+  final payload = <String, Object?>{'isSuccess': success, 'errorMsg': errorMsg};
   if (data != null) payload['data'] = data;
   return jsonEncode(payload);
 }
@@ -181,7 +178,29 @@ void main() {
       final r = await client.bookContent('https://b.test/1', 3);
       expect(r.title, '第一章');
       expect(r.content, '正文');
+      expect(r.resourceUrl, isNull);
+      expect(r.variable, isNull);
+      expect(r.mediaHeaders, isEmpty);
       expect(t.calls.single.query?['index'], '3');
+    });
+
+    test('bookContent 保留媒体资源和歌词变量', () async {
+      final t = _FakeTransport(
+        (m, p, q, b) async => (
+          status: 200,
+          body: envelope({
+            'title': '歌曲',
+            'content': 'https://cdn.test/track.mp3',
+            'resourceUrl': 'https://cdn.test/track.mp3',
+            'variable': '{"lyric":"[00:01]歌词"}',
+          }),
+        ),
+      );
+      final result = await ChlorisApiClient(
+        transport: t.transport,
+      ).bookContent('https://b.test/music', 0);
+      expect(result.resourceUrl, 'https://cdn.test/track.mp3');
+      expect(result.variable, '{"lyric":"[00:01]歌词"}');
     });
 
     test('version parses ServerInfo and is usable without a token', () async {
@@ -287,6 +306,26 @@ void main() {
       );
       final port = HttpOnlineBookPort(ChlorisApiClient(transport: t.transport));
       expect(await port.loadChapterContent(_source, _book, _chapter(2)), '正文');
+    });
+
+    test('HTTP章节加载回写歌词与资源地址供播放器读取', () async {
+      final transport = _FakeTransport(
+        (m, p, q, b) async => (
+          status: 200,
+          body: envelope({
+            'title': '歌名',
+            'content': 'https://cdn.test/music.mp3',
+            'resourceUrl': 'https://cdn.test/music.mp3',
+            'variable': '{"lyric":"[00:01]歌词"}',
+          }),
+        ),
+      );
+      final chapter = _chapter(2);
+      await HttpOnlineBookPort(
+        ChlorisApiClient(transport: transport.transport),
+      ).loadChapterContent(_source, _book, chapter);
+      expect(chapter.resourceUrl, 'https://cdn.test/music.mp3');
+      expect(chapter.getVariable('lyric'), '[00:01]歌词');
     });
 
     test('routes the contract does not cover fail loudly', () async {

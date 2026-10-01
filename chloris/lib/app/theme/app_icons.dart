@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Theme;
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'app_theme.dart';
@@ -113,6 +114,13 @@ abstract final class AppIcons {
   static const playFilled = CupertinoIcons.play_fill;
   static const pause = CupertinoIcons.pause;
   static const pauseFilled = CupertinoIcons.pause_fill;
+  static const music = CupertinoIcons.music_note;
+  static const headphones = CupertinoIcons.headphones;
+  static const queue = CupertinoIcons.music_note_list;
+  static const shuffle = CupertinoIcons.shuffle;
+  static const equalizer = CupertinoIcons.waveform;
+  static const volume = CupertinoIcons.volume_up;
+  static const volumeOff = CupertinoIcons.volume_off;
   static const album = CupertinoIcons.music_albums;
   static const albumFilled = CupertinoIcons.music_albums_fill;
   static const zoomIn = CupertinoIcons.zoom_in;
@@ -144,6 +152,7 @@ abstract final class AppIcons {
     libraryPair,
     searchPair,
     explorePair,
+    AppIconPair(album, albumFilled),
     personPair,
   ];
 
@@ -226,7 +235,7 @@ abstract final class AppIcons {
     bug: LucideIcons.bug300,
     flash: LucideIcons.zap300,
     archive: LucideIcons.archive300,
-    menuBook: LucideIcons.bookOpen300,
+
     list: LucideIcons.list300,
     grid: LucideIcons.layoutGrid300,
     selectAll: LucideIcons.squareCheckBig300,
@@ -236,6 +245,18 @@ abstract final class AppIcons {
     arrowLeft: LucideIcons.arrowLeft300,
     arrowRight: LucideIcons.arrowRight300,
     swap: LucideIcons.arrowLeftRight300,
+    music: LucideIcons.music300,
+    headphones: LucideIcons.headphones300,
+    queue: LucideIcons.listMusic300,
+    album: LucideIcons.disc3300,
+    equalizer: LucideIcons.audioLines300,
+    shuffle: LucideIcons.shuffle300,
+    volume: LucideIcons.volume2300,
+    volumeOff: LucideIcons.volumeX300,
+    skipPrevious: LucideIcons.skipBack300,
+    skipNext: LucideIcons.skipForward300,
+    replay: LucideIcons.rotateCcw300,
+    forward10: LucideIcons.rotateCw300,
     play: LucideIcons.play300,
     pause: LucideIcons.pause300,
     zoomIn: LucideIcons.zoomIn300,
@@ -272,8 +293,11 @@ class AppIconPair {
     return resolve(active: active);
   }
 
-  AppIcon at({required bool active, double? size, Color? color}) =>
-      AppIcon(resolve(active: active), size: size, color: color);
+  AppIcon at({required bool active, double? size, Color? color}) => AppIcon(
+    resolve(active: active),
+    size: size,
+    color: color,
+  );
 
   /// Style-aware [at]. Colour stays the caller's choice; the icon simply
   /// refuses to fill under styles with [AppStyleExtension.filledIcons] off.
@@ -282,7 +306,11 @@ class AppIconPair {
     required bool active,
     double? size,
     Color? color,
-  }) => AppIcon(styled(style, active: active), size: size, color: color);
+  }) => AppIcon(
+    styled(style, active: active),
+    size: size,
+    color: color,
+  );
 }
 
 class AppIcon extends Icon {
@@ -294,4 +322,19 @@ class AppIcon extends Icon {
     super.semanticLabel,
     super.textDirection,
   });
+  @override
+  Widget build(BuildContext context) {
+    final style = Theme.of(context).extension<AppStyleExtension>();
+    final line = style?.style == AppUiStyle.absolutely
+        ? AppIcons._absolutelyLine[icon]
+        : null;
+    if (line == null) return super.build(context);
+    return Icon(
+      line,
+      size: size,
+      color: color,
+      semanticLabel: semanticLabel,
+      textDirection: textDirection,
+    );
+  }
 }

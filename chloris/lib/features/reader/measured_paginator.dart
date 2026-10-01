@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/painting.dart';
 import 'package:chloris_engine/chloris_engine.dart';
 
@@ -11,25 +13,25 @@ class MeasuredPaginator {
   /// 会被反复测量；TextPainter.layout + computeLineMetrics 是排版热路径的
   /// 大头。静态缓存跨会话命中，容量封顶防泄漏。
   static const int _measureCacheCap = 800;
-  static final Map<int, List<_MeasuredLine>> _measureCache = {};
+  static const int _measureCacheMaxChars = 4 * 1024 * 1024;
+  static final LinkedHashMap<_MeasureKey, List<_MeasuredLine>> _measureCache =
+      LinkedHashMap<_MeasureKey, List<_MeasuredLine>>();
+  static int _measureCacheChars = 0;
+
+  static _MeasureKey _cacheKey(
+    String para,
+    double width,
+    TextStyle style,
+    TextScaler textScaler,
+  ) => (para, width, style, textScaler);
 
   static List<_MeasuredLine>? _measureCacheGet(
     String para,
     double w,
     TextStyle style,
     TextScaler textScaler,
-    double fontSize,
   ) {
-    final key = Object.hash(
-      para,
-      w.round(),
-      fontSize,
-      style.height,
-      style.letterSpacing,
-      style.fontFamily,
-      style.fontWeight,
-      textScaler.hashCode,
-    );
+    final key = _cacheKey(para, w, style, textScaler);
     final hit = _measureCache.remove(key);
     if (hit == null) return null;
     // 重新插入以刷新 LRU 位置
@@ -42,23 +44,21 @@ class MeasuredPaginator {
     double w,
     TextStyle style,
     TextScaler textScaler,
-    double fontSize,
     List<_MeasuredLine> lines,
   ) {
-    final key = Object.hash(
-      para,
-      w.round(),
-      fontSize,
-      style.height,
-      style.letterSpacing,
-      style.fontFamily,
-      style.fontWeight,
-      textScaler.hashCode,
-    );
-    if (_measureCache.length >= _measureCacheCap) {
-      _measureCache.remove(_measureCache.keys.first);
+    final key = _cacheKey(para, w, style, textScaler);
+    final old = _measureCache.remove(key);
+    if (old != null) {
+      _measureCacheChars -= para.length;
     }
     _measureCache[key] = lines;
+    _measureCacheChars += para.length;
+    while (_measureCache.length > _measureCacheCap ||
+        _measureCacheChars > _measureCacheMaxChars) {
+      final oldest = _measureCache.keys.first;
+      _measureCacheChars -= oldest.$1.length;
+      _measureCache.remove(oldest);
+    }
   }
 
   static PaginatedChapter layout({
@@ -74,9 +74,7 @@ class MeasuredPaginator {
   }) {
     final w = width <= 1 ? 360.0 : width;
     final h = height <= 1 ? 640.0 : height;
-    var pageH = firstPageHeight == null
-        ? h
-        : firstPageHeight.clamp(80.0, h);
+    var pageH = firstPageHeight == null ? h : firstPageHeight.clamp(80.0, h);
     if (content.isEmpty) {
       return PaginatedChapter(
         content: '',
@@ -85,7 +83,8 @@ class MeasuredPaginator {
         consumedChars: 0,
       );
     }
-    var work = content;
+    var work = content.replaceAll(RegExp(r'\r\n?'), '\n');
+    final offset = startOffset.clamp(0, work.length);
     if (maxChars != null && work.length > maxChars) {
       var cut = maxChars;
       final nl = work.lastIndexOf('\n', cut);
@@ -96,8 +95,8 @@ class MeasuredPaginator {
     final pages = <TextPage>[];
     var lines = <String>[];
     var used = 0.0;
-    var start = startOffset;
-    var pos = startOffset;
+    var start = offset;
+    var pos = 0;
 
     void flush() {
       if (lines.isEmpty) return;
@@ -122,7 +121,7 @@ class MeasuredPaginator {
 
       final fontSize = style.fontSize ?? 18;
       // 布局缓存优先：同段落 + 同排版参数直接复用折行结果。
-      final cached = _measureCacheGet(para, w, style, textScaler, fontSize);
+      final cached = _measureCacheGet(para, w, style, textScaler);
       if (cached != null) return cached;
 
       // Layout each paragraph once. ComputeLineMetrics is the source of truth
@@ -139,42 +138,45 @@ class MeasuredPaginator {
           leadingDistribution: TextLeadingDistribution.even,
         ),
       )..layout(maxWidth: w);
-      final metrics = painter.computeLineMetrics();
-      if (metrics.isEmpty) {
-        return <_MeasuredLine>[_MeasuredLine(para, fontSize)];
-      }
+      try {
+        final metrics = painter.computeLineMetrics();
+        if (metrics.isEmpty) {
+          final lines = <_MeasuredLine>[_MeasuredLine(para, fontSize)];
+          _measureCachePut(para, w, style, textScaler, lines);
+          return lines;
+        }
 
-      final raw = <_MeasuredLine>[];
-      var offset = 0;
-      for (var i = 0; i < metrics.length && offset < para.length; i++) {
-        final nextTop = i + 1 < metrics.length
-            ? metrics[i + 1].baseline - metrics[i + 1].ascent
-            : double.infinity;
-        final end = _exclusiveLineEnd(
-          painter: painter,
-          start: offset,
-          textLen: para.length,
-          nextLineTop: nextTop,
-        );
-        final height = i < metrics.length
-            ? metrics[i].height
-            : (style.height ?? 1.6) * fontSize;
-        raw.add(
-          _MeasuredLine(para.substring(offset, end).replaceAll('\n', ''), height),
-        );
-        offset = end;
+        final raw = <_MeasuredLine>[];
+        var charOffset = 0;
+        for (var i = 0; i < metrics.length && charOffset < para.length; i++) {
+          final nextTop = i + 1 < metrics.length
+              ? metrics[i + 1].baseline - metrics[i + 1].ascent
+              : double.infinity;
+          final end = _exclusiveLineEnd(
+            painter: painter,
+            start: charOffset,
+            textLen: para.length,
+            nextLineTop: nextTop,
+          );
+          raw.add(
+            _MeasuredLine(
+              para.substring(charOffset, end).replaceAll('\n', ''),
+              metrics[i].height,
+            ),
+          );
+          charOffset = end;
+        }
+        if (charOffset < para.length) {
+          raw.add(
+            _MeasuredLine(para.substring(charOffset), metrics.last.height),
+          );
+        }
+        final tidy = _tidyCjkLines(raw);
+        _measureCachePut(para, w, style, textScaler, tidy);
+        return tidy;
+      } finally {
+        painter.dispose();
       }
-      if (offset < para.length) {
-        raw.add(
-          _MeasuredLine(
-            para.substring(offset).replaceAll('\n', ''),
-            metrics.last.height,
-          ),
-        );
-      }
-      final tidy = _tidyCjkLines(raw);
-      _measureCachePut(para, w, style, textScaler, fontSize, tidy);
-      return tidy;
     }
 
     final paragraphs = work
@@ -184,22 +186,35 @@ class MeasuredPaginator {
     var needGap = false;
     // 增量续排：startOffset 之前的段落只推进位置、不重复测量渲染。
     // 调用方保证 startOffset 落在段落边界（maxChars 截断点在 \n 处）。
-    for (final para in paragraphs) {
-      final paraSpan = para.length + 1;
+    for (
+      var paragraphIndex = 0;
+      paragraphIndex < paragraphs.length;
+      paragraphIndex++
+    ) {
+      final para = paragraphs[paragraphIndex];
+      final hasNewline = paragraphIndex < paragraphs.length - 1;
+      final paraSpan = para.length + (hasNewline ? 1 : 0);
       final paraStart = pos;
       final paraEnd = pos + paraSpan;
-      if (paraEnd <= startOffset) {
+      if (paraEnd <= offset) {
         // 整段在续排起点之前：跳过。
+        if (para.trim().isNotEmpty) needGap = true;
         pos = paraEnd;
         continue;
       }
-      if (paraStart < startOffset && startOffset < paraEnd) {
-        // 未对齐段落边界（防御分支）：从段首补齐位置即可，代价是本段多测一次。
-        pos = paraStart;
+      final localOffset = (offset - paraStart).clamp(0, para.length);
+      final remaining = para.substring(localOffset);
+      pos = paraStart + localOffset;
+      if (remaining.isEmpty && hasNewline) {
+        // The preview consumed all paragraph text and stopped immediately
+        // before its newline. Advance over that separator exactly once.
+        pos++;
+        if (para.trim().isNotEmpty) needGap = true;
+        continue;
       }
-      if (para.trim().isEmpty) {
+      if (remaining.trim().isEmpty) {
         needGap = lines.isNotEmpty;
-        pos += para.length + 1;
+        pos = paraEnd;
         continue;
       }
       if (needGap && paragraphSpacing > 0 && lines.isNotEmpty) {
@@ -210,7 +225,9 @@ class MeasuredPaginator {
         }
       }
       needGap = true;
-      final wrapped = wrapParagraph(para);
+      // A continuation inside a paragraph has no paragraph gap at its start.
+      if (localOffset > 0) needGap = false;
+      final wrapped = wrapParagraph(remaining);
       for (var i = 0; i < wrapped.length; i++) {
         final line = wrapped[i].text;
         final lh = wrapped[i].height;
@@ -223,27 +240,24 @@ class MeasuredPaginator {
         used += lh;
         pos += line.length;
       }
-      pos += 1; // the paragraph newline
+      if (hasNewline) pos += 1; // the paragraph newline
     }
     flush();
-    if (pages.isEmpty && startOffset == 0) {
+    if (pages.isEmpty && offset == 0) {
       pages.add(
-        TextPage(
-          index: 0,
-          lines: [content],
-          startPos: 0,
-          endPos: content.length,
-        ),
+        TextPage(index: 0, lines: [work], startPos: 0, endPos: content.length),
       );
     }
     return PaginatedChapter(
-      content: content,
+      content: work,
       pages: pages,
-      totalChars: content.length,
+      totalChars: work.length,
       consumedChars: pos,
     );
   }
 }
+
+typedef _MeasureKey = (String, double, TextStyle, TextScaler);
 
 /// Collapse blank / whitespace-only lines so `\n\n` and `　　\n` do not paint
 /// as extra full-height rows in scroll mode.
@@ -323,7 +337,12 @@ List<_MeasuredLine> _tidyCjkLines(List<_MeasuredLine> raw) {
         !_cjkNoLineEnd.contains(out.last.text[out.last.text.length - 1])) {
       final prev = out.removeLast();
       final steal = prev.text[prev.text.length - 1];
-      out.add(_MeasuredLine(prev.text.substring(0, prev.text.length - 1), prev.height));
+      out.add(
+        _MeasuredLine(
+          prev.text.substring(0, prev.text.length - 1),
+          prev.height,
+        ),
+      );
       text = steal + text;
     }
     if (out.isNotEmpty &&

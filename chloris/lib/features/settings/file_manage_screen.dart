@@ -22,11 +22,14 @@ class _FileManageScreenState extends ConsumerState<FileManageScreen> {
 
   Future<void> _export(LocalBookBundle bundle, bool epub) async {
     final service = const ExportService();
+    final hydrated = await ref
+        .read(localShelfProvider.notifier)
+        .loadForExport(bundle);
     final bytes = epub
-        ? service.buildEpub(bundle)
-        : service.buildTxtBytes(bundle);
+        ? service.buildEpub(hydrated)
+        : service.buildTxtBytes(hydrated);
     final base = service.exportBaseName(
-      bundle,
+      hydrated,
       template: await loadExportFileNameTemplate(),
     );
     await downloadBytes(
@@ -114,13 +117,17 @@ class _FileManageScreenState extends ConsumerState<FileManageScreen> {
                               IconButton(
                                 tooltip: '下载 PDF',
                                 icon: const Icon(Icons.picture_as_pdf_outlined),
-                                onPressed: b.rawBytes == null
-                                    ? null
-                                    : () => downloadBytes(
-                                        b.rawBytes!,
-                                        '${b.book.name}.pdf',
-                                        'application/pdf',
-                                      ),
+                                onPressed: () async {
+                                  final bytes = await ref
+                                      .read(localShelfProvider.notifier)
+                                      .readOriginal(b);
+                                  if (bytes == null) return;
+                                  await downloadBytes(
+                                    bytes,
+                                    '${b.book.name}.pdf',
+                                    'application/pdf',
+                                  );
+                                },
                               ),
                             IconButton(
                               tooltip: '删除',

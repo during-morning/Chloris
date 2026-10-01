@@ -6,6 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/book_detail/book_detail_provider.dart';
 import '../../features/library/online_shelf_provider.dart';
 import '../../features/library/reading_progress_provider.dart';
+import '../../features/media/media_resource.dart';
+import '../../features/media/audio_types.dart';
+import '../../features/media/audio_resolver.dart';
 import '../../features/sources/source_library_provider.dart';
 import '../../app/providers.dart';
 import 'api_contract.dart';
@@ -17,10 +20,31 @@ import 'server_backend.dart';
 /// sees the shelf and reading state the user sees. Deliberately no caching and
 /// no second implementation of scraping: the catalog and content routes go
 /// through the same use cases as the reader.
-class AppServerBackend implements ServerBackend {
+class AppServerBackend implements ServerBackend, MusicServerBackend {
   AppServerBackend(this._ref);
 
   final Ref _ref;
+
+  @override
+  Future<Map<String, dynamic>> resolveAudio(
+    Map<String, dynamic> reference,
+  ) async {
+    final resolver = AudioResolver(
+      http: _ref.read(httpPortProvider),
+      engine: _ref.read(engineFacadeProvider),
+      port: _ref.read(onlineBookPortProvider),
+      findSource: _requireSource,
+    );
+    final op = MusicOperation();
+    try {
+      return (await resolver.resolve(
+        TrackRef.fromJson(reference),
+        op,
+      )).toJson();
+    } finally {
+      op.cancel();
+    }
+  }
 
   OnlineShelfItem? _shelfItem(String bookUrl) {
     for (final item in _ref.read(onlineShelfProvider)) {
@@ -112,10 +136,14 @@ class AppServerBackend implements ServerBackend {
   ) async {
     final source = await _requireSource(sourceUrl);
     final seed = Book.fromJson(rawBook);
-    final book = await _ref.read(loadOnlineBookInfoUseCaseProvider)(source, seed);
+    final book = await _ref.read(loadOnlineBookInfoUseCaseProvider)(
+      source,
+      seed,
+    );
     return book.toJson();
   }
 
+  @override
   Future<List<Map<String, dynamic>>> bookshelf() async => [
     for (final item in _ref.read(onlineShelfProvider))
       {
@@ -233,11 +261,34 @@ class AppServerBackend implements ServerBackend {
       book: book,
       chapter: chapter,
     );
+    var mediaHeaders = const <String, String>{};
+    var mediaUrl = chapter.resourceUrl;
+    if (book.isAudio) {
+      final media = parseMediaResource(
+        content,
+        baseUrl: chapter.baseUrl.isEmpty ? chapter.url : chapter.baseUrl,
+        resourceUrl: chapter.resourceUrl,
+      );
+      if (media != null) {
+        final prepared = await _ref.read(sourceMediaRequestProvider)(
+          media.ruleUrl ?? media.url,
+          source: item.source,
+          book: book,
+          chapter: chapter,
+          headers: media.headers,
+        );
+        mediaHeaders = prepared.headers;
+        mediaUrl = prepared.url;
+      }
+    }
     return {
       'bookUrl': bookUrl,
       'index': chapterIndex,
       'title': chapter.title,
       'content': content,
+      'resourceUrl': mediaUrl,
+      'variable': chapter.variable,
+      'mediaHeaders': mediaHeaders,
     };
   }
 

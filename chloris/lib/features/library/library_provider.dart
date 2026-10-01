@@ -5,21 +5,27 @@ import 'package:chloris_engine/chloris_engine.dart';
 import '../../core/persist/kv_settings.dart';
 
 import '../local/local_book_provider.dart';
+import '../../core/read/book_validation.dart';
 import 'online_shelf_provider.dart';
 
 /// 书架 = 本地导入 + 在线加入。
 final booksProvider = FutureProvider<List<Book>>((ref) async {
   final local = ref.watch(localShelfProvider).map((b) => b.book);
-  final online = ref.watch(onlineShelfProvider).map((e) => e.searchBook.toBook());
-  return [...local, ...online];
+  final online = ref.watch(onlineShelfProvider).map((e) => e.toShelfBook());
+  return [...local, ...online]
+      .where(
+        (book) => bookIdentityError(name: book.name, url: book.bookUrl) == null,
+      )
+      .toList();
 });
 
 /// 书架查询/分组状态。
 final libraryFilterProvider = StateProvider<String>((ref) => 'all');
 final librarySortProvider = StateProvider<String>((ref) => 'latest');
 
-final pinnedUrlsProvider =
-    NotifierProvider<PinnedUrlsNotifier, Set<String>>(PinnedUrlsNotifier.new);
+final pinnedUrlsProvider = NotifierProvider<PinnedUrlsNotifier, Set<String>>(
+  PinnedUrlsNotifier.new,
+);
 
 class PinnedUrlsNotifier extends Notifier<Set<String>> {
   @override
@@ -60,9 +66,9 @@ class BookGroupDef {
   Map<String, dynamic> toJson() => {'id': id, 'name': name};
 
   static BookGroupDef fromJson(Map<String, dynamic> json) => BookGroupDef(
-        id: (json['id'] as num?)?.toInt() ?? 0,
-        name: json['name']?.toString() ?? '',
-      );
+    id: (json['id'] as num?)?.toInt() ?? 0,
+    name: json['name']?.toString() ?? '',
+  );
 }
 
 /// 分组定义：`[{id, name}]`，KV 持久化（与置顶同一模式）。
@@ -72,8 +78,8 @@ class BookGroupDef {
 /// 统一走这里，因为本地书架重载时会重新解析出新的 Book 对象。
 final bookGroupsProvider =
     NotifierProvider<BookGroupsNotifier, List<BookGroupDef>>(
-  BookGroupsNotifier.new,
-);
+      BookGroupsNotifier.new,
+    );
 
 class BookGroupsNotifier extends Notifier<List<BookGroupDef>> {
   static const _defsKey = 'bookGroupDefs';
@@ -144,8 +150,8 @@ class BookGroupsNotifier extends Notifier<List<BookGroupDef>> {
 /// bookUrl → 分组位掩码（对齐 legado `Book.group`：位或多个分组 id）。
 final bookGroupMapProvider =
     NotifierProvider<BookGroupMapNotifier, Map<String, int>>(
-  BookGroupMapNotifier.new,
-);
+      BookGroupMapNotifier.new,
+    );
 
 class BookGroupMapNotifier extends Notifier<Map<String, int>> {
   static const _key = 'bookGroupMap';

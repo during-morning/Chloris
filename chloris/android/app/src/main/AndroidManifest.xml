@@ -4,10 +4,14 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Android 13+（API 33）起展示通知需此权限（正常权限，低版本忽略）。 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
 
     <application
-        android:label="Chloris"
+        android:label="Cholris"
         android:name="${applicationName}"
+        android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

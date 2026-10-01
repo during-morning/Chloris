@@ -9,42 +9,46 @@ import '../core/http/http_session.dart';
 
 /// Web 端把书源 HTTP 转发到同源 `/proxy/http`，由服务端出网，避开浏览器 CORS。
 class ProxyHttpPort implements HttpPort, SessionAwareHttp {
-  ProxyHttpPort({String? origin, http.Client? client, http.Client? backgroundClient})
-    : origin = origin ?? Uri.base.origin,
-      _ownsBackground = backgroundClient == null && client == null,
-      _interactive = client ?? http.Client(),
-      _background = backgroundClient ?? client ?? http.Client();
+  ProxyHttpPort({
+    String? origin,
+    http.Client? client,
+    http.Client? backgroundClient,
+    this.connection,
+  }) : origin = origin ?? Uri.base.origin,
+       _interactive = client ?? http.Client(),
+       _background = backgroundClient ?? client ?? http.Client();
 
   final String origin;
-  final bool _ownsBackground;
-  http.Client _interactive;
-  http.Client _background;
+  final Future<({String origin, String token})> Function()? connection;
+  Future<({String origin, String token})> _connection() async =>
+      connection == null ? (origin: origin, token: '') : await connection!();
+  Uri _uri(String base, String path) => Uri.parse(base).resolve(path);
+  Map<String, String> _auth(String token) => {
+    if (token.isNotEmpty) 'authorization': 'Bearer $token',
+  };
+  final http.Client _interactive;
+  final http.Client _background;
   int _epoch = 0;
   final Map<String, int> _sessionEpoch = {};
   final Map<String, Future<StrResponse>> _inflight = {};
+  final Map<String, Set<Completer<void>>> _aborts = {};
 
   http.Client _clientFor(String? session) =>
       isBackgroundHttpSession(session) ? _background : _interactive;
 
-  void _recycleBackground() {
-    if (identical(_background, _interactive)) return;
-    try {
-      _background.close();
-    } catch (_) {}
-    if (_ownsBackground) {
-      _background = http.Client();
-    }
-  }
-
-  Uri get _httpUri => Uri.parse(origin).replace(path: '/proxy/http');
   bool _available = true;
   bool get isAvailable => _available;
 
   /// Probes the same-origin proxy before routing CORS-sensitive requests.
   Future<bool> probe() async {
     try {
+      final endpoint = await _connection();
+      final request = http.Request(
+        'OPTIONS',
+        _uri(endpoint.origin, '/proxy/http'),
+      )..headers.addAll(_auth(endpoint.token));
       final res = await _interactive
-          .send(http.Request('OPTIONS', _httpUri))
+          .send(request)
           .then(http.Response.fromStream)
           .timeout(const Duration(seconds: 2));
       return _available = res.statusCode < 500;
@@ -52,8 +56,6 @@ class ProxyHttpPort implements HttpPort, SessionAwareHttp {
       return _available = false;
     }
   }
-
-  Uri get _bytesUri => Uri.parse(origin).replace(path: '/proxy/bytes');
 
   int _mark(String? session) {
     if (session == null || session.isEmpty) return _epoch;
@@ -63,24 +65,47 @@ class ProxyHttpPort implements HttpPort, SessionAwareHttp {
   @override
   void cancelInFlight() {
     _epoch++;
+    for (final group in _aborts.values) {
+      for (final abort in group) {
+        if (!abort.isCompleted) abort.complete();
+      }
+    }
   }
 
   @override
   void cancelSession(String session) {
+    for (final entry in _aborts.entries) {
+      if (entry.key == session || entry.key.startsWith('$session.')) {
+        for (final abort in entry.value) {
+          if (!abort.isCompleted) abort.complete();
+        }
+      }
+    }
     _sessionEpoch[session] = (_sessionEpoch[session] ?? 0) + 1;
-    if (isBackgroundHttpSession(session)) {
-      _recycleBackground();
+    final affected = _sessionEpoch.keys
+        .where((id) => id.startsWith('$session.'))
+        .toList(growable: false);
+    for (final id in affected) {
+      _sessionEpoch[id] = (_sessionEpoch[id] ?? 0) + 1;
     }
   }
 
   @override
   Future<StrResponse> send(HttpRequestSpec spec) async {
+    final endpoint = await _connection();
     final session = HttpSession.current;
     final lane = isBackgroundHttpSession(session) ? 'bg' : 'fg';
-    final coalesceKey = '$lane\u0001${_coalesceKey(spec)}';
+    final operationScope =
+        session?.startsWith('search.') == true ||
+            session?.startsWith('explore.') == true ||
+            session?.startsWith('music-') == true
+        ? session
+        : '';
+    final coalesceKey =
+        '${endpoint.origin}\u0001${endpoint.token}\u0001$lane\u0001$operationScope\u0001${_coalesceKey(spec)}';
     final existing = _inflight[coalesceKey];
     if (existing != null) return existing;
-    final future = _sendUncoalesced(spec, session);
+    final future = _sendUncoalesced(spec, session, endpoint);
     _inflight[coalesceKey] = future;
     try {
       return await future;
@@ -96,6 +121,8 @@ class ProxyHttpPort implements HttpPort, SessionAwareHttp {
       ..sort((a, b) => a.key.toLowerCase().compareTo(b.key.toLowerCase()));
     return [
       spec.method.toUpperCase(),
+      '${spec.maxResponseBytes}',
+      '${spec.allowTruncated}',
       spec.url,
       spec.body ?? '',
       spec.charset ?? '',
@@ -110,8 +137,12 @@ class ProxyHttpPort implements HttpPort, SessionAwareHttp {
   Future<StrResponse> _sendUncoalesced(
     HttpRequestSpec spec,
     String? session,
+    ({String origin, String token}) endpoint,
   ) async {
     final epoch = _mark(session);
+    if (session != null && session.isNotEmpty) {
+      _sessionEpoch.putIfAbsent(session, () => 0);
+    }
     final timeoutMs = spec.effectiveTimeout.inMilliseconds;
     final payload = jsonEncode({
       'url': spec.url,
@@ -120,6 +151,8 @@ class ProxyHttpPort implements HttpPort, SessionAwareHttp {
       'body': spec.body,
       'charset': spec.charset,
       'timeoutMs': timeoutMs,
+      'maxResponseBytes': spec.maxResponseBytes,
+      'allowTruncated': spec.allowTruncated,
       if (spec.origin != null) 'origin': spec.origin,
       if (spec.dnsIp != null) 'dnsIp': spec.dnsIp,
       if (spec.serverID != null) 'serverID': spec.serverID,
@@ -129,15 +162,36 @@ class ProxyHttpPort implements HttpPort, SessionAwareHttp {
     for (var attempt = 0; attempt <= spec.retry; attempt++) {
       if (epoch != _mark(session)) throw const HttpCancelledException();
       try {
-        final res = await _clientFor(session)
-            .post(
-              _httpUri,
-              headers: const {
-                'content-type': 'application/json; charset=utf-8',
-              },
-              body: payload,
-            )
-            .timeout(spec.effectiveTimeout);
+        final abort = Completer<void>();
+        final group = _aborts.putIfAbsent(session ?? '', () => {});
+        group.add(abort);
+        late http.Response res;
+        try {
+          final request =
+              http.AbortableRequest(
+                  'POST',
+                  _uri(endpoint.origin, '/proxy/http'),
+                  abortTrigger: abort.future,
+                )
+                ..headers.addAll(_auth(endpoint.token))
+                ..headers['content-type'] = 'application/json; charset=utf-8'
+                ..body = payload;
+          res = await _clientFor(session)
+              .send(request)
+              .then(http.Response.fromStream)
+              .timeout(
+                spec.effectiveTimeout,
+                onTimeout: () {
+                  if (!abort.isCompleted) abort.complete();
+                  throw TimeoutException('请求超时');
+                },
+              );
+        } on http.RequestAbortedException {
+          throw const HttpCancelledException();
+        } finally {
+          group.remove(abort);
+          if (group.isEmpty) _aborts.remove(session ?? '');
+        }
         if (epoch != _mark(session)) throw const HttpCancelledException();
         if (res.statusCode == 404 || res.statusCode == 405) {
           _available = false;
@@ -192,13 +246,15 @@ class ProxyHttpPort implements HttpPort, SessionAwareHttp {
 
   @override
   Future<Uint8List> getBytes(String url, {Map<String, String>? headers}) async {
+    final endpoint = await _connection();
     Object? last;
     for (var attempt = 0; attempt < 3; attempt++) {
       try {
         final res = await _interactive
             .post(
-              _bytesUri,
-              headers: const {
+              _uri(endpoint.origin, '/proxy/bytes'),
+              headers: {
+                ..._auth(endpoint.token),
                 'content-type': 'application/json; charset=utf-8',
               },
               body: jsonEncode({'url': url, 'headers': headers ?? {}}),

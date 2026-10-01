@@ -1,3 +1,4 @@
+#include "music_browser.h"
 #include "my_application.h"
 
 #include <flutter_linux/flutter_linux.h>
@@ -45,11 +46,11 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "Chloris");
+    gtk_header_bar_set_title(header_bar, "Cholris");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "Chloris");
+    gtk_window_set_title(window, "Cholris");
   }
 
   gtk_window_set_default_size(window, 1280, 720);
@@ -74,6 +75,7 @@ static void my_application_activate(GApplication* application) {
   gtk_widget_realize(GTK_WIDGET(view));
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
+  RegisterMusicBrowser(fl_engine_get_binary_messenger(fl_view_get_engine(view)));
 
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }

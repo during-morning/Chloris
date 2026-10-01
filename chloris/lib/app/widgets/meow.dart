@@ -645,13 +645,19 @@ class MeowPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (icon != null) {
-      return FilledButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 17),
-        label: Text(label),
+      return AppPressable(
+        enabled: onPressed != null,
+        child: FilledButton.icon(
+          onPressed: onPressed,
+          icon: Icon(icon, size: 17),
+          label: Text(label),
+        ),
       );
     }
-    return FilledButton(onPressed: onPressed, child: Text(label));
+    return AppPressable(
+      enabled: onPressed != null,
+      child: FilledButton(onPressed: onPressed, child: Text(label)),
+    );
   }
 }
 
@@ -670,13 +676,19 @@ class MeowGhostButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (icon != null) {
-      return OutlinedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 17),
-        label: Text(label),
+      return AppPressable(
+        enabled: onPressed != null,
+        child: OutlinedButton.icon(
+          onPressed: onPressed,
+          icon: Icon(icon, size: 17),
+          label: Text(label),
+        ),
       );
     }
-    return OutlinedButton(onPressed: onPressed, child: Text(label));
+    return AppPressable(
+      enabled: onPressed != null,
+      child: OutlinedButton(onPressed: onPressed, child: Text(label)),
+    );
   }
 }
 
@@ -744,7 +756,10 @@ class MeowIconButton extends StatelessWidget {
         ),
       );
     }
-    return tooltip == null ? btn : Tooltip(message: tooltip!, child: btn);
+    final feedback = AppPressable(child: btn);
+    return tooltip == null
+        ? feedback
+        : Tooltip(message: tooltip!, child: feedback);
   }
 }
 
@@ -766,7 +781,14 @@ class MeowChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final ui = theme.extension<AppStyleExtension>()?.style;
+    // Terminal selected chips invert to a white cell, so their label must
+    // use the matching inverse ink rather than the normal white surface ink.
+    final activeLabelColor = ui == AppUiStyle.terminal
+        ? colors.onInverseSurface
+        : colors.onSurface;
     return FilterChip(
       // FilterChip's default label color can fall back to the platform theme
       // when a custom ChipThemeData is active. Keep the text tied to the same
@@ -775,7 +797,7 @@ class MeowChip extends StatelessWidget {
       label: Text(
         label,
         style: TextStyle(
-          color: active ? colors.onSurface : colors.onSurfaceVariant,
+          color: active ? activeLabelColor : colors.onSurfaceVariant,
         ),
       ),
       avatar: icon,

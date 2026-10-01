@@ -1,3 +1,4 @@
+import '../../features/media/music_schema.dart';
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
@@ -11,10 +12,12 @@ part 'app_database.g.dart';
 /// - `group` 是**位掩码**（Legado 的 `Long`），不是单个分组 id。
 @TableIndex(name: 'books_last_read', columns: {#lastReadTime})
 @TableIndex(name: 'books_group', columns: {#group})
+@TableIndex(name: 'books_identity_key', columns: {#identityKey})
 class Books extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get bookUrl => text().unique()();
   TextColumn get name => text()();
+  TextColumn get identityKey => text().withDefault(const Constant(''))();
   // NOT NULL 才能参与去重：SQLite 把 NULL 视为互不相等，可空的 author 会让
   // 同一本书进来两次。
   TextColumn get author => text().withDefault(const Constant(''))();
@@ -30,6 +33,7 @@ class Books extends Table {
   TextColumn get latestChapterTitle => text().nullable()();
   IntColumn get totalChapterNum => integer().withDefault(const Constant(0))();
   IntColumn get type => integer().withDefault(const Constant(0))();
+
   /// Legado `Book.group`：用户分组 id 的位或，0 表示未分组。
   IntColumn get group => integer().withDefault(const Constant(0))();
   IntColumn get customOrder => integer().withDefault(const Constant(0))();
@@ -49,8 +53,10 @@ class Books extends Table {
 /// 而不是 `books`。
 @TableIndex(name: 'search_books_origin', columns: {#origin})
 @TableIndex(name: 'search_books_book_url', columns: {#bookUrl})
+@TableIndex(name: 'search_books_identity_key', columns: {#identityKey})
 class SearchBooks extends Table {
   TextColumn get bookUrl => text()();
+  TextColumn get identityKey => text().withDefault(const Constant(''))();
   TextColumn get origin => text().customConstraint(
     'NOT NULL REFERENCES book_sources (book_source_url) ON DELETE CASCADE',
   )();
@@ -226,10 +232,12 @@ class RssSources extends Table {
   TextColumn get sourceComment => text().nullable()();
   TextColumn get variableComment => text().nullable()();
   BoolColumn get enabled => boolean().withDefault(const Constant(true))();
-  BoolColumn get enabledCookieJar => boolean().withDefault(const Constant(true))();
+  BoolColumn get enabledCookieJar =>
+      boolean().withDefault(const Constant(true))();
   BoolColumn get enableJs => boolean().withDefault(const Constant(false))();
   BoolColumn get singleUrl => boolean().withDefault(const Constant(true))();
-  BoolColumn get loadWithBaseUrl => boolean().withDefault(const Constant(false))();
+  BoolColumn get loadWithBaseUrl =>
+      boolean().withDefault(const Constant(false))();
   BoolColumn get shouldOverrideUrlLoading => boolean().nullable()();
   IntColumn get articleStyle => integer().withDefault(const Constant(0))();
   IntColumn get customOrder => integer().withDefault(const Constant(0))();
@@ -326,6 +334,29 @@ class RssReadRecords extends Table {
   Set<Column> get primaryKey => {record};
 }
 
+/// Local shelf descriptors are indexed metadata only. Original documents and
+/// chapter bodies live in the durable document store, outside Blob eviction.
+@TableIndex(name: 'local_book_order', columns: {#customOrder})
+class LocalBookDescriptors extends Table {
+  TextColumn get bookUrl => text()();
+  TextColumn get metadata => text()();
+  IntColumn get customOrder => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column> get primaryKey => {bookUrl};
+}
+
+/// Persistent size/access index for expendable binary cache entries.
+@TableIndex(name: 'blob_entries_access', columns: {#lastAccess})
+class BlobEntries extends Table {
+  TextColumn get key => text()();
+  IntColumn get size => integer().withDefault(const Constant(0))();
+  IntColumn get lastAccess => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
 @DriftDatabase(
   tables: [
     Books,
@@ -342,13 +373,16 @@ class RssReadRecords extends Table {
     RssArticles,
     RssStars,
     RssReadRecords,
+    LocalBookDescriptors,
+    BlobEntries,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   AppDatabase.connect()
-      : super(driftDatabase(
+    : super(
+        driftDatabase(
           name: 'chloris',
           // On the web, drift needs the sqlite3 wasm module and the drift
           // worker to open the database. Both assets are served from `web/`.
@@ -357,20 +391,27 @@ class AppDatabase extends _$AppDatabase {
             sqlite3Wasm: Uri.parse('sqlite3.wasm'),
             driftWorker: Uri.parse('drift_worker.js'),
           ),
-        ));
+        ),
+      );
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) => m.createAll(),
+    onCreate: (m) async {
+      await m.createAll();
+      await createMusicSchema(this);
+    },
     // SQLite ignores foreign keys unless they are switched on per connection,
     // so the chapter cascade would be decorative without this.
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
+      // Add idempotent music indexes to databases already on version 9.
+      await createMusicSchema(this);
     },
     onUpgrade: (m, from, to) async {
+      await createMusicSchema(this);
       // Version 2 only recorded the boundary. Version 3 adds the four
       // ReplaceRule columns the engine model always had but the table never
       // stored. Version 4 adds the tables that previously had no home: chapters,
@@ -446,6 +487,16 @@ class AppDatabase extends _$AppDatabase {
         // schema, therefore the copy is lossless; the new secondary index
         // keeps direct URL lookups efficient for legacy call sites.
         await m.alterTable(TableMigration(searchBooks));
+      }
+      if (from < 8) {
+        await m.addColumn(books, books.identityKey);
+        await m.addColumn(searchBooks, searchBooks.identityKey);
+        await m.createIndex(booksIdentityKey);
+        await m.createIndex(searchBooksIdentityKey);
+        await m.createTable(localBookDescriptors);
+        await m.createTable(blobEntries);
+        await m.createIndex(localBookOrder);
+        await m.createIndex(blobEntriesAccess);
       }
     },
   );

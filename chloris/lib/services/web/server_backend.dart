@@ -86,3 +86,7 @@ abstract interface class ServerBackend {
   /// `/image` — raw bytes for a remote image URL.
   Future<Uint8List?> image(String url);
 }
+
+abstract interface class MusicServerBackend {
+  Future<Map<String, dynamic>> resolveAudio(Map<String, dynamic> reference);
+}

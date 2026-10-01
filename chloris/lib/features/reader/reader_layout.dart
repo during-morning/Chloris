@@ -5,6 +5,12 @@ extension _ReaderLayout on _ReaderScreenState {
     final rules = settings.enableReplace
         ? ref.read(replaceRulesProvider)
         : const <ReplaceRule>[];
+    if (!identical(_fingerprintedRules, rules)) {
+      _fingerprintedRules = rules;
+      _rulesFingerprint = jsonEncode(
+        rules.map((rule) => rule.toJson()).toList(growable: false),
+      );
+    }
     final key = (
       widget.content,
       widget.chapterTitle,
@@ -12,7 +18,8 @@ extension _ReaderLayout on _ReaderScreenState {
       widget.bookAuthor,
       settings.enableReplace,
       settings.chineseConvert,
-      rules.length,
+      _rulesFingerprint,
+      settings.paragraphIndent,
     );
     if (_pipeKey == key && _plain.isNotEmpty) return _plain;
     _pipeKey = key;
@@ -27,6 +34,7 @@ extension _ReaderLayout on _ReaderScreenState {
       enableReplace: settings.enableReplace,
       replaceRules: rules,
       chineseConvert: settings.chineseConvert,
+      paragraphIndent: settings.paragraphIndent,
     );
     if (preview) _kickFullPipeline(key, settings, rules);
     return _plain;
@@ -104,6 +112,7 @@ extension _ReaderLayout on _ReaderScreenState {
     final readH = restH;
     final layoutKey = ReaderLayoutKey(
       contentHash: Object.hashAll([body]),
+      content: body,
       chapterTitle: widget.chapterTitle,
       bookTitle: widget.bookTitle ?? '',
       bookAuthor: widget.bookAuthor,
@@ -127,6 +136,8 @@ extension _ReaderLayout on _ReaderScreenState {
       letterSpacing: ((style.letterSpacing ?? 0) * 1000).round(),
       fontFamily: style.fontFamily,
       textScaler: textScaler.hashCode,
+      scaler: textScaler,
+      textStyle: style,
       paragraphSpacing: settings.paragraphSpacing.round(),
       doublePage: doublePage,
     );
@@ -195,7 +206,7 @@ extension _ReaderLayout on _ReaderScreenState {
     );
     _measured = next;
     _paginatedContent = body;
-    if (!preview && !appending) {
+    if (!preview) {
       _layoutCache.put(
         layoutKey,
         next,
@@ -208,7 +219,7 @@ extension _ReaderLayout on _ReaderScreenState {
     _lastTextScaler = textScaler;
     _lastDoublePage = doublePage;
     if (preview) _previewConsumed = next.consumedChars;
-    if (!preview && !appending) _previewConsumed = 0;
+    if (!preview) _previewConsumed = 0;
     if (next.pages.isNotEmpty) {
       if (_pendingEnd) {
         _page = next.pages.length - 1;
@@ -242,7 +253,16 @@ extension _ReaderLayout on _ReaderScreenState {
       _previewConsumed = 0;
       return PaginatedChapter(
         content: body,
-        pages: [...previewChapter.pages, ...rest.pages],
+        pages: [
+          ...previewChapter.pages,
+          for (var i = 0; i < rest.pages.length; i++)
+            TextPage(
+              index: previewChapter.pages.length + i,
+              lines: rest.pages[i].lines,
+              startPos: rest.pages[i].startPos,
+              endPos: rest.pages[i].endPos,
+            ),
+        ],
         totalChars: body.length,
         consumedChars: body.length,
       );

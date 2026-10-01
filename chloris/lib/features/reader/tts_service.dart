@@ -1,3 +1,4 @@
+import '../media/audio_focus.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart' show kIsWeb, VoidCallback;
@@ -85,8 +86,10 @@ class TtsController extends Notifier<TtsState> {
 
   @override
   TtsState build() {
+    AudioFocusCoordinator.instance.register('tts',() async { stop(); });
     _configure();
     ref.onDispose(() {
+      AudioFocusCoordinator.instance.unregister('tts');
       _disposed = true;
       _safe(() => _tts.stop());
     });
@@ -137,6 +140,7 @@ class TtsController extends Notifier<TtsState> {
   Future<void> _speak(String text) async {
     if (_disposed) return;
     try {
+      if (!await AudioFocusCoordinator.instance.acquire('tts')) return;
       await _tts.speak(text);
     } catch (_) {
       // 朗读失败：复位，避免卡在 playing。

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chloris_engine/chloris_engine.dart';
 
 import '../../core/http/channel_ws_port.dart';
@@ -101,6 +103,11 @@ class HttpOnlineBookPort implements OnlineBookPort {
     int maxHops = 32,
   }) async {
     final result = await _client.bookContent(book.bookUrl, chapter.index);
+    chapter.resourceUrl = result.resourceUrl ?? chapter.resourceUrl;
+    chapter.variable = result.variable ?? chapter.variable;
+    if (result.mediaHeaders.isNotEmpty) {
+      chapter.putVariable('_mediaHeaders', jsonEncode(result.mediaHeaders));
+    }
     final content = result.content;
     if (content.trim().isEmpty) {
       throw DomainError(
@@ -164,7 +171,8 @@ class HttpChapterCatalogStore implements ChapterCatalogStore {
 }
 
 /// Body cache for the HTTP port. Memory-only for the same reason.
-class HttpChapterContentStore implements ChapterContentStore {
+class HttpChapterContentStore
+    implements ChapterContentStore, AsyncChapterContentStore {
   final Map<String, String> _mem = {};
 
   String _key(String sourceId, String chapterUrl) => '$sourceId|$chapterUrl';
@@ -175,6 +183,10 @@ class HttpChapterContentStore implements ChapterContentStore {
   @override
   String? get(String sourceId, String chapterUrl) =>
       _mem[_key(sourceId, chapterUrl)];
+
+  @override
+  Future<String?> read(String sourceId, String chapterUrl) async =>
+      get(sourceId, chapterUrl);
 
   @override
   Future<void> put(String sourceId, String chapterUrl, String content) async {

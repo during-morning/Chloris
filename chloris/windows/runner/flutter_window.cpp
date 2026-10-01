@@ -1,3 +1,5 @@
+#include "music_browser.h"
+#include "music_media_session.h"
 #include "flutter_window.h"
 
 #include <optional>
@@ -25,6 +27,8 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
+  RegisterMusicMediaSession(flutter_controller_->engine()->messenger(),GetHandle());
+  RegisterMusicBrowser(flutter_controller_->engine()->messenger(),GetHandle());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
@@ -40,6 +44,8 @@ bool FlutterWindow::OnCreate() {
 }
 
 void FlutterWindow::OnDestroy() {
+  DisposeMusicMediaSession();
+  DisposeMusicBrowser();
   if (flutter_controller_) {
     flutter_controller_ = nullptr;
   }

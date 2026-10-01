@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../book_detail/cache_provider.dart';
 import '../book_detail/chapter_text_cache.dart';
+import '../../application/download/download_recovery.dart';
+import '../sources/source_library_provider.dart';
+import '../book_detail/book_detail_provider.dart';
 
 class CacheManageScreen extends ConsumerStatefulWidget {
   const CacheManageScreen({super.key});
@@ -13,6 +16,32 @@ class CacheManageScreen extends ConsumerStatefulWidget {
 }
 
 class _CacheManageScreenState extends ConsumerState<CacheManageScreen> {
+  Future<void> _resume(CacheJob job) async {
+    try {
+      final sources = await ref.read(allSourcesProvider.future);
+      if (!mounted) return;
+      final handler = resolvePersistedDownloadJob(
+        metadata: job.metadata,
+        bookName: job.bookName,
+        sources: sources,
+        content: ref.read(loadOnlineChapterContentUseCaseProvider),
+      );
+      if (handler == null) throw StateError('缺少恢复信息或书源，请从书籍详情重新下载');
+      await ref
+          .read(cacheJobsProvider.notifier)
+          .resume(
+            job,
+            fetchChapter: handler.fetchChapter,
+            hostOf: handler.hostOf,
+          );
+    } catch (e) {
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('恢复下载失败：$e')));
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -91,6 +120,11 @@ class _CacheManageScreenState extends ConsumerState<CacheManageScreen> {
                                     .read(cacheJobsProvider.notifier)
                                     .cancel(j),
                                 child: const Text('取消'),
+                              )
+                            : j.hasPending
+                            ? TextButton(
+                                onPressed: () => _resume(j),
+                                child: Text(j.failed > 0 ? '重试' : '继续'),
                               )
                             : null,
                         subtitle: Column(

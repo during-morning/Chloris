@@ -55,9 +55,10 @@ abstract final class AppTokens {
   static const controlHeight = 40.0;
   static const controlHeightCompact = 34.0;
   static const iconButtonSize = 36.0;
+
   /// Minimum interactive hit target.  Visual icons may remain 36pt while the
   /// surrounding control stays large enough for touch and switch access.
-  static const touchTarget = 44.0;
+  static const touchTarget = 48.0;
   static const topBarHeight = 26.0;
 
   static const tocItemExtent = 56.0;

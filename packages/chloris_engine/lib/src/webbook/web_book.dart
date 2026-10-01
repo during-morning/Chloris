@@ -317,7 +317,8 @@ class WebBook {
     String? sourceRegex,
     Duration? timeout,
   }) async {
-    final memoKey = (jsStr == null || jsStr.isEmpty) &&
+    final memoKey =
+        (jsStr == null || jsStr.isEmpty) &&
             (sourceRegex == null || sourceRegex.isEmpty)
         ? url
         : null;
@@ -350,7 +351,7 @@ class WebBook {
       _recentPages[memoKey] = (DateTime.now(), res);
       if (_recentPages.length > 16) {
         final oldest = _recentPages.entries.reduce(
-            (a, b) => a.value.$1.isBefore(b.value.$1) ? a : b,
+          (a, b) => a.value.$1.isBefore(b.value.$1) ? a : b,
         );
         _recentPages.remove(oldest.key);
       }
@@ -796,7 +797,9 @@ class WebBook {
     if (listRule.startsWith('+')) listRule = listRule.substring(1);
     final chapters = <BookChapter>[];
     void emitPartial() {
-      onPartial?.call(List<BookChapter>.from(ChapterListHygiene.sanitize(chapters)));
+      onPartial?.call(
+        List<BookChapter>.from(ChapterListHygiene.sanitize(chapters)),
+      );
     }
 
     final first = await _analyzeOneTocPage(
@@ -808,8 +811,9 @@ class WebBook {
       currentBody: body,
       discoverNext: true,
       chapterOffset: 0,
-      onProgress: (part) =>
-          onPartial?.call(List<BookChapter>.from(ChapterListHygiene.sanitize(part))),
+      onProgress: (part) => onPartial?.call(
+        List<BookChapter>.from(ChapterListHygiene.sanitize(part)),
+      ),
     );
     chapters.addAll(first.chapters);
     emitPartial();
@@ -865,9 +869,9 @@ class WebBook {
           emitPartial();
           if (pending.isEmpty && page.nextUrls.length > 1) {
             pending.addAll(
-              page.nextUrls.skip(1).where(
-                (url) => ContentHopPolicy.markSeen(seenPages, url),
-              ),
+              page.nextUrls
+                  .skip(1)
+                  .where((url) => ContentHopPolicy.markSeen(seenPages, url)),
             );
           }
           String? next;
@@ -951,7 +955,9 @@ class WebBook {
           ..setBook(book)
           ..setContent(currentBody, currentUrl)
           ..setRedirectUrl(currentUrl);
-    var items = listRule.isEmpty ? <Object>[] : await rule.getElements(listRule);
+    var items = listRule.isEmpty
+        ? <Object>[]
+        : await rule.getElements(listRule);
     if (items.isEmpty) {
       for (final fb in const [
         r'@css:#list dd a, #list a, .listmain a, .chapterlist a',
@@ -995,7 +1001,9 @@ class WebBook {
         if (title.isEmpty) title = await rule.getString('text');
         title = title.replaceAll(RegExp(r'\s+'), ' ').trim();
         if (title.isEmpty) continue;
-        var url = hasUrl ? await rule.getString(toc.chapterUrl, isUrl: true) : '';
+        var url = hasUrl
+            ? await rule.getString(toc.chapterUrl, isUrl: true)
+            : '';
         if (url.isEmpty || url == currentUrl) {
           url = await rule.getString('tag.a@href', isUrl: true);
         }
@@ -1234,7 +1242,7 @@ class WebBook {
         } catch (_) {}
       }
       if (book.isAudio) {
-        chapter.variable = '{"lyric":${jsonEncodeSafe(sub)}}';
+        chapter.putVariable('lyric', sub);
       } else if (book.isVideo) {
         chapter.variable = '{"danmaku":${jsonEncodeSafe(sub)}}';
       } else if (sub.isNotEmpty) {

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,6 +43,7 @@ void main() {
   });
 
   testWidgets('SourcesScreen 展示默认源总数与启用数', (tester) async {
+    SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -52,6 +54,9 @@ void main() {
     );
     var found = false;
     for (var i = 0; i < 30; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)),
+      );
       await tester.pump(const Duration(milliseconds: 1));
       if (find.textContaining('共 ').evaluate().isNotEmpty &&
           find.textContaining('启用 ').evaluate().isNotEmpty) {

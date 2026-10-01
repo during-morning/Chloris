@@ -29,6 +29,7 @@ class _AppEntranceState extends State<AppEntrance>
   late final AnimationController _controller;
   Timer? _timer;
   bool _started = false;
+  late final CurvedAnimation _curve;
 
   @override
   void initState() {
@@ -38,17 +39,20 @@ class _AppEntranceState extends State<AppEntrance>
       duration: widget.duration,
       value: 0,
     );
+    _curve = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_started) return;
-    _started = true;
     if (MediaQuery.disableAnimationsOf(context)) {
+      _timer?.cancel();
+      _started = true;
       _controller.value = 1;
       return;
     }
+    if (_started) return;
+    _started = true;
     if (widget.delay == Duration.zero) {
       _controller.forward();
     } else {
@@ -61,16 +65,14 @@ class _AppEntranceState extends State<AppEntrance>
   @override
   void dispose() {
     _timer?.cancel();
+    _curve.dispose();
     _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final curve = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    );
+    final curve = _curve;
     return FadeTransition(
       opacity: curve,
       child: SlideTransition(
@@ -86,10 +88,16 @@ class _AppEntranceState extends State<AppEntrance>
 
 /// Subtle scale feedback for prominent actions, without changing semantics.
 class AppPressable extends StatefulWidget {
-  const AppPressable({super.key, required this.child, this.onTap});
+  const AppPressable({
+    super.key,
+    required this.child,
+    this.onTap,
+    this.enabled = true,
+  });
 
   final Widget child;
   final VoidCallback? onTap;
+  final bool enabled;
 
   @override
   State<AppPressable> createState() => _AppPressableState();
@@ -100,25 +108,30 @@ class _AppPressableState extends State<AppPressable> {
 
   @override
   Widget build(BuildContext context) {
-    final disabled = widget.onTap == null;
+    final disabled = !widget.enabled;
     final reduce = MediaQuery.disableAnimationsOf(context);
-    return GestureDetector(
-      onTap: widget.onTap,
-      onTapDown: disabled || reduce
+    final feedback = Listener(
+      onPointerDown: disabled || reduce
           ? null
           : (_) => setState(() => _pressed = true),
-      onTapCancel: disabled || reduce
-          ? null
-          : () => setState(() => _pressed = false),
-      onTapUp: disabled || reduce
-          ? null
-          : (_) => setState(() => _pressed = false),
+      onPointerCancel: (_) {
+        if (_pressed) setState(() => _pressed = false);
+      },
+      onPointerUp: (_) {
+        if (_pressed) setState(() => _pressed = false);
+      },
       child: AnimatedScale(
-        scale: _pressed ? .97 : 1,
+        scale: _pressed ? .975 : 1,
         duration: reduce ? Duration.zero : AppTokens.durationFast,
-        curve: Curves.easeOut,
+        curve: Curves.easeOutCubic,
         child: widget.child,
       ),
     );
+    return widget.onTap == null
+        ? feedback
+        : GestureDetector(
+            onTap: disabled ? null : widget.onTap,
+            child: feedback,
+          );
   }
 }

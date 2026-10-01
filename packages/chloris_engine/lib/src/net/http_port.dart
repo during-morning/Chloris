@@ -30,6 +30,8 @@ class HttpRequestSpec {
     this.dnsIp,
     this.serverID,
     this.proxy,
+    this.maxResponseBytes,
+    this.allowTruncated = false,
   });
 
   final String url;
@@ -46,6 +48,8 @@ class HttpRequestSpec {
   final String? dnsIp;
   final String? serverID;
   final String? proxy;
+  final int? maxResponseBytes;
+  final bool allowTruncated;
 
   Duration get effectiveTimeout => timeout ?? EngineLimits.httpTimeout;
 }
@@ -69,33 +73,27 @@ abstract class SessionAwareHttp {
 /// (detail, TOC, content) must not share that connection pool, and cancelling
 /// search must abort those sockets immediately.
 bool isBackgroundHttpSession(String? session) =>
-    session == 'search' || session == 'explore';
+    session == 'search' ||
+    session?.startsWith('search.') == true ||
+    session == 'explore' ||
+    session?.startsWith('explore.') == true ||
+    session?.startsWith('music-search-') == true ||
+    session?.startsWith('music-prefetch-') == true;
 
 class PackageHttpPort implements HttpPort, SessionAwareHttp {
   PackageHttpPort({http.Client? client, http.Client? backgroundClient})
-    : _ownsBackground = backgroundClient == null && client == null,
-      _interactive = client ?? createHttpClient(),
+    : _interactive = client ?? createHttpClient(),
       _background = backgroundClient ?? client ?? createHttpClient();
 
-  final bool _ownsBackground;
   http.Client _interactive;
   http.Client _background;
   int _epoch = 0;
   final Map<String, int> _sessionEpoch = {};
   final Map<String, Future<StrResponse>> _inflight = {};
+  final Map<String, Set<Completer<void>>> _activeRequests = {};
 
   http.Client _clientFor(String? session) =>
       isBackgroundHttpSession(session) ? _background : _interactive;
-
-  void _recycleBackground() {
-    if (identical(_background, _interactive)) return;
-    try {
-      _background.close();
-    } catch (_) {}
-    if (_ownsBackground) {
-      _background = createHttpClient();
-    }
-  }
 
   int _mark(String? session) {
     if (session == null || session.isEmpty) return _epoch;
@@ -105,13 +103,23 @@ class PackageHttpPort implements HttpPort, SessionAwareHttp {
   @override
   void cancelInFlight() {
     _epoch++;
+    for (final requests in _activeRequests.values) {
+      for (final request in requests) {
+        if (!request.isCompleted) request.complete();
+      }
+    }
   }
 
   @override
   void cancelSession(String session) {
-    _sessionEpoch[session] = (_sessionEpoch[session] ?? 0) + 1;
-    if (isBackgroundHttpSession(session)) {
-      _recycleBackground();
+    final affected = _sessionEpoch.keys
+        .where((id) => id == session || id.startsWith('$session.'))
+        .toList(growable: false);
+    for (final id in affected) {
+      _sessionEpoch[id] = (_sessionEpoch[id] ?? 0) + 1;
+      for (final request in _activeRequests[id] ?? const <Completer<void>>{}) {
+        if (!request.isCompleted) request.complete();
+      }
     }
   }
 
@@ -119,7 +127,13 @@ class PackageHttpPort implements HttpPort, SessionAwareHttp {
   Future<StrResponse> send(HttpRequestSpec spec) async {
     final session = Zone.current[#chlorisHttpSession] as String?;
     final lane = isBackgroundHttpSession(session) ? 'bg' : 'fg';
-    final coalesceKey = '$lane\u0001${_coalesceKey(spec)}';
+    final operationScope =
+        session?.startsWith('search.') == true ||
+            session?.startsWith('explore.') == true ||
+            session?.startsWith('music-') == true
+        ? session
+        : '';
+    final coalesceKey = '$lane\u0001$operationScope\u0001${_coalesceKey(spec)}';
     final existing = _inflight[coalesceKey];
     if (existing != null) return existing;
     final future = _sendUncoalesced(spec, session);
@@ -138,6 +152,8 @@ class PackageHttpPort implements HttpPort, SessionAwareHttp {
       ..sort((a, b) => a.key.toLowerCase().compareTo(b.key.toLowerCase()));
     return [
       spec.method.toUpperCase(),
+      '${spec.maxResponseBytes}',
+      '${spec.allowTruncated}',
       spec.url,
       spec.body ?? '',
       spec.charset ?? '',
@@ -155,73 +171,131 @@ class PackageHttpPort implements HttpPort, SessionAwareHttp {
   ) async {
     Object? lastError;
     http.Response? response;
+    if (session != null && session.isNotEmpty) {
+      _sessionEpoch.putIfAbsent(session, () => 0);
+    }
     final epoch = _mark(session);
-    bool cancelled() => epoch != _mark(session);
-    for (var i = 0; i <= spec.retry; i++) {
-      if (cancelled()) throw const HttpCancelledException();
-      try {
-        final uri = Uri.parse(spec.url);
-        final headers = Map<String, String>.from(spec.headers);
-        final method = spec.method.toUpperCase();
-        final timeout = spec.effectiveTimeout;
-        final client = _clientFor(session);
-        if (method == 'POST') {
-          response = await client
-              .post(
-                uri,
-                headers: headers,
-                body: HttpBodyDecoder.encodeRequestBody(spec.body, spec.charset),
-              )
-              .timeout(timeout);
-        } else if (method == 'HEAD') {
-          response = await client.head(uri, headers: headers).timeout(timeout);
-        } else {
-          response = await client.get(uri, headers: headers).timeout(timeout);
-        }
-        if (cancelled()) throw const HttpCancelledException();
-        lastError = null;
-        if (response.statusCode >= 200 && response.statusCode < 500) {
-          break;
-        }
-        if (i < spec.retry) {
-          await Future<void>.delayed(
-            Duration(milliseconds: 120 * (1 << i.clamp(0, 4))),
-          );
-        }
-      } on HttpCancelledException {
-        rethrow;
-      } catch (e) {
-        if (cancelled()) throw const HttpCancelledException();
-        lastError = e;
-        if (i == spec.retry) rethrow;
-      }
-    }
-    if (response == null) {
-      throw lastError ?? StateError('empty http response');
-    }
-    // A terminal 5xx is a transport failure even when the server returned an
-    // HTML error page.  Returning it as a successful StrResponse lets the
-    // content selector cache an error document as a chapter and is the most
-    // common cause of apparently empty/phantom chapters.  Keep 4xx bodies
-    // available so AnalyzeUrl can classify login/captcha walls.
-    if (response.statusCode >= 500) {
-      throw lastError ?? StateError('HTTP ${response.statusCode} ${spec.url}');
-    }
-    final headerMap = <String, String>{};
-    response.headers.forEach((k, v) => headerMap[k] = v);
-    String? body;
-    try {
-      body = _decodeBody(response, spec.charset);
-    } catch (_) {
-      body = latin1.decode(response.bodyBytes, allowInvalid: true);
-    }
-    return StrResponse(
-      url: response.request?.url.toString() ?? spec.url,
-      body: body,
-      code: response.statusCode,
-      headers: headerMap,
-      error: lastError,
+    final operationCancel = Completer<void>();
+    final active = _activeRequests.putIfAbsent(
+      session ?? '',
+      () => <Completer<void>>{},
     );
+    active.add(operationCancel);
+    bool cancelled() => epoch != _mark(session);
+    try {
+      for (var i = 0; i <= spec.retry; i++) {
+        if (cancelled()) throw const HttpCancelledException();
+        final attemptCancel = Completer<void>();
+        try {
+          final uri = Uri.parse(spec.url);
+          final headers = Map<String, String>.from(spec.headers);
+          final method = spec.method.toUpperCase();
+          final timeout = spec.effectiveTimeout;
+          final client = _clientFor(session);
+          final request = http.AbortableRequest(
+            method,
+            uri,
+            abortTrigger: Future.any([
+              operationCancel.future,
+              attemptCancel.future,
+            ]),
+          )..headers.addAll(headers);
+          if (method == 'POST') {
+            final body = HttpBodyDecoder.encodeRequestBody(
+              spec.body,
+              spec.charset,
+            );
+            request.bodyBytes = body is String
+                ? utf8.encode(body)
+                : body as List<int>;
+          }
+          try {
+            final requestFuture = (() async {
+              final streamed = await client.send(request);
+              if (spec.maxResponseBytes == null)
+                return http.Response.fromStream(streamed);
+              final bytes = BytesBuilder(copy: false);
+              var truncated = false;
+              await for (final chunk in streamed.stream) {
+                final remaining = spec.maxResponseBytes! - bytes.length;
+                if (chunk.length > remaining) {
+                  if (!spec.allowTruncated)
+                    throw const FormatException('响应超过允许大小');
+                  if (remaining > 0) bytes.add(chunk.sublist(0, remaining));
+                  truncated = true;
+                  break;
+                }
+                bytes.add(chunk);
+              }
+              if (truncated && !attemptCancel.isCompleted)
+                attemptCancel.complete();
+              return http.Response.bytes(
+                bytes.takeBytes(),
+                streamed.statusCode,
+                headers: streamed.headers,
+                request: streamed.request,
+              );
+            })();
+            response = await Future.any([
+              requestFuture,
+              operationCancel.future.then<http.Response>(
+                (_) => throw const HttpCancelledException(),
+              ),
+            ]).timeout(timeout);
+          } on TimeoutException {
+            if (!attemptCancel.isCompleted) attemptCancel.complete();
+            rethrow;
+          }
+          if (!attemptCancel.isCompleted) attemptCancel.complete();
+          if (cancelled()) throw const HttpCancelledException();
+          lastError = null;
+          if (response.statusCode >= 200 && response.statusCode < 500) {
+            break;
+          }
+          if (i < spec.retry) {
+            await Future<void>.delayed(
+              Duration(milliseconds: 120 * (1 << i.clamp(0, 4))),
+            );
+          }
+        } on HttpCancelledException {
+          rethrow;
+        } catch (e) {
+          if (cancelled()) throw const HttpCancelledException();
+          lastError = e;
+          if (i == spec.retry) rethrow;
+        } finally {
+          if (!attemptCancel.isCompleted) attemptCancel.complete();
+        }
+      }
+      if (cancelled()) throw const HttpCancelledException();
+      if (response == null) {
+        throw lastError ?? StateError('empty http response');
+      }
+      // A terminal 5xx is a transport failure even when the server returned an
+      // HTML error page. Keep 4xx bodies for login/captcha classification.
+      if (response.statusCode >= 500) {
+        throw lastError ??
+            StateError('HTTP ${response.statusCode} ${spec.url}');
+      }
+      final headerMap = <String, String>{};
+      response.headers.forEach((k, v) => headerMap[k] = v);
+      String? body;
+      try {
+        body = _decodeBody(response, spec.charset);
+      } catch (_) {
+        body = latin1.decode(response.bodyBytes, allowInvalid: true);
+      }
+      return StrResponse(
+        url: response.request?.url.toString() ?? spec.url,
+        body: body,
+        code: response.statusCode,
+        headers: headerMap,
+        error: lastError,
+      );
+    } finally {
+      active.remove(operationCancel);
+      if (active.isEmpty) _activeRequests.remove(session ?? '');
+    }
   }
 
   @override
@@ -352,7 +426,9 @@ class CharsetDecoder {
     if (name.contains('gb18030') ||
         name.contains('gbk') ||
         name.contains('gb2312')) {
-      return Uint8List.fromList(const GbkCodec(allowInvalid: false).encode(text));
+      return Uint8List.fromList(
+        const GbkCodec(allowInvalid: false).encode(text),
+      );
     }
     if (name.contains('big5') || name == 'cp950' || name == '950') {
       return Uint8List.fromList(

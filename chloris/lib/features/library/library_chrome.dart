@@ -235,16 +235,22 @@ extension _LibraryChrome on _LibraryScreenState {
     required String sourceUrl,
   }) async {
     ref.read(pinnedUrlsProvider.notifier).unpin(bookUrl);
-    await ref
-        .read(bookCleanupProvider)
-        .cleanBook(
-          bookUrl: bookUrl,
-          name: name,
-          author: author,
-          sourceUrl: sourceUrl,
-        );
+    // Remove the visible/library record first so cleanup latency cannot make
+    // the delete action appear unresponsive.
     ref.read(onlineShelfProvider.notifier).remove(bookUrl);
     ref.read(localShelfProvider.notifier).remove(bookUrl);
+    try {
+      await ref
+          .read(bookCleanupProvider)
+          .cleanBook(
+            bookUrl: bookUrl,
+            name: name,
+            author: author,
+            sourceUrl: sourceUrl,
+          );
+    } catch (_) {
+      // Stale progress/cache rows must never keep a deleted book on the shelf.
+    }
   }
 
   Future<void> _deleteBook(Book book) async {
@@ -393,9 +399,9 @@ extension _LibraryChrome on _LibraryScreenState {
             ListTile(
               leading: const Icon(Icons.delete_outline),
               title: const Text('删除'),
-              onTap: () {
-                _deleteBook(book);
+              onTap: () async {
                 Navigator.pop(ctx);
+                await _deleteBook(book);
               },
             ),
           ],

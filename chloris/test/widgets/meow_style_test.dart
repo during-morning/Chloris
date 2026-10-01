@@ -59,6 +59,27 @@ void main() {
     expect(find.byType(MeowRule), findsNothing);
   });
 
+  testWidgets('terminal selected chip keeps contrast against its white fill', (
+    tester,
+  ) async {
+    final theme = AppTheme.light(
+      AppThemeFamily.green,
+      style: AppUiStyle.terminal,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Scaffold(
+          body: MeowChip(label: '在读', active: true),
+        ),
+      ),
+    );
+
+    final label = tester.widget<Text>(find.text('在读'));
+    expect(label.style?.color, theme.colorScheme.onInverseSurface);
+    expect(theme.chipTheme.selectedColor, theme.colorScheme.onSurface);
+  });
+
   testWidgets('the measured column caps width in the new styles', (
     tester,
   ) async {

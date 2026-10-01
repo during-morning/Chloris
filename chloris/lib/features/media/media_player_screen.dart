@@ -1,200 +1,425 @@
-import 'package:chloris_engine/chloris_engine.dart';
+import 'music_artwork.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 
-import 'video_engine/video_engine_factory.dart';
 import '../../app/theme/app_icons.dart';
+import 'lyrics_view.dart';
+import 'music_controller.dart';
+import 'video_engine/video_engine_factory.dart';
 
-String? playableUrlFromContent(String text) {
-  final t = text.trim();
-  if (t.startsWith('http://') || t.startsWith('https://')) {
-    return t.split(RegExp(r'\s')).first;
-  }
-  final m = RegExp(r'https?://[^\s"<>]+').firstMatch(t);
-  return m?.group(0);
-}
+export 'media_resource.dart' show playableUrlFromContent;
 
-/// 音频/视频播放。音频控制对齐 legado AudioPlay：进度、±15s、倍速、上一章/下一章。
+/// 章节音频与独立音乐页共用同一前台/系统媒体会话。
 class MediaPlayerView extends StatefulWidget {
   const MediaPlayerView({
     super.key,
     required this.url,
     this.title = '',
+    this.artist,
+    this.coverUrl,
+    this.lyric,
+    this.headers = const {},
     this.isVideo = false,
     this.onPrev,
     this.onNext,
     this.hasPrev = false,
     this.hasNext = false,
+    this.controller,
   });
-
   final String url;
   final String title;
+  final String? artist;
+  final String? coverUrl;
+  final String? lyric;
+  final Map<String, String> headers;
   final bool isVideo;
   final VoidCallback? onPrev;
   final VoidCallback? onNext;
   final bool hasPrev;
   final bool hasNext;
+  final MusicController? controller;
 
   @override
   State<MediaPlayerView> createState() => _MediaPlayerViewState();
 }
 
 class _MediaPlayerViewState extends State<MediaPlayerView> {
-  AudioPlayer? _audio;
-  bool _ready = false;
-  String? _error;
-  double _speed = 1;
-
-  static const _speeds = [0.75, 1.0, 1.25, 1.5, 2.0];
-
+  late MusicController _controller;
   @override
   void initState() {
     super.initState();
-    _init();
-  }
-
-  Future<void> _init() async {
-    try {
-      if (!widget.isVideo) {
-        final audio = AudioPlayer();
-        _audio = audio;
-        await audio.setUrl(widget.url);
-        await audio.setSpeed(_speed);
-        await audio.play();
-      }
-      if (mounted) setState(() => _ready = true);
-    } catch (e) {
-      if (mounted) setState(() => _error = e.toString());
+    if (!widget.isVideo) {
+      _controller = widget.controller ?? sharedMusicController();
+      _open();
     }
   }
 
-  @override
-  void dispose() {
-    _audio?.dispose();
-    super.dispose();
-  }
-
-  Future<void> _skip(int seconds) async {
-    final a = _audio;
-    if (a == null) return;
-    final next = a.position + Duration(seconds: seconds);
-    final dur = a.duration ?? next;
-    await a.seek(
-      next < Duration.zero ? Duration.zero : (next > dur ? dur : next),
-    );
-  }
-
-  Future<void> _cycleSpeed() async {
-    final i = (_speeds.indexOf(_speed) + 1) % _speeds.length;
-    _speed = _speeds[i];
-    await _audio?.setSpeed(_speed);
-    if (mounted) setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_error != null) return Center(child: Text('播放失败：' + _error!));
-    if (!_ready) return const Center(child: CircularProgressIndicator());
-    if (widget.isVideo) return VideoEngineView(url: widget.url);
-    return _buildAudio(context);
-  }
-
-  Widget _buildAudio(BuildContext context) {
-    final audio = _audio!;
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          const Spacer(),
-          const AppIcon(AppIcons.album, size: 96),
-          const SizedBox(height: 16),
-          Text(
-            widget.title.isEmpty ? '音频' : widget.title,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const Spacer(),
-          StreamBuilder<Duration>(
-            stream: audio.positionStream,
-            builder: (ctx, posSnap) {
-              final pos = posSnap.data ?? Duration.zero;
-              return StreamBuilder<Duration?>(
-                stream: audio.durationStream,
-                builder: (ctx, durSnap) {
-                  final dur = durSnap.data ?? Duration.zero;
-                  final ms = dur.inMilliseconds;
-                  return Column(
-                    children: [
-                      Slider(
-                        value: ms > 0
-                            ? pos.inMilliseconds.clamp(0, ms).toDouble()
-                            : 0,
-                        max: ms > 0 ? ms.toDouble() : 1,
-                        onChanged: (v) =>
-                            audio.seek(Duration(milliseconds: v.round())),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [Text(_fmt(pos)), Text(_fmt(dur))],
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
-          const SizedBox(height: 8),
-          StreamBuilder<PlayerState>(
-            stream: audio.playerStateStream,
-            builder: (ctx, snap) {
-              final playing = snap.data?.playing ?? audio.playing;
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    tooltip: '上一章',
-                    onPressed: widget.hasPrev ? widget.onPrev : null,
-                    icon: const AppIcon(AppIcons.skipPrevious, size: 32),
-                  ),
-                  IconButton(
-                    tooltip: '-15s',
-                    onPressed: () => _skip(-15),
-                    icon: const AppIcon(AppIcons.replay),
-                  ),
-                  IconButton.filled(
-                    iconSize: 36,
-                    onPressed: () => playing ? audio.pause() : audio.play(),
-                    icon: AppIcon(playing ? AppIcons.pause : AppIcons.play),
-                  ),
-                  IconButton(
-                    tooltip: '+15s',
-                    onPressed: () => _skip(15),
-                    icon: const AppIcon(AppIcons.forward10),
-                  ),
-                  IconButton(
-                    tooltip: '下一章',
-                    onPressed: widget.hasNext ? widget.onNext : null,
-                    icon: const AppIcon(AppIcons.skipNext, size: 32),
-                  ),
-                ],
-              );
-            },
-          ),
-          TextButton(
-            onPressed: _cycleSpeed,
-            child: Text(_speed.toStringAsFixed(2) + 'x'),
-          ),
-          const SizedBox(height: 24),
-        ],
+  void _open() {
+    unawaited(
+      _controller.openChapter(
+        MusicTrack(
+          url: widget.url,
+          title: widget.title,
+          artist: widget.artist,
+          coverUrl: widget.coverUrl,
+          lyric: widget.lyric,
+          headers: widget.headers,
+        ),
+        onPrevious: widget.hasPrev ? widget.onPrev : null,
+        onNext: widget.hasNext ? widget.onNext : null,
       ),
     );
   }
 
-  String _fmt(Duration d) {
-    final m = d.inMinutes.toString().padLeft(2, '0');
-    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
-    return m + ':' + s;
+  @override
+  void didUpdateWidget(covariant MediaPlayerView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isVideo) {
+      if (!oldWidget.isVideo) unawaited(_controller.stop());
+      return;
+    }
+    if (oldWidget.isVideo || widget.controller != oldWidget.controller) {
+      _controller = widget.controller ?? sharedMusicController();
+      _open();
+    } else if (widget.url != oldWidget.url ||
+        widget.title != oldWidget.title ||
+        widget.lyric != oldWidget.lyric ||
+        widget.artist != oldWidget.artist ||
+        widget.coverUrl != oldWidget.coverUrl ||
+        !_sameHeaders(widget.headers, oldWidget.headers)) {
+      _open();
+    } else {
+      _controller.updateChapterControls(
+        onPrevious: widget.hasPrev ? widget.onPrev : null,
+        onNext: widget.hasNext ? widget.onNext : null,
+      );
+    }
   }
+
+  bool _sameHeaders(Map<String, String> a, Map<String, String> b) =>
+      a.length == b.length &&
+      a.entries.every((entry) => b[entry.key] == entry.value);
+  @override
+  void dispose() {
+    if (!widget.isVideo && _controller.current?.url == widget.url) {
+      _controller.updateChapterControls(notify: false);
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.isVideo
+      ? VideoEngineView(key: ValueKey(widget.url), url: widget.url)
+      : MusicPlayerPanel(controller: _controller);
+}
+
+class MusicPlayerPanel extends StatelessWidget {
+  const MusicPlayerPanel({
+    super.key,
+    required this.controller,
+    this.showLyrics = true,
+    this.showArtwork = true,
+  });
+  final bool showLyrics, showArtwork;
+  final MusicController controller;
+  static const _speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0];
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: controller,
+    builder: (context, _) => LayoutBuilder(
+      builder: (context, constraints) {
+        final track = controller.current;
+        final narrow = constraints.maxWidth < 360;
+        final padding = narrow ? 12.0 : 24.0;
+        final lyricHeight = constraints.maxHeight.isFinite
+            ? (constraints.maxHeight * .38).clamp(128.0, 340.0)
+            : 240.0;
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(padding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (track == null) ...[
+                const AppIcon(AppIcons.album, size: 64),
+                const SizedBox(height: 12),
+                Text(
+                  '添加音频开始播放',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ] else ...[
+                if (showArtwork)
+                  Center(
+                    child: MusicArtwork(
+                      url: track.coverUrl,
+                      size: (constraints.maxWidth - padding * 2).clamp(96, 228),
+                    ),
+                  ),
+                const SizedBox(height: 12),
+                Text(
+                  track.displayTitle,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                if (track.artist?.isNotEmpty == true) ...[
+                  const SizedBox(height: 6),
+                  Text(track.artist!, textAlign: TextAlign.center),
+                ],
+                if (controller.loading ||
+                    controller.phase == MusicPhase.buffering) ...[
+                  const SizedBox(height: 12),
+                  const LinearProgressIndicator(),
+                  const SizedBox(height: 4),
+                  Text(
+                    controller.loading ? '正在加载音频' : '正在缓冲',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+                if (controller.error != null) ...[
+                  const SizedBox(height: 12),
+                  Text('播放失败：${controller.error}', textAlign: TextAlign.center),
+                  TextButton.icon(
+                    onPressed: controller.retry,
+                    icon: const AppIcon(AppIcons.refresh),
+                    label: const Text('重试播放'),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                if (showLyrics)
+                  SizedBox(
+                    height: lyricHeight,
+                    child: ValueListenableBuilder<int>(
+                      valueListenable: controller.lyricLineListenable,
+                      builder: (context, line, _) => LyricsView(
+                        document: controller.lyrics,
+                        position: controller.position,
+                        positionListenable: controller.positionListenable,
+                        offset: Duration(milliseconds: controller.lyricOffset),
+                        currentLine: line,
+                        onSeek: controller.seek,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 8),
+                ValueListenableBuilder<Duration>(
+                  valueListenable: controller.positionListenable,
+                  builder: (context, position, _) => Column(
+                    children: [
+                      Slider(
+                        key: const ValueKey('music-progress'),
+                        value: controller.duration.inMilliseconds > 0
+                            ? position.inMilliseconds
+                                  .clamp(0, controller.duration.inMilliseconds)
+                                  .toDouble()
+                            : 0,
+                        max: controller.duration.inMilliseconds > 0
+                            ? controller.duration.inMilliseconds.toDouble()
+                            : 1,
+                        onChanged:
+                            controller.loading ||
+                                controller.duration <= Duration.zero
+                            ? null
+                            : (value) => controller.seek(
+                                Duration(milliseconds: value.round()),
+                              ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              formatMusicTime(position),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Flexible(
+                            child: Text(
+                              controller.current?.live == true
+                                  ? '直播'
+                                  : controller.duration == Duration.zero
+                                  ? '时长未知'
+                                  : formatMusicTime(controller.duration),
+                              textAlign: TextAlign.end,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: narrow ? 0 : 8,
+                    children: [
+                      IconButton(
+                        tooltip: '上一首',
+                        onPressed: controller.hasPrevious
+                            ? controller.previous
+                            : null,
+                        icon: const AppIcon(AppIcons.skipPrevious),
+                      ),
+                      IconButton(
+                        tooltip: '后退15秒',
+                        onPressed: controller.loading
+                            ? null
+                            : () => controller.skip(-15),
+                        icon: const AppIcon(AppIcons.replay),
+                      ),
+                      IconButton.filled(
+                        tooltip: controller.playing ? '暂停' : '播放',
+                        onPressed: controller.loading
+                            ? null
+                            : controller.togglePlayback,
+                        icon: AppIcon(
+                          controller.playing ? AppIcons.pause : AppIcons.play,
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: '前进15秒',
+                        onPressed: controller.loading
+                            ? null
+                            : () => controller.skip(15),
+                        icon: const AppIcon(AppIcons.forward10),
+                      ),
+                      IconButton(
+                        tooltip: '下一首',
+                        onPressed: controller.hasNext ? controller.next : null,
+                        icon: const AppIcon(AppIcons.skipNext),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 6,
+                  runSpacing: 2,
+                  children: [
+                    SizedBox(
+                      width: (constraints.maxWidth - padding * 2).clamp(
+                        88,
+                        112,
+                      ),
+                      child: DropdownButton<double>(
+                        isExpanded: true,
+                        underline: const SizedBox.shrink(),
+                        value: _speeds.contains(controller.speed)
+                            ? controller.speed
+                            : 1.0,
+                        onChanged: (value) {
+                          if (value != null) controller.setSpeed(value);
+                        },
+                        items: _speeds
+                            .map(
+                              (speed) => DropdownMenuItem(
+                                value: speed,
+                                child: Text(
+                                  '$speed倍速',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
+                    FilterChip(
+                      avatar: AppIcon(
+                        AppIcons.shuffle,
+                        size: 17,
+                        color: controller.shuffle
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                      ),
+                      label: const Text('随机'),
+                      selected: controller.shuffle,
+                      onSelected: (_) => controller.toggleShuffle(),
+                    ),
+                    FilterChip(
+                      avatar: AppIcon(
+                        controller.repeat == MusicRepeat.one
+                            ? AppIcons.restart
+                            : AppIcons.refresh,
+                        size: 17,
+                        color: controller.repeat != MusicRepeat.off
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                      ),
+                      label: Text(switch (controller.repeat) {
+                        MusicRepeat.off => '顺序',
+                        MusicRepeat.all => '列表循环',
+                        MusicRepeat.one => '单曲循环',
+                      }),
+                      selected: controller.repeat != MusicRepeat.off,
+                      onSelected: (_) => controller.cycleRepeat(),
+                    ),
+                    PopupMenuButton<int>(
+                      tooltip: '定时停止',
+                      onSelected: (minutes) => controller.setSleepTimer(
+                        minutes == 0 ? null : Duration(minutes: minutes),
+                      ),
+                      itemBuilder: (_) => const [
+                        PopupMenuItem(value: 0, child: Text('取消定时')),
+                        PopupMenuItem(value: 15, child: Text('15分钟后停止')),
+                        PopupMenuItem(value: 30, child: Text('30分钟后停止')),
+                        PopupMenuItem(value: 60, child: Text('60分钟后停止')),
+                      ],
+                      child: IconButton(
+                        tooltip: controller.sleepUntil == null
+                            ? '定时停止'
+                            : '定时已开启',
+                        onPressed: null,
+                        icon: AppIcon(
+                          AppIcons.timer,
+                          color: controller.sleepUntil == null
+                              ? null
+                              : Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Text('音量'),
+                    Expanded(
+                      child: Slider(
+                        key: const ValueKey('music-volume'),
+                        value: controller.volume,
+                        onChanged: controller.setVolume,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 64,
+                      child: Text(
+                        '${(controller.volume * 100).round()}%',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    ),
+  );
+}
+
+String formatMusicTime(Duration duration) {
+  final minutes = duration.inMinutes.toString().padLeft(2, '0');
+  final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
+  return '$minutes:$seconds';
 }
 
 class MediaPlayerScreen extends StatelessWidget {
@@ -202,32 +427,45 @@ class MediaPlayerScreen extends StatelessWidget {
     super.key,
     required this.url,
     this.title = '',
+    this.artist,
+    this.coverUrl,
+    this.lyric,
+    this.headers = const {},
     this.isVideo = false,
     this.onPrev,
     this.onNext,
     this.hasPrev = false,
     this.hasNext = false,
+    this.controller,
   });
-
   final String url;
   final String title;
+  final String? artist;
+  final String? coverUrl;
+  final String? lyric;
+  final Map<String, String> headers;
   final bool isVideo;
   final VoidCallback? onPrev;
   final VoidCallback? onNext;
   final bool hasPrev;
   final bool hasNext;
-
+  final MusicController? controller;
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: Text(title.isEmpty ? '播放' : title)),
     body: MediaPlayerView(
       url: url,
       title: title,
+      artist: artist,
+      coverUrl: coverUrl,
+      lyric: lyric,
+      headers: headers,
       isVideo: isVideo,
       onPrev: onPrev,
       onNext: onNext,
       hasPrev: hasPrev,
       hasNext: hasNext,
+      controller: controller,
     ),
   );
 }

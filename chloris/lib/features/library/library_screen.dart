@@ -15,6 +15,7 @@ import '../local/local_book_provider.dart';
 import '../local/local_import_screen.dart';
 import '../sources/source_library_provider.dart';
 import 'book_cleanup.dart';
+import 'book_health_screen.dart';
 import 'library_provider.dart';
 import 'online_shelf_provider.dart';
 import 'reading_progress_provider.dart';
@@ -114,6 +115,13 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                   tooltip: '筛选',
                   onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
                 ),
+              MeowIconButton(
+                icon: AppIcons.checkCircle,
+                tooltip: '检查无效书籍',
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const BookHealthScreen()),
+                ),
+              ),
               MeowIconButton(
                 icon: AppIcons.copy,
                 tooltip: '导出书架 JSON',

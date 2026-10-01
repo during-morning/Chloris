@@ -56,3 +56,9 @@ abstract interface class ChapterContentStore {
   Future<void> put(String sourceId, String chapterUrl, String content);
   Future<void> remove(String sourceId, String chapterUrl);
 }
+
+/// Optional cold-read capability for persistent stores. Implementations that
+/// only keep an in-memory cache can continue to use the synchronous [get].
+abstract interface class AsyncChapterContentStore {
+  Future<String?> read(String sourceId, String chapterUrl);
+}

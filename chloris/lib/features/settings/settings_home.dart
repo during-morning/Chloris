@@ -15,6 +15,12 @@ class _SettingsHome extends ConsumerWidget {
         child: ListView(
           children: [
             ListTile(
+              leading: const AppIcon(AppIcons.album),
+              title: const Text('音乐播放器'),
+              subtitle: const Text('音频解析、本地音乐与同步歌词'),
+              onTap: () => context.go('/music'),
+            ),
+            ListTile(
               leading: const AppIcon(AppIcons.tune),
               title: const Text('书源管理'),
               subtitle: const Text('导入、启用、分组'),

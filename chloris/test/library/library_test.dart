@@ -6,8 +6,24 @@ import 'package:chloris_engine/chloris_engine.dart';
 
 import 'package:chloris/features/library/library_provider.dart';
 import 'package:chloris/features/library/library_screen.dart';
+import 'package:chloris/features/library/online_shelf_provider.dart';
 
 void main() {
+  test('书库 Book 使用去重后的书架身份 URL', () {
+    final item = OnlineShelfItem(
+      source: BookSource(bookSourceUrl: 'https://source.example'),
+      searchBook: SearchBook(
+        bookUrl: 'https://source.example/book/123',
+        name: '同一本书',
+        author: '作者',
+      ),
+      identityBookUrl: 'chloris://book/identity-123',
+    );
+
+    expect(item.candidateBookUrl, 'https://source.example/book/123');
+    expect(item.toShelfBook().bookUrl, 'chloris://book/identity-123');
+  });
+
   testWidgets('书架可切换网格/列表视图', (tester) async {
     final sample = Book(bookUrl: 's1', name: '示例书', author: '作者');
     await tester.pumpWidget(

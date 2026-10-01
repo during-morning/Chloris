@@ -1,3 +1,4 @@
+import '../media/music_workspace.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,16 +15,16 @@ class HomeShell extends ConsumerWidget {
 
   final StatefulNavigationShell navigationShell;
 
-  /// 书库 / 寻找 / 探索 / 我的。
+  /// 书库 / 寻找 / 探索 / 音乐 / 我的。
   ///
   /// 书源与 RSS 仍保留独立路由和页面状态，但从「我的」进入，避免
   /// 主导航被管理型页面占满。
-  static const _branch = <int>[0, 1, 2, 5];
+  static const _branch = <int>[0, 1, 2, 6, 5];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = AppStrings.of(ref.watch(localeProvider));
-    final labels = [s.library, s.search, s.explore, s.settings];
+    final labels = [s.library, s.search, s.explore, '音乐', s.settings];
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final ext = theme.extension<AppStyleExtension>();
@@ -34,22 +35,34 @@ class HomeShell extends ConsumerWidget {
         final wide = constraints.maxWidth >= AppTokens.bpRail;
         final extended = constraints.maxWidth >= AppTokens.bpExtended;
         final reduce = MediaQuery.disableAnimationsOf(context);
-        final body = AnimatedSwitcher(
+        // Keep a single shell mounted: AnimatedSwitcher would duplicate the
+        // branch Navigator global keys while outgoing and incoming shells overlap.
+        final body = TweenAnimationBuilder<double>(
+          key: ValueKey('transition-${navigationShell.currentIndex}'),
+          tween: Tween(begin: reduce ? 1 : .75, end: 1),
           duration: reduce ? Duration.zero : AppTokens.durationMed,
-          reverseDuration: reduce ? Duration.zero : AppTokens.durationFast,
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
-          child: KeyedSubtree(
-            key: ValueKey(navigationShell.currentIndex),
-            child: navigationShell,
-          ),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) =>
+              Opacity(opacity: value, child: child),
+          child: navigationShell,
         );
         void go(int tabIndex) {
           final branch = _branch[tabIndex.clamp(0, _branch.length - 1)];
           navigationShell.goBranch(branch);
           // Persist the visible tab index. Older builds stored the internal
           // branch index; redirect clamps those values to「我的」safely.
-          KvSettings.ready().then((p) => p.setInt('homeBranch', tabIndex));
+          KvSettings.ready().then(
+            (p) => p.setString(
+              'homeDestination',
+              const [
+                '/library',
+                '/search',
+                '/explore',
+                '/music',
+                '/settings',
+              ][tabIndex],
+            ),
+          );
         }
 
         if (wide) {
@@ -74,9 +87,7 @@ class HomeShell extends ConsumerWidget {
                               const SizedBox(width: 12),
                               Flexible(
                                 child: Text(
-                                  ui == AppUiStyle.terminal
-                                      ? 'chloris'
-                                      : 'Chloris',
+                                  'Chloris',
                                   overflow: TextOverflow.ellipsis,
                                   style: ui == AppUiStyle.absolutely
                                       ? theme.textTheme.titleLarge
@@ -111,26 +122,39 @@ class HomeShell extends ConsumerWidget {
                   ],
                 ),
                 VerticalDivider(width: 1, color: cs.outlineVariant),
-                Expanded(child: body),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(child: body),
+                      const MusicMiniPlayer(),
+                    ],
+                  ),
+                ),
               ],
             ),
           );
         }
         return Scaffold(
           body: body,
-          bottomNavigationBar: NavigationBar(
-            selectedIndex: tab,
-            onDestinationSelected: go,
-            destinations: [
-              for (var i = 0; i < labels.length; i++)
-                NavigationDestination(
-                  icon: AppIcons.navPairs[i].styledAt(ext, active: false),
-                  selectedIcon: AppIcons.navPairs[i].styledAt(
-                    ext,
-                    active: true,
-                  ),
-                  label: labels[i],
-                ),
+          bottomNavigationBar: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const MusicMiniPlayer(),
+              NavigationBar(
+                selectedIndex: tab,
+                onDestinationSelected: go,
+                destinations: [
+                  for (var i = 0; i < labels.length; i++)
+                    NavigationDestination(
+                      icon: AppIcons.navPairs[i].styledAt(ext, active: false),
+                      selectedIcon: AppIcons.navPairs[i].styledAt(
+                        ext,
+                        active: true,
+                      ),
+                      label: labels[i],
+                    ),
+                ],
+              ),
             ],
           ),
         );
@@ -140,7 +164,7 @@ class HomeShell extends ConsumerWidget {
 
   int _tabIndex(int branch) {
     final i = _branch.indexOf(branch);
-    return i < 0 ? 3 : i;
+    return i < 0 ? 4 : i;
   }
 }
 

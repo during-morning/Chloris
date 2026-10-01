@@ -151,8 +151,7 @@ class LenientJsRuntime implements JsRuntime {
     if (c == 'key' || c == 'key;') return key;
     if (c == 'page' || c == 'page;') return page;
     if (c == 'baseUrl' || c == 'baseUrl;') return baseUrl;
-    if (c == 'encodeURIComponent(key)' ||
-        c == 'encodeURIComponent(key);') {
+    if (c == 'encodeURIComponent(key)' || c == 'encodeURIComponent(key);') {
       return Uri.encodeQueryComponent(key);
     }
     if (c == 'encodeURI(key)' || c == 'encodeURI(key);') {
@@ -161,9 +160,7 @@ class LenientJsRuntime implements JsRuntime {
 
     final java = vars['java'];
     if (java != null) {
-      final jm = RegExp(
-        r'''java\.(\w+)\(\s*([^)]*)\s*\)''',
-      ).firstMatch(c);
+      final jm = RegExp(r'''java\.(\w+)\(\s*([^)]*)\s*\)''').firstMatch(c);
       if (jm != null) {
         final v = _callJava(java, jm.group(1)!, jm.group(2) ?? '');
         if (v != null) return v;
@@ -190,8 +187,9 @@ class LenientJsRuntime implements JsRuntime {
     if (repl != null) {
       return rs.replaceAll(repl.group(1)!, repl.group(2)!);
     }
-    final sub = RegExp(r'result\.substring\(\s*(\d+)\s*(?:,\s*(\d+)\s*)?\)')
-        .firstMatch(c);
+    final sub = RegExp(
+      r'result\.substring\(\s*(\d+)\s*(?:,\s*(\d+)\s*)?\)',
+    ).firstMatch(c);
     if (sub != null && rs.isNotEmpty) {
       final a = int.parse(sub.group(1)!);
       final b = sub.group(2) != null ? int.parse(sub.group(2)!) : rs.length;
@@ -200,7 +198,12 @@ class LenientJsRuntime implements JsRuntime {
     if (key.isNotEmpty) {
       expanded = expanded.replaceAllMapped(
         RegExp("'([^']*)'\\s*\\+\\s*key\\s*\\+\\s*'([^']*)'"),
-        (m) => "'" + m.group(1)! + Uri.encodeQueryComponent(key) + m.group(2)! + "'",
+        (m) =>
+            "'" +
+            m.group(1)! +
+            Uri.encodeQueryComponent(key) +
+            m.group(2)! +
+            "'",
       );
       expanded = expanded.replaceAll(
         RegExp(r'''(['"'])\s*\+\s*key\s*\+\s*(['"'])'''),
@@ -232,11 +235,7 @@ class LenientJsRuntime implements JsRuntime {
     }
     // Nothing matched: previously the input was handed back as if the rule had
     // succeeded. Report it, then refuse to pretend unless explicitly asked to.
-    _report(
-      'js_unsupported',
-      '规则 JS 未被宽松解释器支持，已原样返回输入',
-      c,
-    );
+    _report('js_unsupported', '规则 JS 未被宽松解释器支持，已原样返回输入', c);
     if (strict) {
       throw DomainError(
         code: 'js_unsupported',
@@ -282,9 +281,16 @@ class LenientJsRuntime implements JsRuntime {
       final ch = s[i];
       if (ch == '(') depth++;
       if (ch == ')') depth--;
-      if (ch == ',' && depth == 0) { out.add(s.substring(start, i)); start = i + 1; }
+      if (ch == ',' && depth == 0) {
+        out.add(s.substring(start, i));
+        start = i + 1;
+      }
     }
     out.add(s.substring(start));
     return out;
   }
+}
+
+abstract interface class JsSessionLifecycle {
+  void cancelSession(String id);
 }

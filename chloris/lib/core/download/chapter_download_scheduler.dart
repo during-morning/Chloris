@@ -45,7 +45,7 @@ class ChapterDownloadScheduler {
         work.cancel();
       }
     }
-    while (_active < _concurrency().clamp(1, 16)) {
+    while (_active < _concurrency().clamp(1, 128)) {
       final cap = _hostConcurrency();
       final index = _pending.indexWhere(
         (w) => w.host.isEmpty || cap <= 0 || (_hosts[w.host] ?? 0) < cap,

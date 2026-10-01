@@ -52,4 +52,6 @@ final httpTimeoutSecProvider = StateProvider<int>((ref) => 15);
 final searchTimeoutSecProvider = StateProvider<int>((ref) => 12);
 final searchPoolProvider = StateProvider<int>((ref) => 32);
 final downloadPoolProvider = StateProvider<int>((ref) => 8);
+final searchHostCapProvider = StateProvider<int>((ref) => 2);
+final downloadHostCapProvider = StateProvider<int>((ref) => 3);
 final userAgentProvider = StateProvider<String>((ref) => '');

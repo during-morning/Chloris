@@ -125,16 +125,22 @@ extension _BookDetailBody on _BookDetailScreenState {
                   label: const Text('换源'),
                 ),
                 OutlinedButton.icon(
-                  onPressed: () {
-                    ref
-                        .read(onlineShelfProvider.notifier)
-                        .add(source, searchBook);
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text('已加入书架')));
-                  },
-                  icon: const Icon(Icons.favorite_border),
-                  label: const Text('加入书架'),
+                  onPressed: allChapters.isEmpty || _addingToShelf
+                      ? null
+                      : () => _addVerifiedBookToShelf(
+                          context,
+                          source,
+                          searchBook,
+                          book,
+                          allChapters,
+                        ),
+                  icon: _addingToShelf
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.favorite_border),
+                  label: Text(_addingToShelf ? '验证中' : '验证后加入书架'),
                 ),
                 OutlinedButton.icon(
                   onPressed: allChapters.isEmpty

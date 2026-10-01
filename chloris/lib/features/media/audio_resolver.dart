@@ -27,26 +27,42 @@ ResolvedAudio parseAudio(
   } catch (_) {}
   List<AudioSegment> segments(Object? items) {
     if (items is! List) return const [];
-    return [for (final item in items) _segment(item, baseUrl, headers)];
+    return [
+      for (final item in items)
+        if ('$item'.trim().isNotEmpty) _segment(item, baseUrl, headers),
+    ];
   }
 
   if (json is List && json.isEmpty) throw const FormatException('音频列表为空');
   if (json is List && !json.every((e) => e is String)) {
-    throw AudioSelectionRequired([for (final item in json) jsonEncode(item)]);
+    final choices = [for (final item in json) jsonEncode(item)];
+    if (choices.isEmpty) throw const FormatException('音频列表为空');
+    throw AudioSelectionRequired(choices);
   }
   if (json is List && json.every((e) => e is String)) {
-    if (!chapter) throw AudioSelectionRequired(json.cast<String>());
+    final choices = json
+        .cast<String>()
+        .where((e) => e.trim().isNotEmpty)
+        .toList(growable: false);
+    if (choices.isEmpty) throw const FormatException('音频列表为空');
+    if (!chapter) throw AudioSelectionRequired(choices);
+    final parts = segments(choices);
+    if (parts.isEmpty) throw const FormatException('音频分段为空');
     return ResolvedAudio(
-      variants: [AudioVariant(label: '原始音质', segments: segments(json))],
+      variants: [AudioVariant(label: '原始音质', segments: parts)],
     );
   }
   if (json is Map) {
     Object? nestedTracks(Object? value) {
-      if (value is! Map) return null;
-      final direct = value['songs'] ?? value['tracks'];
-      if (direct is List) return direct;
-      for (final child in value.values) {
-        if (child is Map) {
+      if (value is Map) {
+        final direct = value['songs'] ?? value['tracks'];
+        if (direct is List) return direct;
+        for (final child in value.values) {
+          final found = nestedTracks(child);
+          if (found != null) return found;
+        }
+      } else if (value is List) {
+        for (final child in value) {
           final found = nestedTracks(child);
           if (found != null) return found;
         }
@@ -56,7 +72,9 @@ ResolvedAudio parseAudio(
 
     final tracks = nestedTracks(json);
     if (tracks is List) {
-      throw AudioSelectionRequired([for (final t in tracks) jsonEncode(t)]);
+      final choices = [for (final t in tracks) jsonEncode(t)];
+      if (choices.isEmpty) throw const FormatException('音频曲目列表为空');
+      throw AudioSelectionRequired(choices);
     }
     final extra = mergeMediaHeaders(headers, _map(json['headers']));
     if (json['segments'] is List || json['variants'] is List) {
@@ -242,7 +260,12 @@ class AudioResolver {
           operation.onCancel(() => port.cancelSession(operation.id));
           input =
               contentOverride ??
-              await port.loadChapterContent(source, book, chapter);
+              await port.loadChapterContent(
+                source,
+                book,
+                chapter,
+                nextChapterUrl: ref.nextChapterUrl,
+              );
           operation.check();
         }
         ResolvedAudio parsed;

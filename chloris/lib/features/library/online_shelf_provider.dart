@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +7,7 @@ import '../../core/persist/kv_settings.dart';
 import '../../core/persist/persist_queue.dart';
 import '../../core/startup_metrics.dart';
 import '../../core/search/search_match.dart';
+import '../../core/read/book_validation.dart';
 import '../../data/database/shelf_repository.dart';
 
 import '../../services/persist/vault_sync.dart';
@@ -64,9 +66,12 @@ final onlineShelfProvider =
     );
 
 class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
+  bool _shelfLoaded = false;
+  Future<void>? _loadFuture;
+
   @override
   List<OnlineShelfItem> build() {
-    Future.microtask(_load);
+    _loadFuture = Future<void>.microtask(_load);
     return const [];
   }
 
@@ -111,6 +116,14 @@ class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
   }
 
   Future<void> _load() async {
+    try {
+      await _loadContents();
+    } finally {
+      _shelfLoaded = true;
+    }
+  }
+
+  Future<void> _loadContents() async {
     final repo = await ref.read(shelfRepositoryProvider.future);
     if (repo != null) {
       try {
@@ -120,7 +133,18 @@ class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
         if (legacy != null && legacy.isNotEmpty) {
           await repo.migrateFromKv(legacy);
         }
-        final entries = await repo.load();
+        final entries = <ShelfEntry>[];
+        for (final entry in await repo.load()) {
+          if (bookIdentityError(
+                name: entry.book.name,
+                url: entry.book.bookUrl,
+              ) ==
+              null) {
+            entries.add(entry);
+          } else {
+            await repo.remove(entry.book.bookUrl);
+          }
+        }
         if (entries.isNotEmpty) {
           state = [for (final e in entries) _toItem(e)];
           StartupMetrics.mark('shelf_available');
@@ -143,7 +167,14 @@ class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
       for (final e in list) {
         if (e is Map) {
           final item = OnlineShelfItem.fromJson(Map<String, dynamic>.from(e));
-          if (item != null) items.add(item);
+          if (item != null &&
+              bookIdentityError(
+                    name: item.searchBook.name,
+                    url: item.candidateBookUrl,
+                  ) ==
+                  null) {
+            items.add(item);
+          }
         }
       }
       if (items.isNotEmpty) state = items;
@@ -166,6 +197,18 @@ class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
   }
 
   void add(BookSource source, SearchBook searchBook) {
+    if (!_shelfLoaded) {
+      final loading = _loadFuture;
+      if (loading != null) {
+        unawaited(loading.then((_) => add(source, searchBook)));
+      }
+      return;
+    }
+    if (!isUsableSearchBook(searchBook) ||
+        bookIdentityError(name: searchBook.name, url: searchBook.bookUrl) !=
+            null) {
+      return;
+    }
     final identity = _identityKey(searchBook.name, searchBook.author);
     final existingIndex = state.indexWhere(
       (e) => _identityKey(e.searchBook.name, e.searchBook.author) == identity,
@@ -215,6 +258,33 @@ class OnlineShelfNotifier extends Notifier<List<OnlineShelfItem>> {
         return e;
       }).toList();
     });
+  }
+
+  /// Removes a shelf entry only when the exact source candidate has been
+  /// confirmed unusable (for example, a successfully fetched empty catalog).
+  void removeCandidate(String sourceUrl, String candidateBookUrl) {
+    if (!_shelfLoaded) {
+      final loading = _loadFuture;
+      if (loading != null) {
+        unawaited(
+          loading.then(
+            (_) => removeCandidate(sourceUrl, candidateBookUrl),
+          ),
+        );
+      }
+      return;
+    }
+    final matches = state
+        .where(
+          (item) =>
+              item.source.bookSourceUrl == sourceUrl &&
+              item.candidateBookUrl == candidateBookUrl,
+        )
+        .map((item) => item.bookUrl)
+        .toSet();
+    for (final bookUrl in matches) {
+      remove(bookUrl);
+    }
   }
 
   void replaceBook(String oldUrl, BookSource source, SearchBook searchBook) {

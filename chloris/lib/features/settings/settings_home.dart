@@ -125,6 +125,8 @@ class _SettingsHome extends ConsumerWidget {
                 ref.read(searchTimeoutSecProvider.notifier).state = 30;
                 ref.read(searchPoolProvider.notifier).state = 32;
                 ref.read(downloadPoolProvider.notifier).state = 8;
+                ref.read(searchHostCapProvider.notifier).state = 2;
+                ref.read(downloadHostCapProvider.notifier).state = 3;
                 ref.read(debugVerboseProvider.notifier).state = true;
                 ref.read(userAgentProvider.notifier).state = '';
                 EngineLimits.apply(
@@ -133,8 +135,10 @@ class _SettingsHome extends ConsumerWidget {
                   tocTimeoutSec: 30,
                   contentTimeoutSec: 30,
                   searchPool: 32,
+                  searchHostCap: 2,
                   searchEarlyStopHits: 8,
                   downloadPool: 8,
+                  downloadHostCap: 3,
                   debugVerbose: true,
                   userAgent: '',
                 );
@@ -151,22 +155,29 @@ class _SettingsHome extends ConsumerWidget {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(ref.watch(downloadPoolProvider).toString() + ' 路'),
+                  Text(
+                    '${ref.watch(downloadPoolProvider)} 路 · 单站最高 ${ref.watch(downloadHostCapProvider)} 路',
+                  ),
                   Slider(
                     value: ref
                         .watch(downloadPoolProvider)
                         .toDouble()
-                        .clamp(2, 16),
+                        .clamp(2, kIsWeb ? 16 : 128)
+                        .toDouble(),
                     min: 2,
-                    max: 16,
-                    divisions: 14,
+                    max: kIsWeb ? 16 : 128,
+                    divisions: kIsWeb ? 14 : 126,
                     onChanged: (v) {
                       final n = v.round();
                       ref.read(downloadPoolProvider.notifier).state = n;
-                      EngineLimits.apply(downloadPool: n);
+                      ref.read(downloadHostCapProvider.notifier).state = n;
+                      EngineLimits.apply(downloadPool: n, downloadHostCap: n);
                       ref
                           .read(settingsWriteUseCaseProvider)
                           .setInt('downloadPool', n);
+                      ref
+                          .read(settingsWriteUseCaseProvider)
+                          .setInt('downloadHostCap', n);
                     },
                   ),
                 ],
@@ -178,22 +189,29 @@ class _SettingsHome extends ConsumerWidget {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${ref.watch(searchPoolProvider)} 路 · 全源都会搜完，快源优先出结果'),
+                  Text(
+                    '${ref.watch(searchPoolProvider)} 路 · 单站最高 ${ref.watch(searchHostCapProvider)} 路 · 全源都会搜完',
+                  ),
                   Slider(
                     value: ref
                         .watch(searchPoolProvider)
                         .toDouble()
-                        .clamp(8, 64),
+                        .clamp(8, kIsWeb ? 64 : 128)
+                        .toDouble(),
                     min: 8,
-                    max: 64,
-                    divisions: 56,
+                    max: kIsWeb ? 64 : 128,
+                    divisions: kIsWeb ? 56 : 120,
                     onChanged: (v) {
                       final n = v.round();
                       ref.read(searchPoolProvider.notifier).state = n;
-                      EngineLimits.apply(searchPool: n);
+                      ref.read(searchHostCapProvider.notifier).state = n;
+                      EngineLimits.apply(searchPool: n, searchHostCap: n);
                       ref
                           .read(settingsWriteUseCaseProvider)
                           .setInt('searchPool', n);
+                      ref
+                          .read(settingsWriteUseCaseProvider)
+                          .setInt('searchHostCap', n);
                     },
                   ),
                 ],

@@ -66,7 +66,9 @@ class SettingsWriteUseCase {
     await setInt('tocTimeoutSec', 30);
     await setInt('contentTimeoutSec', 30);
     await setInt('searchPool', 32);
+    await setInt('searchHostCap', 2);
     await setInt('downloadPool', 8);
+    await setInt('downloadHostCap', 3);
     await setBool('debugVerbose', true);
     await setString('userAgent', '');
   }

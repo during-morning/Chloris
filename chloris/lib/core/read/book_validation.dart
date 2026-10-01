@@ -4,9 +4,19 @@ String? bookIdentityError({required String name, required String url}) {
   if (const {
     'null',
     'undefined',
+    '未知',
     '未知书籍',
     '无标题',
     '暂无数据',
+    '暂无书籍',
+    '搜索结果',
+    '详情页',
+    'book',
+    'unknown',
+    'untitled',
+    'no data',
+    'no title',
+    'not found',
   }.contains(name.trim().toLowerCase()))
     return '书名是占位信息';
   final value = url.trim();

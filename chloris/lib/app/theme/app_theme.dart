@@ -706,8 +706,8 @@ abstract final class AppTheme {
   /// the same on every platform — including CanvasKit, which cannot resolve
   /// platform fonts. The rest of the stack is for hosts that have the
   /// original faces installed.
-  /// Pan-CJK faces bundled with the app. Without them the web build renders
-  /// Chinese as tofu whenever the engine cannot reach fonts.gstatic.com.
+  /// Full CJK fallback bundled with the app. This covers rare characters too,
+  /// so Web/CanvasKit does not depend on a remote font download.
   static const cjkSansFallback = 'NotoSansSC';
   static const cjkSerifFallback = 'NotoSerifSC';
 

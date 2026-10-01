@@ -353,7 +353,9 @@ extension _BookDetailActions on _BookDetailScreenState {
 
       await Future.wait(
         List.generate(
-          chapters.length.clamp(1, EngineLimits.downloadPool.clamp(1, 16)),
+          chapters.length
+              .clamp(1, EngineLimits.downloadPool.clamp(1, 128))
+              .toInt(),
           (_) => worker(),
         ),
         eagerError: true,

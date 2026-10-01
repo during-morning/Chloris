@@ -1,5 +1,3 @@
-import '../features/media/music_workspace.dart';
-import '../features/media/music_source_screens.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,6 +8,7 @@ import '../features/book_detail/book_detail_screen.dart';
 import '../features/book_detail/toc_page.dart';
 import '../features/home/home_shell.dart';
 import '../features/library/library_screen.dart';
+import '../features/media/music_screen.dart';
 import '../features/rss/rss_screen.dart';
 import '../features/search/search_screen.dart';
 import '../features/settings/settings_screen.dart';
@@ -101,27 +100,11 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/music',
-              builder: (context, state) => const MusicWorkspace(),
+              builder: (context, state) => const MusicScreen(),
             ),
           ],
         ),
       ],
-    ),
-    GoRoute(
-      path: '/music/player',
-      builder: (context, state) => const MusicFullPlayer(),
-    ),
-    GoRoute(
-      path: '/music/search',
-      builder: (context, state) => const MusicSearchScreen(),
-    ),
-    GoRoute(
-      path: '/music/resolve',
-      builder: (context, state) => const MusicResolveScreen(),
-    ),
-    GoRoute(
-      path: '/music/settings',
-      builder: (context, state) => const MusicSettingsScreen(),
     ),
     GoRoute(
       path: bookDetailRoute,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:chloris_engine/chloris_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/providers.dart';
@@ -83,19 +84,32 @@ class _BookHealthState extends ConsumerState<BookHealthScreen> {
                   if (chapters.isEmpty)
                     return const _Health('书源返回空目录，可换源或移除', invalid: true);
                   if (generation != _generation) throw StateError('检查已取消');
-                  final body = await port.loadChapterContent(
-                    item.source,
-                    book,
-                    chapters.first,
-                    nextChapterUrl: chapters.length > 1
-                        ? chapters[1].url
-                        : null,
-                    maxHops: 3,
+                  final content = ref.read(
+                    loadOnlineChapterContentUseCaseProvider,
                   );
-                  if (body.trim().isEmpty ||
-                      const {'null', 'undefined', '[]'}.contains(body.trim()))
-                    return const _Health('首章正文为空，可换源或移除', invalid: true);
-                  return _Health('目录 ${chapters.length} 章，首章可读取', valid: true);
+                  for (final entry in chapters.take(3).toList().asMap().entries) {
+                    try {
+                      final body = await content(
+                        source: item.source,
+                        book: book,
+                        chapter: entry.value,
+                        nextChapterUrl: entry.key + 1 < chapters.length
+                            ? chapters[entry.key + 1].url
+                            : null,
+                      );
+                      if (body.trim().isNotEmpty) {
+                        return _Health(
+                          '目录 ' +
+                              chapters.length.toString() +
+                              ' 章，正文可读取',
+                          valid: true,
+                        );
+                      }
+                    } on DomainError catch (error) {
+                      if (error.code != 'content_empty') rethrow;
+                    }
+                  }
+                  return const _Health('前 3 章均无可读正文，可换源或移除', invalid: true);
                 }).timeout(
                   const Duration(seconds: 15),
                   onTimeout: () {
@@ -103,6 +117,10 @@ class _BookHealthState extends ConsumerState<BookHealthScreen> {
                     throw TimeoutException('检查超时');
                   },
                 );
+          } on DomainError catch (e) {
+            result = e.code == 'content_empty'
+                ? const _Health('前 3 章均无可读正文，可换源或移除', invalid: true)
+                : _Health('暂时无法验证：' + e.toString().split('\n').first);
           } catch (e) {
             result = _Health('暂时无法验证：${e.toString().split('\n').first}');
           } finally {

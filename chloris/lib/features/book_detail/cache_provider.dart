@@ -459,7 +459,7 @@ class CacheJobsNotifier extends Notifier<List<CacheJob>> {
     state = [...state];
     await _persist();
     _emit(job, CacheJobEventType.started);
-    final conc = EngineLimits.downloadPool.clamp(1, 16);
+    final conc = EngineLimits.downloadPool.clamp(1, 128).toInt();
     final pendingIndexes = job.pendingIndexes.toList();
     final chapters = {
       for (final chapter

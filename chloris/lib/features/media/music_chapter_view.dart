@@ -45,9 +45,10 @@ class _MusicChapterViewState extends ConsumerState<MusicChapterView> {
     final chapters = widget.chapters.isEmpty
         ? [widget.chapter]
         : widget.chapters;
-    final tracks = [
-      for (final ch in chapters)
-        MusicTrack(
+    final tracks = chapters.asMap().entries.map((entry) {
+      final chapterIndex = entry.key;
+      final ch = entry.value;
+      return MusicTrack(
           url: '',
           title: ch.title,
           artist: book.author,
@@ -62,12 +63,15 @@ class _MusicChapterViewState extends ConsumerState<MusicChapterView> {
             book: book.toJson(),
             chapter: (ch.url == widget.chapter.url ? widget.chapter : ch)
                 .toJson(),
+            nextChapterUrl: chapterIndex + 1 < chapters.length
+                ? chapters[chapterIndex + 1].url
+                : null,
             title: ch.title,
             artist: book.author,
             album: book.name,
           ),
-        ),
-    ];
+      );
+    }).toList(growable: false);
     final index = chapters
         .indexWhere((c) => c.url == widget.chapter.url)
         .clamp(0, chapters.length - 1);

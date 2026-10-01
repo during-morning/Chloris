@@ -55,10 +55,10 @@ abstract final class EngineLimits {
       jsEvalTimeout = Duration(seconds: jsEvalTimeoutSec.clamp(1, 120));
     }
     if (searchPool != null) {
-      EngineLimits.searchPool = searchPool.clamp(4, 64);
+      EngineLimits.searchPool = searchPool.clamp(4, 128).toInt();
     }
     if (searchHostCap != null) {
-      EngineLimits.searchHostCap = searchHostCap.clamp(0, 32);
+      EngineLimits.searchHostCap = searchHostCap.clamp(0, 128).toInt();
     }
     if (searchEarlyStopHits != null) {
       EngineLimits.searchEarlyStopHits = searchEarlyStopHits.clamp(0, 24);
@@ -67,10 +67,10 @@ abstract final class EngineLimits {
       EngineLimits.searchEarlyStopScore = searchEarlyStopScore.clamp(300, 1000);
     }
     if (downloadPool != null) {
-      EngineLimits.downloadPool = downloadPool.clamp(2, 16);
+      EngineLimits.downloadPool = downloadPool.clamp(2, 128).toInt();
     }
     if (downloadHostCap != null) {
-      EngineLimits.downloadHostCap = downloadHostCap.clamp(1, 8);
+      EngineLimits.downloadHostCap = downloadHostCap.clamp(1, 128).toInt();
     }
     if (debugVerbose != null) {
       EngineLimits.debugVerbose = debugVerbose;

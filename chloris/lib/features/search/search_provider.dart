@@ -72,7 +72,10 @@ class SearchController extends Notifier<SearchSession> {
           .where((s) => (s.bookSourceGroup ?? '未分组') == group)
           .toList();
     }
-    await SourceLatencyStore.ensureLoaded();
+    await SourceLatencyStore.ensureLoaded().timeout(
+      const Duration(milliseconds: 100),
+      onTimeout: () {},
+    );
     if (token != _token) return;
     SourceLatencyStore.applyTo(enabledList);
     final ordered = orderSearchSources(enabledList);
@@ -138,6 +141,9 @@ class SearchController extends Notifier<SearchSession> {
       ),
       isCancelled: () => token != _token,
       errorOf: friendlySearchError,
+      // Cache hydration is an optimization; it must not delay the first live
+      // source requests on a cold launch.
+      waitForCache: false,
       // A search must not silently pause after reaching a hit threshold. Let
       // every eligible source finish; the next explicit request starts fresh.
       earlyStop: false,

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:chloris_engine/chloris_engine.dart';
 
+import '../../core/read/book_validation.dart';
 import 'online_book_port.dart';
 
 typedef CatalogUpdate = void Function(List<BookChapter> chapters);
@@ -177,6 +178,40 @@ class LoadOnlineChapterContentUseCase {
 
   static const _mediaCachePrefix = '\u0000media-chapter-v1:';
 
+  bool _hasReadableContent(String content, Book book) {
+    if (content.trim().isEmpty) return false;
+    if (book.isAudio || book.isVideo) {
+      final mediaReference = RegExp(
+        r'https?://|blob:|data:audio|<audio\b|<source\b|(?:^|[\s\[\{,:])(?:/|\.\.?/)[^,\s"<>]+|\.m3u8(?:[?#]|$)|\.(?:mp3|m4a|aac|flac|ogg|opus|wav)(?:[?#]|$)',
+        caseSensitive: false,
+      ).hasMatch(content);
+      final trimmed = content.trim();
+      return mediaReference ||
+          ((trimmed.startsWith('[') || trimmed.startsWith('{')) &&
+              trimmed.contains('/'));
+    }
+    if (book.isImage &&
+        RegExp(r'<img\b[^>]*\bsrc\s*=', caseSensitive: false).hasMatch(content)) {
+      return true;
+    }
+    final visible = content
+        .replaceAll(
+          RegExp(r'<(script|style)\b[\s\S]*?</\1>', caseSensitive: false),
+          '',
+        )
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .replaceAll(
+          RegExp(
+            r'&(?:nbsp|thinsp|ensp|emsp|zwnj|zwj);|&#(?:160|8203|12288|x0*a0|x200b|x3000);',
+            caseSensitive: false,
+          ),
+          '',
+        )
+        .replaceAll(RegExp(r'[\u00a0\u200b\u200c\u200d\ufeff]'), '')
+        .trim();
+    return visible.isNotEmpty;
+  }
+
   String _restoreCachedChapter(String cached, BookChapter chapter) {
     if (!cached.startsWith(_mediaCachePrefix)) return cached;
     try {
@@ -216,7 +251,7 @@ class LoadOnlineChapterContentUseCase {
           cached?.startsWith(_mediaCachePrefix) != true;
       if (cached != null && !needsMediaMetadata) {
         final content = _restoreCachedChapter(cached, chapter);
-        if (content.trim().isNotEmpty) return content;
+        if (_hasReadableContent(content, book)) return content;
       }
     }
     _validateChapterIdentity(source, book, chapter);
@@ -228,7 +263,7 @@ class LoadOnlineChapterContentUseCase {
         nextChapterUrl: nextChapterUrl,
         maxHops: maxHops,
       );
-      if (content.trim().isEmpty) {
+      if (!_hasReadableContent(content, book)) {
         throw DomainError(
           code: 'content_empty',
           stage: DomainErrorStage.content,
@@ -306,6 +341,11 @@ class RefreshOnlineBookUseCase {
 void _validateBookIdentity(BookSource source, Book seed, Book result) {
   if (result.bookUrl.trim().isEmpty) result.bookUrl = seed.bookUrl;
   if (result.origin.trim().isEmpty) result.origin = source.bookSourceUrl;
+  if (bookIdentityError(name: result.name, url: result.bookUrl) != null &&
+      bookIdentityError(name: seed.name, url: seed.bookUrl) == null) {
+    result.name = seed.name;
+  }
+  if (result.author.trim().isEmpty) result.author = seed.author;
   if (result.origin != source.bookSourceUrl) {
     throw DomainError(
       code: 'book_identity_mismatch',
@@ -315,6 +355,18 @@ void _validateBookIdentity(BookSource source, Book seed, Book result) {
       bookId: seed.bookUrl,
       recoverable: false,
       suggestedAction: '请返回搜索结果并重新选择书源',
+    );
+  }
+  final issue = bookIdentityError(name: result.name, url: result.bookUrl);
+  if (issue != null) {
+    throw DomainError(
+      code: 'book_identity_invalid',
+      stage: DomainErrorStage.detail,
+      message: issue,
+      sourceId: source.bookSourceUrl,
+      bookId: seed.bookUrl,
+      recoverable: false,
+      suggestedAction: '返回搜索结果并选择有效的书籍记录',
     );
   }
 }

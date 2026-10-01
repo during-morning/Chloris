@@ -118,7 +118,7 @@ class _ChapterContentScreenState extends ConsumerState<ChapterContentScreen> {
   late Book book = widget.book;
   late List<BookChapter> chapters = List<BookChapter>.from(widget.chapters);
   bool openAtEnd = false;
-  late bool _tocLoading = chapters.length < 2;
+  late bool _tocLoading = chapters.isEmpty;
   String? _shownText;
   late BookSource source = widget.source;
   bool _autoSwitching = false;
@@ -127,7 +127,7 @@ class _ChapterContentScreenState extends ConsumerState<ChapterContentScreen> {
   @override
   void initState() {
     super.initState();
-    if (chapters.length < 2) {
+    if (chapters.isEmpty) {
       Future<void>.microtask(_refreshToc);
     }
   }
@@ -173,7 +173,7 @@ class _ChapterContentScreenState extends ConsumerState<ChapterContentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_tocLoading && chapters.length < 2) {
+    if (_tocLoading && chapters.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text(chapter.title)),
         body: const Center(child: CircularProgressIndicator()),

@@ -123,7 +123,6 @@ class MusicPlayerPanel extends StatelessWidget {
   });
   final bool showLyrics, showArtwork;
   final MusicController controller;
-  static const _speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0];
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
@@ -298,95 +297,6 @@ class MusicPlayerPanel extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 6,
-                  runSpacing: 2,
-                  children: [
-                    SizedBox(
-                      width: (constraints.maxWidth - padding * 2).clamp(
-                        88,
-                        112,
-                      ),
-                      child: DropdownButton<double>(
-                        isExpanded: true,
-                        underline: const SizedBox.shrink(),
-                        value: _speeds.contains(controller.speed)
-                            ? controller.speed
-                            : 1.0,
-                        onChanged: (value) {
-                          if (value != null) controller.setSpeed(value);
-                        },
-                        items: _speeds
-                            .map(
-                              (speed) => DropdownMenuItem(
-                                value: speed,
-                                child: Text(
-                                  '$speed倍速',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ),
-                    FilterChip(
-                      avatar: AppIcon(
-                        AppIcons.shuffle,
-                        size: 17,
-                        color: controller.shuffle
-                            ? Theme.of(context).colorScheme.primary
-                            : null,
-                      ),
-                      label: const Text('随机'),
-                      selected: controller.shuffle,
-                      onSelected: (_) => controller.toggleShuffle(),
-                    ),
-                    FilterChip(
-                      avatar: AppIcon(
-                        controller.repeat == MusicRepeat.one
-                            ? AppIcons.restart
-                            : AppIcons.refresh,
-                        size: 17,
-                        color: controller.repeat != MusicRepeat.off
-                            ? Theme.of(context).colorScheme.primary
-                            : null,
-                      ),
-                      label: Text(switch (controller.repeat) {
-                        MusicRepeat.off => '顺序',
-                        MusicRepeat.all => '列表循环',
-                        MusicRepeat.one => '单曲循环',
-                      }),
-                      selected: controller.repeat != MusicRepeat.off,
-                      onSelected: (_) => controller.cycleRepeat(),
-                    ),
-                    PopupMenuButton<int>(
-                      tooltip: '定时停止',
-                      onSelected: (minutes) => controller.setSleepTimer(
-                        minutes == 0 ? null : Duration(minutes: minutes),
-                      ),
-                      itemBuilder: (_) => const [
-                        PopupMenuItem(value: 0, child: Text('取消定时')),
-                        PopupMenuItem(value: 15, child: Text('15分钟后停止')),
-                        PopupMenuItem(value: 30, child: Text('30分钟后停止')),
-                        PopupMenuItem(value: 60, child: Text('60分钟后停止')),
-                      ],
-                      child: IconButton(
-                        tooltip: controller.sleepUntil == null
-                            ? '定时停止'
-                            : '定时已开启',
-                        onPressed: null,
-                        icon: AppIcon(
-                          AppIcons.timer,
-                          color: controller.sleepUntil == null
-                              ? null
-                              : Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
                 Row(
                   children: [
                     const Text('音量'),

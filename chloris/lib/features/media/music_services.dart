@@ -80,7 +80,6 @@ class MusicServices extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> _restore() async {
     try {
       settings = await repository.state('settings') ?? {};
-      await downloads.restore();
       final state = await repository.state('queue');
       if (state != null) {
         controller.restoreQueue(

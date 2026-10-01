@@ -168,7 +168,6 @@ class _ChlorisAppState extends ConsumerState<ChlorisApp> {
                   ].contains(path);
                   final show =
                       !home &&
-                      path != '/music/player' &&
                       (path != '/reader' || readerMusicControlsVisible.value);
                   return Column(
                     children: [

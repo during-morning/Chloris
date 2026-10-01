@@ -103,10 +103,9 @@ flutter:
           weight: 500
         - asset: assets/fonts/IBMPlexMono-SemiBold.ttf
           weight: 600
-    # Pan-CJK faces so Chinese text never renders as tofu when the engine
-    # cannot download Noto from fonts.gstatic.com. Both are subset to the
-    # GB2312 set (all standard Simplified Chinese) plus Latin, kana and CJK
-    # punctuation; see assets/fonts/OFL.md for how to widen the subset.
+    # Bundled CJK fallback. Noto Sans SC includes uncommon Han characters so
+    # CanvasKit does not need a network font download; Noto Serif SC is a
+    # smaller serif face and falls back to the sans face for missing glyphs.
     - family: NotoSansSC
       fonts:
         - asset: assets/fonts/NotoSansSC-Regular.otf

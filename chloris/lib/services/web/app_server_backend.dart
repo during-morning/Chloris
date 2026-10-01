@@ -10,6 +10,7 @@ import '../../features/media/media_resource.dart';
 import '../../features/media/audio_types.dart';
 import '../../features/media/audio_resolver.dart';
 import '../../features/sources/source_library_provider.dart';
+import '../../core/read/book_validation.dart';
 import '../../app/providers.dart';
 import 'api_contract.dart';
 import 'server_backend.dart';
@@ -162,11 +163,15 @@ class AppServerBackend implements ServerBackend, MusicServerBackend {
   @override
   Future<void> saveBook(Map<String, dynamic> book) async {
     final searchBook = SearchBook.fromJson(book);
-    if (searchBook.bookUrl.isEmpty) {
-      throw const DomainError(
-        code: 'book_url_missing',
+    final issue = bookIdentityError(
+      name: searchBook.name,
+      url: searchBook.bookUrl,
+    );
+    if (issue != null) {
+      throw DomainError(
+        code: 'book_identity_invalid',
         stage: DomainErrorStage.persist,
-        message: '缺少 bookUrl',
+        message: issue,
         recoverable: false,
       );
     }

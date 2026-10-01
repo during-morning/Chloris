@@ -71,6 +71,7 @@ class TrackRef {
     this.title = '',
     this.artist,
     this.album,
+    this.nextChapterUrl,
     this.variant = 0,
     this.continuous = false,
   });
@@ -78,7 +79,7 @@ class TrackRef {
       sha256.convert(utf8.encode(value)).toString();
   final String id;
   final TrackOrigin origin;
-  final String? address, sourceId, localKey, artist, album;
+  final String? address, sourceId, localKey, artist, album, nextChapterUrl;
   final String title;
   final int variant;
   final bool continuous;
@@ -94,6 +95,7 @@ class TrackRef {
     'title': title,
     'artist': artist,
     'album': album,
+    'nextChapterUrl': nextChapterUrl,
     'variant': variant,
     'continuous': continuous,
   };
@@ -115,6 +117,7 @@ class TrackRef {
     title: j['title'] as String? ?? '',
     artist: j['artist'] as String?,
     album: j['album'] as String?,
+    nextChapterUrl: j['nextChapterUrl'] as String?,
     variant: (j['variant'] as num?)?.toInt() ?? 0,
     continuous: j['continuous'] == true,
   );

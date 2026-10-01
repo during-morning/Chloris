@@ -199,14 +199,17 @@ class _BookTile extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.favorite_border),
-                  title: const Text('加入书架'),
+                  leading: const Icon(Icons.menu_book_outlined),
+                  title: const Text('打开目录后验证并加入书架'),
                   onTap: () {
-                    ref.read(onlineShelfProvider.notifier).add(source, book);
                     Navigator.pop(ctx);
-                    ScaffoldMessenger.of(
+                    openOnlineBook(
                       context,
-                    ).showSnackBar(const SnackBar(content: Text('已加入书架')));
+                      ref,
+                      source: source,
+                      searchBook: book,
+                      forceDetail: true,
+                    );
                   },
                 ),
                 ListTile(

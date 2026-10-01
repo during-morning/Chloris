@@ -16,6 +16,7 @@ export 'music_artwork.dart' show MusicArtwork;
 import 'music_services.dart';
 import 'music_controller.dart';
 import 'music_repository.dart';
+import 'music_screen.dart';
 import 'audio_download_manager.dart';
 import 'audio_resolver.dart';
 import 'audio_types.dart';
@@ -122,7 +123,7 @@ class _MusicLandingState extends State<MusicLanding> {
                     child: InkWell(
                       onTap: () {
                         services.controller.play();
-                        context.push('/music/player');
+                        context.go('/music');
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(12),
@@ -329,103 +330,10 @@ class _MusicLandingState extends State<MusicLanding> {
   );
 }
 
-class MusicWorkspace extends ConsumerStatefulWidget {
+class MusicWorkspace extends StatelessWidget {
   const MusicWorkspace({super.key});
   @override
-  ConsumerState<MusicWorkspace> createState() => _MusicWorkspaceState();
-}
-
-class _MusicWorkspaceState extends ConsumerState<MusicWorkspace> {
-  Future<void> _import(MusicServices services) async {
-    await musicAction(context, () async {
-      final chosen = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: const [
-          'mp3',
-          'm4a',
-          'aac',
-          'flac',
-          'ogg',
-          'opus',
-          'wav',
-          'wma',
-        ],
-        allowMultiple: true,
-        withData: kIsWeb,
-      );
-      if (chosen == null) return;
-      for (final file in chosen.files) {
-        await services.importAudio(
-          path: kIsWeb ? null : file.path,
-          bytes: file.bytes,
-          name: file.name,
-        );
-      }
-      if (mounted) musicMessage(context, '已导入 ${chosen.files.length} 首音频');
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final services = ref.watch(musicServicesProvider);
-    return DefaultTabController(
-      length: 4,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('音乐'),
-          actions: [
-            IconButton(
-              tooltip: '搜索音乐书源',
-              onPressed: () => context.push('/music/search'),
-              icon: const AppIcon(AppIcons.search),
-            ),
-            IconButton(
-              tooltip: '导入本地音频',
-              onPressed: () => _import(services),
-              icon: const AppIcon(AppIcons.file),
-            ),
-            IconButton(
-              tooltip: '解析音频地址',
-              onPressed: () => context.push('/music/resolve'),
-              icon: const AppIcon(AppIcons.link),
-            ),
-            IconButton(
-              tooltip: '音乐设置',
-              onPressed: () => context.push('/music/settings'),
-              icon: const AppIcon(AppIcons.settings),
-            ),
-          ],
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: '发现'),
-              Tab(text: '曲库'),
-              Tab(text: '歌单'),
-              Tab(text: '下载'),
-            ],
-          ),
-        ),
-        body: FutureBuilder<void>(
-          future: services.startup,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (services.error != null) {
-              return Center(child: Text('音乐存储不可用：${services.error}'));
-            }
-            return TabBarView(
-              children: [
-                MusicLanding(services: services),
-                MusicLibrary(services: services),
-                MusicPlaylists(services: services),
-                MusicDownloads(services: services),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const MusicScreen();
 }
 
 class MusicLibrary extends StatefulWidget {
@@ -1110,7 +1018,7 @@ class MusicMiniPlayer extends ConsumerWidget {
                         MusicArtwork(url: c.current!.coverUrl),
                         Expanded(
                           child: InkWell(
-                            onTap: () => context.push('/music/player'),
+                            onTap: () => context.go('/music'),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,

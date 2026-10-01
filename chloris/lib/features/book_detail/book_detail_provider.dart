@@ -136,19 +136,30 @@ final bookTocProvider = FutureProvider.autoDispose
       final useCase = ref.read(loadOnlineCatalogUseCaseProvider);
       final partial = ref.read(tocPartialProvider(args).notifier);
       var lastPartial = DateTime.fromMillisecondsSinceEpoch(0);
-      final chapters = await useCase(
-        source: source,
-        seed: seed,
-        cacheKey: searchBook.bookUrl,
-        maxPages: 1,
-        onPartial: (part) {
-          if (part.isEmpty) return;
-          final now = DateTime.now();
-          if (now.difference(lastPartial).inMilliseconds < 80) return;
-          lastPartial = now;
-          partial.state = List<BookChapter>.from(part);
-        },
-      );
+      late final List<BookChapter> chapters;
+      try {
+        chapters = await useCase(
+          source: source,
+          seed: seed,
+          cacheKey: searchBook.bookUrl,
+          maxPages: 1,
+          onPartial: (part) {
+            if (part.isEmpty) return;
+            final now = DateTime.now();
+            if (now.difference(lastPartial).inMilliseconds < 80) return;
+            lastPartial = now;
+            partial.state = List<BookChapter>.from(part);
+          },
+        );
+      } on DomainError catch (error) {
+        if (error.code == 'toc_empty') {
+          ref
+              .read(onlineShelfProvider.notifier)
+              .removeCandidate(source.bookSourceUrl, searchBook.bookUrl);
+          return const <BookChapter>[];
+        }
+        rethrow;
+      }
       if (chapters.isNotEmpty) partial.state = chapters;
       unawaited(() async {
         // First-page TOC and the opening chapter share the interactive

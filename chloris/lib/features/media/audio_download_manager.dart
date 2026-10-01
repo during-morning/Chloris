@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:chloris_engine/chloris_engine.dart' show CookieStore;
+import 'package:chloris_engine/chloris_engine.dart';
 import 'audio_types.dart';
 import 'audio_file_store.dart';
 import 'music_controller.dart';
@@ -78,7 +78,7 @@ class AudioDownloadManager extends ChangeNotifier {
   AudioFileStore get _store => store ?? AudioFileStore();
   final List<AudioDownloadTask> tasks = [];
   final _active = <String, MusicOperation>{};
-  final _hosts = <String>{};
+  final _hosts = <String, int>{};
   final _activeHosts = <String, String>{};
   bool _disposed = false, _shuttingDown = false;
   DateTime _lastUpdate = DateTime(0);
@@ -114,20 +114,28 @@ class AudioDownloadManager extends ChangeNotifier {
     _pump();
   }
 
-  String _host(AudioDownloadTask t) =>
-      t.track.ref?.sourceId ?? Uri.tryParse(t.track.url)?.host ?? t.track.id;
+  String _host(AudioDownloadTask t) {
+    final sourceUrl = t.track.ref?.sourceId;
+    final sourceHost = Uri.tryParse(sourceUrl ?? '')?.host;
+    if (sourceHost?.isNotEmpty == true) return sourceHost!;
+    final mediaUrl = t.track.segments.isEmpty
+        ? t.track.url
+        : t.track.segments.first.request.url;
+    return Uri.tryParse(mediaUrl)?.host ?? t.track.id;
+  }
   void _pump() {
     if (_disposed || _shuttingDown) return;
     for (final task in tasks) {
-      if (_active.length >= 2) break;
+      if (_active.length >= EngineLimits.downloadPool.clamp(1, 128)) break;
+      final host = _host(task);
       if (task.status != AudioDownloadStatus.queued ||
-          _hosts.contains(_host(task))) {
+          (_hosts[host] ?? 0) >= EngineLimits.downloadHostCap) {
         continue;
       }
       final op = MusicOperation(timeout: const Duration(days: 7));
       _active[task.track.id] = op;
-      _activeHosts[task.track.id] = _host(task);
-      _hosts.add(_activeHosts[task.track.id]!);
+      _activeHosts[task.track.id] = host;
+      _hosts[host] = (_hosts[host] ?? 0) + 1;
       task.status = AudioDownloadStatus.downloading;
       unawaited(_run(task, op));
     }
@@ -259,7 +267,15 @@ class AudioDownloadManager extends ChangeNotifier {
       await _save(task);
     } finally {
       _active.remove(task.track.id);
-      _hosts.remove(_activeHosts.remove(task.track.id));
+      final host = _activeHosts.remove(task.track.id);
+      if (host != null) {
+        final count = (_hosts[host] ?? 1) - 1;
+        if (count <= 0) {
+          _hosts.remove(host);
+        } else {
+          _hosts[host] = count;
+        }
+      }
       _notify();
       _pump();
     }

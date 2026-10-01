@@ -30,6 +30,7 @@ class HomeShell extends ConsumerWidget {
     final ext = theme.extension<AppStyleExtension>();
     final ui = ext?.style ?? AppUiStyle.classic;
     final tab = _tabIndex(navigationShell.currentIndex);
+    final showMiniPlayer = navigationShell.currentIndex != 6;
     return LayoutBuilder(
       builder: (context, constraints) {
         final wide = constraints.maxWidth >= AppTokens.bpRail;
@@ -126,7 +127,7 @@ class HomeShell extends ConsumerWidget {
                   child: Column(
                     children: [
                       Expanded(child: body),
-                      const MusicMiniPlayer(),
+                      if (showMiniPlayer) const MusicMiniPlayer(),
                     ],
                   ),
                 ),
@@ -139,7 +140,7 @@ class HomeShell extends ConsumerWidget {
           bottomNavigationBar: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const MusicMiniPlayer(),
+              if (showMiniPlayer) const MusicMiniPlayer(),
               NavigationBar(
                 selectedIndex: tab,
                 onDestinationSelected: go,

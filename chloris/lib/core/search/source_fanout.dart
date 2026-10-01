@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:chloris_engine/chloris_engine.dart';
 
@@ -51,7 +52,7 @@ class SourceFanout {
     final cacheReady = SearchHitCache.ensureLoaded();
     final healthReady = SourceHealthStore.ensureLoaded();
     if (waitForCache) await cacheReady;
-    final claimed = List<bool>.filled(sources.length, false);
+    final pending = Queue<int>.from(List<int>.generate(sources.length, (i) => i));
     final sourceHosts = sources.map(searchSourceHost).toList(growable: false);
     final inFlightHost = <String, int>{};
     final hostCap = EngineLimits.searchHostCap;
@@ -93,19 +94,24 @@ class SourceFanout {
           return;
         }
         var idx = -1;
-        for (var i = 0; i < sources.length; i++) {
-          if (claimed[i]) continue;
-          final host = sourceHosts[i];
-          if (hostCap > 0 && (inFlightHost[host] ?? 0) >= hostCap) continue;
-          claimed[i] = true;
-          if (hostCap > 0) {
-            inFlightHost[host] = (inFlightHost[host] ?? 0) + 1;
+        final scanCount = pending.length;
+        for (var i = 0; i < scanCount; i++) {
+          final candidate = pending.removeFirst();
+          final candidateHost = sourceHosts[candidate];
+          if (hostCap > 0 &&
+              (inFlightHost[candidateHost] ?? 0) >= hostCap) {
+            pending.addLast(candidate);
+            continue;
           }
-          idx = i;
+          if (hostCap > 0) {
+            inFlightHost[candidateHost] =
+                (inFlightHost[candidateHost] ?? 0) + 1;
+          }
+          idx = candidate;
           break;
         }
         if (idx < 0) {
-          if (claimed.every((c) => c)) return;
+          if (pending.isEmpty) return;
           await waitForSlot();
           continue;
         }

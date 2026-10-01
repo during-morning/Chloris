@@ -62,6 +62,62 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
   Timer? _prefetch;
   bool _autoSwitching = false;
   bool _autoSwitched = false;
+  bool _addingToShelf = false;
+
+  Future<void> _addVerifiedBookToShelf(
+    BuildContext context,
+    BookSource source,
+    SearchBook searchBook,
+    Book book,
+    List<BookChapter> chapters,
+  ) async {
+    if (_addingToShelf) return;
+    if (chapters.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('目录为空，无法加入书架')),
+      );
+      return;
+    }
+    setState(() => _addingToShelf = true);
+    try {
+      final content = ref.read(loadOnlineChapterContentUseCaseProvider);
+      var readable = false;
+      for (final entry in chapters.take(3).toList().asMap().entries) {
+        final chapter = entry.value;
+        try {
+          final text = await content(
+            source: source,
+            book: book,
+            chapter: chapter,
+            nextChapterUrl: entry.key + 1 < chapters.length
+                ? chapters[entry.key + 1].url
+                : null,
+          );
+          if (text.trim().isNotEmpty) {
+            readable = true;
+            break;
+          }
+        } on DomainError catch (error) {
+          if (error.code != 'content_empty') rethrow;
+        }
+      }
+      if (!readable) {
+        throw const FormatException('前 3 章均无正文，已阻止加入空书');
+      }
+      if (!mounted) return;
+      ref.read(onlineShelfProvider.notifier).add(source, searchBook);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('书籍目录及正文已验证，加入书架')));
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('书籍验证失败：${error.toString().split('\n').first}')),
+      );
+    } finally {
+      if (mounted) setState(() => _addingToShelf = false);
+    }
+  }
 
   @override
   void didUpdateWidget(covariant BookDetailScreen oldWidget) {
@@ -170,7 +226,9 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
     final catalog = ref.read(loadOnlineCatalogUseCaseProvider);
     final cachedToc =
         catalog.peek(book.bookUrl) ?? catalog.peek(searchBook.bookUrl);
-    final openChapters = allChapters.length >= 2
+    // A legitimate book can contain a single chapter. Treat any non-empty
+    // live TOC as readable instead of replacing it with a missing cache.
+    final openChapters = allChapters.isNotEmpty
         ? allChapters
         : (cachedToc ?? const <BookChapter>[]);
     final canStart = openChapters.isNotEmpty;

@@ -156,11 +156,21 @@ Future<void> main() async {
     searchPool = 32;
     await prefs.setInt('searchPool', 32);
   }
+  searchPool = searchPool.clamp(4, kIsWeb ? 64 : 128).toInt();
   var downloadPool = prefs.getInt('downloadPool') ?? 8;
   if (downloadPool == 3) {
     downloadPool = 8;
     await prefs.setInt('downloadPool', 8);
   }
+  downloadPool = downloadPool.clamp(2, kIsWeb ? 16 : 128).toInt();
+  final searchHostCap = (prefs.getInt('searchHostCap') ?? 2).clamp(
+    0,
+    kIsWeb ? 64 : 128,
+  ).toInt();
+  final downloadHostCap = (prefs.getInt('downloadHostCap') ?? 3).clamp(
+    1,
+    kIsWeb ? 16 : 128,
+  ).toInt();
   final userAgent = prefs.getString('userAgent') ?? '';
   EngineLimits.apply(
     debugVerbose: debugVerbose,
@@ -169,10 +179,11 @@ Future<void> main() async {
     tocTimeoutSec: tocTimeoutSec,
     contentTimeoutSec: contentTimeoutSec,
     searchPool: searchPool,
-    searchHostCap: prefs.getInt('searchHostCap') ?? 2,
+    searchHostCap: searchHostCap,
     searchEarlyStopHits: prefs.getInt('searchEarlyStopHits') ?? 8,
     searchEarlyStopScore: 650,
     downloadPool: downloadPool,
+    downloadHostCap: downloadHostCap,
     userAgent: userAgent,
   );
   final overlay = <String, bool>{};
@@ -207,6 +218,8 @@ Future<void> main() async {
         searchTimeoutSecProvider.overrideWith((ref) => searchTimeoutSec),
         searchPoolProvider.overrideWith((ref) => searchPool),
         downloadPoolProvider.overrideWith((ref) => downloadPool),
+        searchHostCapProvider.overrideWith((ref) => searchHostCap),
+        downloadHostCapProvider.overrideWith((ref) => downloadHostCap),
         userAgentProvider.overrideWith((ref) => userAgent),
         uiStyleProvider.overrideWith((ref) => uiStyle),
         sourceEnabledOverrideProvider.overrideWith(

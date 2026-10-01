@@ -20,21 +20,22 @@ nothing to resolve to.
 Both CJK faces are registered as the **last** entries of each font stack, so
 they only supply glyphs the primary face lacks.
 
-## Simplified Chinese subsetting
+## CJK fallback coverage
 
-`NotoSansSC` / `NotoSerifSC` are extracted from `NotoSansCJK-Regular.ttc` /
-`NotoSerifCJK-Regular.ttc` (index 2 — the SC face) and subset to the **GB2312**
-set plus Latin-1, Latin Extended-A, general punctuation, kana, CJK symbols,
-fullwidth forms and CJK punctuation. That is ~8,000 codepoints and covers all
-standard Simplified Chinese — 1.6 MB and 2.2 MB respectively.
+`NotoSansSC-Regular.otf` is the full Simplified Chinese face from
+`notofonts/noto-cjk` (16 MB). It includes uncommon Han characters and removes
+the network dependency that previously left them as tofu. `NotoSerifSC` is
+still subset to the **GB2312** set plus Latin-1, Latin Extended-A, general
+punctuation, kana, CJK symbols, fullwidth forms and CJK punctuation (~8,000
+codepoints, 2.2 MB); the reader fallback stack continues to Noto Sans SC for
+characters missing from the serif subset.
 
 Note: **Noto Sans JP is not a substitute.** It looks similar but omits
 Simplified-only forms such as 书 / 寻 / 还 / 导, which are common in Chloris's
 own UI. Always verify a CJK fallback against real Simplified text.
 
-Rare characters outside GB2312 (囧, 槑, …) fall through to the engine's online
-Noto download. To make the bundle fully self-contained instead, rebuild with
-the full GBK set:
+To reduce the bundled serif face while retaining wide glyph coverage, the
+current Noto Serif subset can be rebuilt from the full CJK source with:
 
 ```bash
 # from a checkout of notofonts/noto-cjk (or the Debian fonts-noto-cjk package)
@@ -56,11 +57,11 @@ for c in cps[1:]:
 ranges.append((start, prev))
 open('u.txt','w').write(','.join(f'U+{a:04X}' if a == b else f'U+{a:04X}-{b:04X}' for a, b in ranges))
 PY
-pyftsubset NotoSansCJK-Regular.ttc --font-number=2 --unicodes-file=u.txt \
-  --output-file=NotoSansSC-Regular.otf --no-hinting --desubroutinize --layout-features=''
+pyftsubset NotoSerifCJK-Regular.ttc --font-number=2 --unicodes-file=u.txt \
+  --output-file=NotoSerifSC-Regular.otf --no-hinting --desubroutinize --layout-features=''
 ```
 
-That yields ~5.1 MB per face (~21,800 codepoints).
+That yields a ~5.1 MB serif face (~21,800 codepoints).
 
 ## Removing a font
 

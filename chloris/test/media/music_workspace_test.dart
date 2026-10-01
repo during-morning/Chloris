@@ -93,7 +93,7 @@ void main() {
       await tester.pump();
     });
   }
-  testWidgets('音乐导航与四个空状态正常切换', (tester) async {
+  testWidgets('音频页只显示解析、播放和队列入口', (tester) async {
     final db = AppDatabase(NativeDatabase.memory()), http = NoHttp();
     final controller = MusicController(driver: FakeMusicDriver()),
         engine = EngineFacade(http: http);
@@ -122,11 +122,10 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 30));
     });
     await tester.pump();
-    expect(find.textContaining('暂无启用'), findsOneWidget);
-    for (final tab in ['曲库', '歌单', '下载']) {
-      await tester.tap(find.text(tab).first);
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
+    expect(find.text('解析并播放'), findsOneWidget);
+    expect(find.byTooltip('播放队列'), findsOneWidget);
+    for (final removed in ['发现', '曲库', '歌单', '下载', '音乐设置']) {
+      expect(find.text(removed), findsNothing);
     }
     await tester.pumpWidget(const SizedBox());
     await tester.runAsync(() async {

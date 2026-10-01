@@ -96,7 +96,7 @@ class _ChangeSourceSheetState extends ConsumerState<ChangeSourceSheet> {
           cacheKey: candidate.book.bookUrl,
           maxPages: 1,
         );
-        if (chapters.length < 2) {
+        if (chapters.isEmpty) {
           return SourceVerification(
             level: SourceVerificationLevel.none,
             chapterCount: chapters.length,

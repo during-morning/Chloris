@@ -23,8 +23,8 @@ void main() {
     final oldPool = EngineLimits.searchPool;
     final oldHost = EngineLimits.searchHostCap;
     final oldHits = EngineLimits.searchEarlyStopHits;
-    EngineLimits.apply(searchPool: 99, searchHostCap: -1, searchEarlyStopHits: -3);
-    expect(EngineLimits.searchPool, 64);
+    EngineLimits.apply(searchPool: 999, searchHostCap: -1, searchEarlyStopHits: -3);
+    expect(EngineLimits.searchPool, 128);
     expect(EngineLimits.searchHostCap, 0);
     expect(EngineLimits.searchEarlyStopHits, 0);
     EngineLimits.apply(

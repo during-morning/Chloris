@@ -521,9 +521,13 @@ class _MusicAlbumState extends ConsumerState<MusicAlbumScreen> {
   }
 
   List<MusicTrack>? _trackSnapshot;
-  List<MusicTrack> get _tracks => _trackSnapshot ??= [
-    for (final ch in _chapters)
-      MusicTrack(
+  List<MusicTrack> get _tracks => _trackSnapshot ??= _chapters
+      .asMap()
+      .entries
+      .map((entry) {
+        final chapterIndex = entry.key;
+        final ch = entry.value;
+        return MusicTrack(
         url: '',
         title: ch.title,
         artist: _book.author,
@@ -537,12 +541,16 @@ class _MusicAlbumState extends ConsumerState<MusicAlbumScreen> {
           sourceId: widget.source.bookSourceUrl,
           book: _book.toJson(),
           chapter: ch.toJson(),
+          nextChapterUrl: chapterIndex + 1 < _chapters.length
+              ? _chapters[chapterIndex + 1].url
+              : null,
           title: ch.title,
           artist: _book.author,
           album: _book.name,
         ),
-      ),
-  ];
+      );
+      })
+      .toList(growable: false);
   @override
   Widget build(BuildContext context) {
     final services = ref.watch(musicServicesProvider);

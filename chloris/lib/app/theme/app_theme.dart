@@ -1023,12 +1023,12 @@ abstract final class AppTheme {
       ],
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-          TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
-          TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
-          TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
-          TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
-          TargetPlatform.fuchsia: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.android: AbsolutelyPageTransitionsBuilder(),
+          TargetPlatform.iOS: AbsolutelyPageTransitionsBuilder(),
+          TargetPlatform.macOS: AbsolutelyPageTransitionsBuilder(),
+          TargetPlatform.linux: AbsolutelyPageTransitionsBuilder(),
+          TargetPlatform.windows: AbsolutelyPageTransitionsBuilder(),
+          TargetPlatform.fuchsia: AbsolutelyPageTransitionsBuilder(),
         },
       ),
       appBarTheme: AppBarTheme(
@@ -1759,6 +1759,60 @@ abstract final class AppTheme {
       ),
     );
   }
+}
+
+/// Absolutely page turn: the incoming page settles up out of the paper
+/// (fade + a short rise), while the page underneath recedes a step — a shared
+/// vertical axis instead of a lateral slide. No overshoot; with animations
+/// disabled the route switches instantly.
+class AbsolutelyPageTransitionsBuilder extends PageTransitionsBuilder {
+  const AbsolutelyPageTransitionsBuilder();
+
+  @override
+  Duration get transitionDuration => AppTokens.durationSlow;
+
+  @override
+  Duration get reverseTransitionDuration => AppTokens.durationMed;
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) => absolutelyPageTransition(animation, secondaryAnimation, child, context);
+}
+
+/// Shared by [AbsolutelyPageTransitionsBuilder] and imperative routes such as
+/// `FollowPageRoute`, so every Absolutely page turns the same way.
+Widget absolutelyPageTransition(
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  Widget child,
+  BuildContext context,
+) {
+  if (MediaQuery.disableAnimationsOf(context)) return child;
+  // `drive` rather than CurvedAnimation: transitions rebuild often and a
+  // CurvedAnimation would need disposing.
+  final enter = animation.drive(CurveTween(curve: AppTokens.curveIn));
+  final recede = secondaryAnimation.drive(CurveTween(curve: AppTokens.curveIn));
+  return SlideTransition(
+    position: Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0, -0.012),
+    ).animate(recede),
+    child: FadeTransition(
+      opacity: recede.drive(Tween<double>(begin: 1, end: .6)),
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.03),
+          end: Offset.zero,
+        ).animate(enter),
+        child: FadeTransition(opacity: enter, child: child),
+      ),
+    ),
+  );
 }
 
 class _InstantPageTransitionsBuilder extends PageTransitionsBuilder {

@@ -191,7 +191,7 @@ class _LyricsViewState extends State<LyricsView> {
     if (widget.document.lines.isEmpty) {
       return Center(
         child: Text(
-          '暂无歌词，可导入 LRC、VTT、SRT 或纯文本歌词',
+          '暂无字幕，可导入 LRC、VTT、SRT 或纯文本字幕',
           textAlign: TextAlign.center,
           style: widget.immersive
               ? const TextStyle(color: Colors.white70)
@@ -250,7 +250,7 @@ class _LyricsViewState extends State<LyricsView> {
             right: 12,
             child: FilledButton.tonal(
               onPressed: _return,
-              child: const Text('回到当前歌词'),
+              child: const Text('回到当前字幕'),
             ),
           ),
       ],

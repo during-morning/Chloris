@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../illustration/sketch.dart';
 import '../theme/app_icons.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
@@ -24,9 +25,13 @@ class AbsolutelyHeroBlock extends StatelessWidget {
       vertical: AppTokens.space48,
     ),
     this.actions,
+    this.illustration,
   });
 
   final IconData? icon;
+
+  /// Absolutely only: a hand-drawn line illustration that replaces [icon].
+  final SketchArt? illustration;
   final String title;
   final String? subtitle;
   final EdgeInsetsGeometry padding;
@@ -42,7 +47,10 @@ class AbsolutelyHeroBlock extends StatelessWidget {
       padding: padding,
       child: Column(
         children: [
-          if (icon != null) ...[
+          if (absolutely && illustration != null) ...[
+            SketchIllustration(illustration!, width: 104, semanticLabel: title),
+            const SizedBox(height: AppTokens.space20),
+          ] else if (icon != null) ...[
             AppIcon(
               icon!,
               size: 36,
@@ -114,11 +122,17 @@ class AbsolutelyDividerGrid extends StatelessWidget {
         final cell = Expanded(child: children[j]);
         cells.add(
           j > i
-              ? Container(decoration: BoxDecoration(border: Border(left: line)), padding: EdgeInsets.only(left: crossAxisSpacing), child: cell)
+              ? Container(
+                  decoration: BoxDecoration(border: Border(left: line)),
+                  padding: EdgeInsets.only(left: crossAxisSpacing),
+                  child: cell,
+                )
               : cell,
         );
       }
-      rows.add(Row(crossAxisAlignment: CrossAxisAlignment.start, children: cells));
+      rows.add(
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: cells),
+      );
       if (i + columns < children.length) {
         rows.add(SizedBox(height: mainAxisSpacing));
       }
@@ -163,9 +177,7 @@ class AbsolutelyBannerCard extends StatelessWidget {
           children: [
             Positioned.fill(
               child: IgnorePointer(
-                child: CustomPaint(
-                  painter: _BannerGridPainter(gridPaint),
-                ),
+                child: CustomPaint(painter: _BannerGridPainter(gridPaint)),
               ),
             ),
             InkWell(
@@ -180,8 +192,9 @@ class AbsolutelyBannerCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: (theme.textTheme.headlineSmall ?? const TextStyle())
-                          .copyWith(color: onGround),
+                      style:
+                          (theme.textTheme.headlineSmall ?? const TextStyle())
+                              .copyWith(color: onGround),
                     ),
                     if (subtitle != null && subtitle!.isNotEmpty) ...[
                       const SizedBox(height: AppTokens.space8),
@@ -222,8 +235,7 @@ class _BannerGridPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _BannerGridPainter old) =>
-      old.color != color;
+  bool shouldRepaint(covariant _BannerGridPainter old) => old.color != color;
 }
 
 /// Paper specimen tag (trailer 标本标签卡 grammar): small raised paper chip

@@ -6,6 +6,7 @@ import '../../application/settings/settings_providers.dart';
 import '../../app/l10n/locale_provider.dart';
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/app_icons.dart';
+import '../../app/theme/app_tokens.dart';
 import '../../app/theme/theme_provider.dart';
 import '../../app/widgets/meow.dart';
 import '../../services/persist/vault_sync.dart';

@@ -315,7 +315,7 @@ class _DeferredMusicDriver implements MusicPlayerDriver {
   bool _disposed = false;
 
   Future<MusicPlayerDriver> _ensure() {
-    if (_disposed) return Future.error(StateError('音乐播放器已释放'));
+    if (_disposed) return Future.error(StateError('音频播放器已释放'));
     final active = _inner;
     if (active != null) return Future.value(active);
     return _initializing ??= _create().catchError((
@@ -329,7 +329,7 @@ class _DeferredMusicDriver implements MusicPlayerDriver {
 
   Future<MusicPlayerDriver> _create() async {
     await initializeAudioBackend();
-    if (_disposed) throw StateError('音乐播放器已释放');
+    if (_disposed) throw StateError('音频播放器已释放');
     final driver = createMusicDriver();
     _inner = driver;
     _subscriptions

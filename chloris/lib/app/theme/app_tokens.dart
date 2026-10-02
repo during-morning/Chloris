@@ -1,3 +1,5 @@
+import 'package:flutter/animation.dart';
+
 /// Layout / motion tokens. Screens must not invent ad-hoc spacing or radii.
 ///
 /// Every value here is shared by all UI styles. Where a style needs a
@@ -37,6 +39,21 @@ abstract final class AppTokens {
   static const durationFast = Duration(milliseconds: 120);
   static const durationMed = Duration(milliseconds: 220);
   static const durationSlow = Duration(milliseconds: 340);
+
+  /// Hand-drawn strokes are written at pen speed — slower than chrome motion.
+  static const durationDraw = Duration(milliseconds: 720);
+
+  /// Gap between consecutive items of a staggered list entrance.
+  static const durationStagger = Duration(milliseconds: 40);
+
+  /// Items beyond this index enter together, so long lists never queue up.
+  static const staggerMaxItems = 8;
+
+  /// "Motion is a page-turn, not a performance": decelerate in, accelerate
+  /// out, and never overshoot.
+  static const curveIn = Curves.easeOutCubic;
+  static const curveOut = Curves.easeInCubic;
+  static const curveEmphasis = Curves.easeInOutCubicEmphasized;
 
   // ---- Breakpoints ------------------------------------------------------
   static const bpRail = 720.0;

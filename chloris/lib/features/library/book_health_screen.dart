@@ -7,6 +7,7 @@ import '../../application/online/online_book_port.dart';
 import '../../app/theme/app_icons.dart';
 import '../../core/http/http_session.dart';
 import '../../core/read/book_validation.dart';
+import '../book_detail/book_detail_provider.dart';
 import 'online_shelf_provider.dart';
 
 class BookHealthScreen extends ConsumerStatefulWidget {
@@ -87,7 +88,8 @@ class _BookHealthState extends ConsumerState<BookHealthScreen> {
                   final content = ref.read(
                     loadOnlineChapterContentUseCaseProvider,
                   );
-                  for (final entry in chapters.take(3).toList().asMap().entries) {
+                  for (final entry
+                      in chapters.take(3).toList().asMap().entries) {
                     try {
                       final body = await content(
                         source: item.source,
@@ -99,9 +101,7 @@ class _BookHealthState extends ConsumerState<BookHealthScreen> {
                       );
                       if (body.trim().isNotEmpty) {
                         return _Health(
-                          '目录 ' +
-                              chapters.length.toString() +
-                              ' 章，正文可读取',
+                          '目录 ' + chapters.length.toString() + ' 章，正文可读取',
                           valid: true,
                         );
                       }

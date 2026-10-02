@@ -3,7 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/illustration/sketch.dart';
 import '../../app/theme/app_icons.dart';
+import '../../app/theme/app_theme.dart';
+import '../../app/widgets/meow.dart';
 import 'audio_resolver.dart';
 import 'audio_types.dart';
 import 'media_player_screen.dart';
@@ -165,7 +168,8 @@ class _MusicScreenState extends ConsumerState<MusicScreen> {
       }
       if (tracks.isEmpty) throw const FormatException('无法读取选中的音频文件');
       await services.controller.addTracks(tracks, playFirst: true);
-      if (mounted) setState(() => _message = '正在播放：${tracks.first.displayTitle}');
+      if (mounted)
+        setState(() => _message = '正在播放：${tracks.first.displayTitle}');
     } catch (error) {
       if (mounted) setState(() => _message = '导入失败：$error');
     } finally {
@@ -319,7 +323,18 @@ class _AudioQueue extends StatelessWidget {
               ),
             ),
             if (controller.queue.isEmpty)
-              const Expanded(child: Center(child: Text('队列为空')))
+              Expanded(
+                child:
+                    Theme.of(context).extension<AppStyleExtension>()?.style ==
+                        AppUiStyle.absolutely
+                    ? MeowEmpty(
+                        compact: true,
+                        illustration: SketchArt.music,
+                        title: '队列为空',
+                        body: '从音频库、书源或本地文件选择音频',
+                      )
+                    : const Center(child: Text('队列为空')),
+              )
             else
               Expanded(
                 child: ReorderableListView.builder(

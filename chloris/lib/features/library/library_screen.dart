@@ -9,6 +9,7 @@ import '../../core/persist/kv_settings.dart';
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/app_icons.dart';
 import '../../app/widgets/absolutely_widgets.dart';
+import '../../app/widgets/app_motion.dart';
 import '../../app/widgets/meow.dart';
 import '../book_detail/open_book.dart';
 import '../local/local_book_provider.dart';
@@ -234,19 +235,22 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                                           mainAxisSpacing: 30,
                                         ),
                                     itemCount: items.length,
-                                    itemBuilder: (context, i) => _BookCard(
-                                      book: items[i],
-                                      source: _coverSource(items[i], sources),
-                                      progress: progLine(items[i]),
-                                      selectMode: _selectMode,
-                                      selected: _selected.contains(
-                                        items[i].bookUrl,
+                                    itemBuilder: (context, i) => AppStagger(
+                                      index: i,
+                                      child: _BookCard(
+                                        book: items[i],
+                                        source: _coverSource(items[i], sources),
+                                        progress: progLine(items[i]),
+                                        selectMode: _selectMode,
+                                        selected: _selected.contains(
+                                          items[i].bookUrl,
+                                        ),
+                                        onTap: () => _onBookTap(items[i]),
+                                        onSelect: () =>
+                                            _toggleSelect(items[i].bookUrl),
+                                        onLongPress: () =>
+                                            _onBookLongPress(items[i]),
                                       ),
-                                      onTap: () => _onBookTap(items[i]),
-                                      onSelect: () =>
-                                          _toggleSelect(items[i].bookUrl),
-                                      onLongPress: () =>
-                                          _onBookLongPress(items[i]),
                                     ),
                                   )
                                 : ListView.separated(
@@ -256,82 +260,85 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                                     itemBuilder: (context, i) {
                                       final book = items[i];
                                       final pl = progLine(book);
-                                      return InkWell(
-                                        onTap: () => _onBookTap(book),
-                                        onLongPress: () =>
-                                            _onBookLongPress(book),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            color: c.panel,
-                                            border: Border.all(color: c.line),
-                                            borderRadius: BorderRadius.circular(
-                                              3,
+                                      return AppStagger(
+                                        index: i,
+                                        child: InkWell(
+                                          onTap: () => _onBookTap(book),
+                                          onLongPress: () =>
+                                              _onBookLongPress(book),
+                                          child: Container(
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color: c.panel,
+                                              border: Border.all(color: c.line),
+                                              borderRadius:
+                                                  BorderRadius.circular(3),
                                             ),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              SizedBox(
-                                                width: 46,
-                                                child: MeowCover(
-                                                  title: book.name,
-                                                  imageUrl: book.coverUrl,
-                                                  height: 46,
-                                                  source: _coverSource(
-                                                    book,
-                                                    sources,
+                                            child: Row(
+                                              children: [
+                                                SizedBox(
+                                                  width: 46,
+                                                  child: MeowCover(
+                                                    title: book.name,
+                                                    imageUrl: book.coverUrl,
+                                                    height: 46,
+                                                    source: _coverSource(
+                                                      book,
+                                                      sources,
+                                                    ),
+                                                    book: book,
                                                   ),
-                                                  book: book,
                                                 ),
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      book.name,
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        color: c.ink,
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        book.name,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          color: c.ink,
+                                                        ),
                                                       ),
-                                                    ),
-                                                    const SizedBox(height: 3),
-                                                    Text(
-                                                      pl ?? book.author,
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                        color: c.muted,
+                                                      const SizedBox(height: 3),
+                                                      Text(
+                                                        pl ?? book.author,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: TextStyle(
+                                                          fontSize: 12,
+                                                          color: c.muted,
+                                                        ),
                                                       ),
-                                                    ),
-                                                  ],
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                              if (_selectMode)
-                                                Icon(
-                                                  _selected.contains(
-                                                        book.bookUrl,
-                                                      )
-                                                      ? AppIcons.checkCircle
-                                                      : Icons
-                                                            .radio_button_unchecked,
-                                                  color:
-                                                      _selected.contains(
-                                                        book.bookUrl,
-                                                      )
-                                                      ? c.accent
-                                                      : c.muted,
-                                                  size: 18,
-                                                ),
-                                            ],
+                                                if (_selectMode)
+                                                  Icon(
+                                                    _selected.contains(
+                                                          book.bookUrl,
+                                                        )
+                                                        ? AppIcons.checkCircle
+                                                        : Icons
+                                                              .radio_button_unchecked,
+                                                    color:
+                                                        _selected.contains(
+                                                          book.bookUrl,
+                                                        )
+                                                        ? c.accent
+                                                        : c.muted,
+                                                    size: 18,
+                                                  ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       );

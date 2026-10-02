@@ -16,8 +16,8 @@ class _SettingsHome extends ConsumerWidget {
           children: [
             ListTile(
               leading: const AppIcon(AppIcons.album),
-              title: const Text('音乐播放器'),
-              subtitle: const Text('音频解析、本地音乐与同步歌词'),
+              title: const Text('音频播放器'),
+              subtitle: const Text('有声书、本地音频与同步字幕'),
               onTap: () => context.go('/music'),
             ),
             ListTile(
@@ -284,17 +284,44 @@ class _SettingsHome extends ConsumerWidget {
                     .setBool('debugVerbose', v);
               },
             ),
-            SwitchListTile(
-              secondary: const AppIcon(AppIcons.remove),
-              title: const Text('减少动画'),
-              subtitle: const Text('关闭主题过渡；系统减少动态效果也会生效'),
-              value: ref.watch(reduceMotionProvider),
-              onChanged: (v) {
-                ref.read(reduceMotionProvider.notifier).state = v;
-                ref
-                    .read(settingsWriteUseCaseProvider)
-                    .setBool('reduceMotion', v);
-              },
+            ListTile(
+              leading: const AppIcon(AppIcons.remove),
+              title: const Text('动画'),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: AppTokens.space8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('系统关闭动画时（如 Windows「显示动画」），跟随系统会停用全部动效'),
+                    const SizedBox(height: AppTokens.space8),
+                    SegmentedButton<String>(
+                      showSelectedIcon: false,
+                      segments: const [
+                        ButtonSegment(value: 'system', label: Text('跟随系统')),
+                        ButtonSegment(value: 'force', label: Text('始终播放')),
+                        ButtonSegment(value: 'reduce', label: Text('减少')),
+                      ],
+                      selected: {
+                        ref.watch(reduceMotionProvider)
+                            ? 'reduce'
+                            : ref.watch(forceMotionProvider)
+                            ? 'force'
+                            : 'system',
+                      },
+                      onSelectionChanged: (v) {
+                        final mode = v.single;
+                        ref.read(reduceMotionProvider.notifier).state =
+                            mode == 'reduce';
+                        ref.read(forceMotionProvider.notifier).state =
+                            mode == 'force';
+                        final w = ref.read(settingsWriteUseCaseProvider);
+                        w.setBool('reduceMotion', mode == 'reduce');
+                        w.setBool('forceMotion', mode == 'force');
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
             ListTile(
               leading: const AppIcon(AppIcons.tune),

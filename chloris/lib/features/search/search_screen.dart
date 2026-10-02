@@ -8,6 +8,8 @@ import 'package:chloris_engine/chloris_engine.dart';
 import '../../core/persist/kv_settings.dart';
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/app_icons.dart';
+import '../../app/illustration/sketch.dart';
+import '../../app/widgets/app_motion.dart';
 import '../../app/widgets/meow.dart';
 import '../../core/search/incremental_merge.dart';
 import 'search_provider.dart';
@@ -220,9 +222,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               onPressed: () => ref
                                   .read(searchControllerProvider.notifier)
                                   .loadMore(),
-                              child: Text(
-                                '加载更多 · 第${session.page + 1}页',
-                              ),
+                              child: Text('加载更多 · 第${session.page + 1}页'),
                             ),
                           ),
                       ],

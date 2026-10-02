@@ -29,7 +29,7 @@ class MusicDiscovery extends ConsumerWidget {
             .toList();
         if (audio.isEmpty) {
           return _empty(
-            const Center(child: Text('暂无启用的音乐书源，请在“我的 → 书源”导入音频书源')),
+            const Center(child: Text('暂无启用的音频书源，请在“我的 → 书源”导入音频书源')),
           );
         }
         final colors = Theme.of(context).colorScheme;
@@ -304,7 +304,7 @@ class _MusicSearchState extends ConsumerState<MusicSearchScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('搜索音乐'),
+      title: const Text('搜索音频'),
       actions: [
         if (_running)
           IconButton(
@@ -322,7 +322,7 @@ class _MusicSearchState extends ConsumerState<MusicSearchScreen> {
             controller: _query,
             onSubmitted: (_) => _run(),
             decoration: InputDecoration(
-              labelText: '曲名、歌手或专辑',
+              labelText: '标题、主播或专辑',
               suffixIcon: IconButton(
                 tooltip: '搜索',
                 onPressed: _run,
@@ -451,7 +451,7 @@ class _MusicSourceExploreState extends ConsumerState<MusicSourceExplore> {
         if (_kinds.isEmpty)
           const Padding(
             padding: EdgeInsets.all(24),
-            child: Text('此书源未提供发现分类，请使用音乐搜索'),
+            child: Text('此书源未提供发现分类，请使用音频搜索'),
           ),
         if (_error != null) Text(_error!),
         Expanded(
@@ -629,7 +629,7 @@ class _MusicAlbumState extends ConsumerState<MusicAlbumScreen> {
                                 () =>
                                     choosePlaylist(context, services, _tracks),
                               ),
-                              child: const Text('加入歌单'),
+                              child: const Text('加入播放列表'),
                             ),
                             TextButton(
                               onPressed: () => musicAction(

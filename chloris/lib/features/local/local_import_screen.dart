@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/app_theme.dart';
 import '../../app/widgets/follow_route.dart';
+import '../../app/illustration/sketch.dart';
 import '../../app/widgets/meow.dart';
 import 'local_book_provider.dart';
 import 'local_book_service.dart';
@@ -132,7 +133,8 @@ class _LocalImportScreenState extends ConsumerState<LocalImportScreen> {
               ),
             Expanded(
               child: shelf.isEmpty
-                  ? const MeowEmpty(
+                  ? MeowEmpty(
+                      illustration: SketchArt.bookStack,
                       title: '还没有本地书',
                       body: '选择 TXT、EPUB 或 PDF 文件导入到书架。',
                     )

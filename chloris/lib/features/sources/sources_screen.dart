@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 
 import '../../app/theme/app_theme.dart';
+import '../../app/widgets/app_motion.dart';
 import '../../app/widgets/meow.dart';
 import 'qr_scanner_screen.dart';
 import 'source_debug_screen.dart';
@@ -212,173 +213,179 @@ class SourcesScreen extends ConsumerWidget {
                     itemCount: shown.length,
                     itemBuilder: (context, i) {
                       final s = shown[i];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 2),
-                        child: InkWell(
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => SourceEditScreen(source: s),
-                            ),
-                          ),
-                          onLongPress: () async {
-                            final ok = await showDialog<bool>(
-                              context: context,
-                              builder: (ctx) => AlertDialog(
-                                title: const Text('删除书源？'),
-                                content: Text(s.bookSourceName),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(ctx, false),
-                                    child: const Text('取消'),
-                                  ),
-                                  FilledButton(
-                                    onPressed: () => Navigator.pop(ctx, true),
-                                    child: const Text('删除'),
-                                  ),
-                                ],
+                      return AppStagger(
+                        index: i,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: InkWell(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => SourceEditScreen(source: s),
                               ),
-                            );
-                            if (ok == true) {
-                              ref
-                                  .read(importedSourcesProvider.notifier)
-                                  .remove(s.bookSourceUrl);
-                              ref
-                                  .read(sourceEnabledOverrideProvider.notifier)
-                                  .setEnabled(s.bookSourceUrl, false);
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 11,
                             ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 7,
-                                  height: 7,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: s.enabled ? c.accent : c.muted,
-                                  ),
+                            onLongPress: () async {
+                              final ok = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text('删除书源？'),
+                                  content: Text(s.bookSourceName),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(ctx, false),
+                                      child: const Text('取消'),
+                                    ),
+                                    FilledButton(
+                                      onPressed: () => Navigator.pop(ctx, true),
+                                      child: const Text('删除'),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 13),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              s.bookSourceName,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w500,
-                                                color: c.ink,
-                                              ),
-                                            ),
-                                          ),
-                                          if (s.bookSourceType !=
-                                              BookSourceType.text)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                left: 6,
-                                              ),
+                              );
+                              if (ok == true) {
+                                ref
+                                    .read(importedSourcesProvider.notifier)
+                                    .remove(s.bookSourceUrl);
+                                ref
+                                    .read(
+                                      sourceEnabledOverrideProvider.notifier,
+                                    )
+                                    .setEnabled(s.bookSourceUrl, false);
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 11,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 7,
+                                    height: 7,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: s.enabled ? c.accent : c.muted,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 13),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
                                               child: Text(
-                                                BookSourceType.label(
-                                                  s.bookSourceType,
-                                                ),
+                                                s.bookSourceName,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
-                                                  fontSize: 10,
-                                                  color: c.accent,
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: c.ink,
                                                 ),
                                               ),
                                             ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        (s.bookSourceGroup ?? '未分组') +
-                                            ' · ' +
-                                            s.bookSourceUrl,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          color: c.muted,
-                                          fontFamily: 'Menlo',
+                                            if (s.bookSourceType !=
+                                                BookSourceType.text)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  left: 6,
+                                                ),
+                                                child: Text(
+                                                  BookSourceType.label(
+                                                    s.bookSourceType,
+                                                  ),
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                    color: c.accent,
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          (s.bookSourceGroup ?? '未分组') +
+                                              ' · ' +
+                                              s.bookSourceUrl,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: c.muted,
+                                            fontFamily: 'Menlo',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (s.hasLoginUrl)
+                                    IconButton(
+                                      tooltip: '登录',
+                                      icon: const Icon(Icons.login, size: 20),
+                                      onPressed: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              SourceLoginScreen(source: s),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                                if (s.hasLoginUrl)
+                                    ),
                                   IconButton(
-                                    tooltip: '登录',
-                                    icon: const Icon(Icons.login, size: 20),
+                                    tooltip: '复制此源 JSON',
+                                    icon: const Icon(Icons.copy, size: 18),
+                                    onPressed: () async {
+                                      final json = const JsonEncoder.withIndent(
+                                        '  ',
+                                      ).convert(s.toJson());
+                                      await Clipboard.setData(
+                                        ClipboardData(text: json),
+                                      );
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('已复制该书源 JSON'),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                  IconButton(
+                                    tooltip: '调试',
+                                    icon: const Icon(
+                                      Icons.bug_report_outlined,
+                                      size: 20,
+                                    ),
                                     onPressed: () => Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (_) =>
-                                            SourceLoginScreen(source: s),
+                                            SourceDebugScreen(source: s),
                                       ),
                                     ),
                                   ),
-                                IconButton(
-                                  tooltip: '复制此源 JSON',
-                                  icon: const Icon(Icons.copy, size: 18),
-                                  onPressed: () async {
-                                    final json = const JsonEncoder.withIndent(
-                                      '  ',
-                                    ).convert(s.toJson());
-                                    await Clipboard.setData(
-                                      ClipboardData(text: json),
-                                    );
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('已复制该书源 JSON'),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                ),
-                                IconButton(
-                                  tooltip: '调试',
-                                  icon: const Icon(
-                                    Icons.bug_report_outlined,
-                                    size: 20,
+                                  Switch(
+                                    value: s.enabled,
+                                    onChanged: (v) {
+                                      ref
+                                          .read(
+                                            sourceEnabledOverrideProvider
+                                                .notifier,
+                                          )
+                                          .setEnabled(s.bookSourceUrl, v);
+                                    },
                                   ),
-                                  onPressed: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          SourceDebugScreen(source: s),
-                                    ),
-                                  ),
-                                ),
-                                Switch(
-                                  value: s.enabled,
-                                  onChanged: (v) {
-                                    ref
-                                        .read(
-                                          sourceEnabledOverrideProvider
-                                              .notifier,
-                                        )
-                                        .setEnabled(s.bookSourceUrl, v);
-                                  },
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),

@@ -68,6 +68,7 @@ class _MergedListState extends State<_MergedList> {
           .toSet();
       final proxyDown = errors.any((e) => e.contains('代理') || e.contains('跨域'));
       return MeowEmpty(
+        illustration: proxyDown ? SketchArt.offline : SketchArt.search,
         title: proxyDown ? '搜索代理未启动' : '暂无命中',
         body: proxyDown
             ? '当前页面没有 /proxy/http，书源请求被浏览器拦住。请用带代理的地址打开。'
@@ -82,7 +83,10 @@ class _MergedListState extends State<_MergedList> {
       separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, i) {
         final (source, b) = items[i];
-        return _BookTile(source: source, book: b);
+        return AppStagger(
+          index: i,
+          child: _BookTile(source: source, book: b),
+        );
       },
     );
   }
@@ -120,7 +124,11 @@ class _BySourceList extends StatelessWidget {
             .toList()
           ..sort((a, b) => _best(b).compareTo(_best(a)));
     if (ok.isEmpty) {
-      return const MeowEmpty(title: '暂无命中', body: '仍在搜索或换个关键词。');
+      return MeowEmpty(
+        illustration: SketchArt.search,
+        title: '暂无命中',
+        body: '仍在搜索或换个关键词。',
+      );
     }
     return ListView.builder(
       physics: const ClampingScrollPhysics(),
@@ -310,7 +318,8 @@ class _History extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final hist = ref.watch(searchHistoryProvider);
     if (hist.isEmpty) {
-      return const MeowEmpty(
+      return MeowEmpty(
+        illustration: SketchArt.search,
         title: '从多个书源并发搜索',
         body: '输入书名或作者，回车即搜。结果边搜边出；点结果直接续读，长按加入书架。',
       );

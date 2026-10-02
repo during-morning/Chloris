@@ -12,6 +12,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'app/app.dart';
+import 'app/illustration/sketch.dart';
 import 'app/widgets/startup_shell.dart';
 import 'app/l10n/locale_provider.dart';
 import 'app/theme/theme_provider.dart';
@@ -32,6 +33,9 @@ Future<void> main() async {
   // Open SQLite after the first frame so it is ready by the time shelf/cache
   // providers need it, without delaying the bootstrap UI.
   unawaited(AppDb.open());
+  // Parse the hand-drawn illustration set off the critical path so empty
+  // states and navigation glyphs paint on their first frame.
+  unawaited(SketchArt.preloadAll().catchError((_) {}));
   FlutterError.onError = (details) {
     DebugLog.error('flutter', details.exceptionAsString());
     FlutterError.presentError(details);
@@ -140,6 +144,7 @@ Future<void> main() async {
   final lang = prefs.getString('locale') ?? 'zh';
   final textScale = prefs.getDouble('uiTextScale') ?? 1.0;
   final reduceMotion = prefs.getBool('reduceMotion') ?? false;
+  final forceMotion = prefs.getBool('forceMotion') ?? false;
   final highContrast = prefs.getBool('highContrast') ?? false;
   final boldText = prefs.getBool('boldText') ?? false;
   final debugVerbose = prefs.getBool('debugVerbose') ?? false;
@@ -163,14 +168,12 @@ Future<void> main() async {
     await prefs.setInt('downloadPool', 8);
   }
   downloadPool = downloadPool.clamp(2, kIsWeb ? 16 : 128).toInt();
-  final searchHostCap = (prefs.getInt('searchHostCap') ?? 2).clamp(
-    0,
-    kIsWeb ? 64 : 128,
-  ).toInt();
-  final downloadHostCap = (prefs.getInt('downloadHostCap') ?? 3).clamp(
-    1,
-    kIsWeb ? 16 : 128,
-  ).toInt();
+  final searchHostCap = (prefs.getInt('searchHostCap') ?? 2)
+      .clamp(0, kIsWeb ? 64 : 128)
+      .toInt();
+  final downloadHostCap = (prefs.getInt('downloadHostCap') ?? 3)
+      .clamp(1, kIsWeb ? 16 : 128)
+      .toInt();
   final userAgent = prefs.getString('userAgent') ?? '';
   EngineLimits.apply(
     debugVerbose: debugVerbose,
@@ -211,6 +214,7 @@ Future<void> main() async {
         localeProvider.overrideWith((ref) => lang),
         uiTextScaleProvider.overrideWith((ref) => textScale),
         reduceMotionProvider.overrideWith((ref) => reduceMotion),
+        forceMotionProvider.overrideWith((ref) => forceMotion),
         highContrastProvider.overrideWith((ref) => highContrast),
         boldTextProvider.overrideWith((ref) => boldText),
         debugVerboseProvider.overrideWith((ref) => debugVerbose),

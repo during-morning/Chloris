@@ -124,7 +124,7 @@ void main() {
     await tester.pump();
     expect(find.text('解析并播放'), findsOneWidget);
     expect(find.byTooltip('播放队列'), findsOneWidget);
-    for (final removed in ['发现', '曲库', '歌单', '下载', '音乐设置']) {
+    for (final removed in ['发现', '音频库', '播放列表', '下载', '音频设置']) {
       expect(find.text(removed), findsNothing);
     }
     await tester.pumpWidget(const SizedBox());

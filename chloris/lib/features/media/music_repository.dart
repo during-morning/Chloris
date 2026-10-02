@@ -18,7 +18,7 @@ class MusicRepository extends ChangeNotifier {
   AppDatabase? _database;
   Future<AppDatabase> get database async {
     final db = _database ??= await AppDb.open();
-    if (db == null) throw StateError('音乐数据库无法打开，请检查存储权限');
+    if (db == null) throw StateError('音频数据库无法打开，请检查存储权限');
     return db;
   }
 
@@ -148,7 +148,7 @@ class MusicRepository extends ChangeNotifier {
           )
           .toList();
   Future<String> createPlaylist(String name) async {
-    if (name.trim().isEmpty) throw const FormatException('请输入歌单名称');
+    if (name.trim().isEmpty) throw const FormatException('请输入播放列表名称');
     final id = 'playlist-${DateTime.now().microsecondsSinceEpoch}';
     await _execute(
       'INSERT INTO music_playlists(id,name,updated) VALUES(?,?,?)',
@@ -159,7 +159,7 @@ class MusicRepository extends ChangeNotifier {
   }
 
   Future<void> renamePlaylist(String id, String name, {String? cover}) async {
-    if (name.trim().isEmpty) throw const FormatException('请输入歌单名称');
+    if (name.trim().isEmpty) throw const FormatException('请输入播放列表名称');
     await _execute(
       'UPDATE music_playlists SET name=?,cover=COALESCE(?,cover),updated=? WHERE id=?',
       [name.trim(), cover, _now, id],

@@ -152,7 +152,6 @@ abstract final class AppIcons {
     libraryPair,
     searchPair,
     explorePair,
-    AppIconPair(album, albumFilled),
     personPair,
   ];
 

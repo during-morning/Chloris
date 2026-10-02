@@ -15,7 +15,7 @@ import '../features/settings/settings_screen.dart';
 import '../features/sources/sources_screen.dart';
 import 'route_args.dart';
 
-const _homePaths = ['/library', '/search', '/explore', '/music', '/settings'];
+const _homePaths = ['/library', '/search', '/explore', '/settings'];
 const bookDetailRoute = '/book/detail';
 const readerRoute = '/reader';
 const readerTocRoute = '/reader/toc';

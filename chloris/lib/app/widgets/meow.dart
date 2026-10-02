@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
 import '../theme/app_icons.dart';
 import '../theme/app_theme.dart';
+import '../illustration/sketch.dart';
 import 'app_motion.dart';
 export 'meow_cover.dart';
 
@@ -57,6 +58,16 @@ class MeowPage extends StatelessWidget {
     final measured = ui != AppUiStyle.classic;
     final maxWidth = style?.contentMaxWidth ?? AppTokens.maxListWidth;
     final canPop = showBackButton ?? Navigator.of(context).canPop();
+
+    // Absolutely: the masthead is set line by line — eyebrow, title, then
+    // subtitle — each a beat after the last.
+    Widget cascade(int step, Widget child) => ui == AppUiStyle.absolutely
+        ? AppEntrance(
+            delay: Duration(milliseconds: 60 * step),
+            offset: const Offset(0, .25),
+            child: child,
+          )
+        : child;
 
     // Header sits in a Column, so it has unbounded height: constrain the
     // width only and let it shrink-wrap vertically.
@@ -227,25 +238,31 @@ class MeowPage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               if (eyebrow.isNotEmpty)
-                                Text(
-                                  mono
-                                      ? '> ${eyebrow.toLowerCase()}'
-                                      // Absolutely keeps the eyebrow in natural
-                                      // case — no wide-tracked uppercase.
-                                      : ui == AppUiStyle.absolutely
-                                      ? eyebrow
-                                      : eyebrow.toUpperCase(),
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: mono
-                                        ? cs.onSurface
-                                        : cs.onSurfaceVariant,
+                                cascade(
+                                  0,
+                                  Text(
+                                    mono
+                                        ? '> ${eyebrow.toLowerCase()}'
+                                        // Absolutely keeps the eyebrow in natural
+                                        // case — no wide-tracked uppercase.
+                                        : ui == AppUiStyle.absolutely
+                                        ? eyebrow
+                                        : eyebrow.toUpperCase(),
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: mono
+                                          ? cs.onSurface
+                                          : cs.onSurfaceVariant,
+                                    ),
                                   ),
                                 ),
                               if (eyebrow.isNotEmpty)
                                 const SizedBox(height: AppTokens.space6),
-                              Text(
-                                mono ? '[ $title ]' : title,
-                                style: theme.textTheme.headlineMedium,
+                              cascade(
+                                1,
+                                Text(
+                                  mono ? '[ $title ]' : title,
+                                  style: theme.textTheme.headlineMedium,
+                                ),
                               ),
                               if (subtitle != null) ...[
                                 SizedBox(
@@ -253,20 +270,24 @@ class MeowPage extends StatelessWidget {
                                       ? AppTokens.space8
                                       : AppTokens.space6,
                                 ),
-                                ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: ui == AppUiStyle.absolutely
-                                        ? 460
-                                        : 560,
-                                  ),
-                                  child: Text(
-                                    subtitle!,
-                                    // Absolutely: editorial subtitles are serif.
-                                    style: ui == AppUiStyle.absolutely
-                                        ? AppTheme.absolutelySubtitle(theme)
-                                        : theme.textTheme.bodyMedium?.copyWith(
-                                            color: cs.onSurfaceVariant,
-                                          ),
+                                cascade(
+                                  2,
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth: ui == AppUiStyle.absolutely
+                                          ? 460
+                                          : 560,
+                                    ),
+                                    child: Text(
+                                      subtitle!,
+                                      // Absolutely: editorial subtitles are serif.
+                                      style: ui == AppUiStyle.absolutely
+                                          ? AppTheme.absolutelySubtitle(theme)
+                                          : theme.textTheme.bodyMedium
+                                                ?.copyWith(
+                                                  color: cs.onSurfaceVariant,
+                                                ),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -306,7 +327,9 @@ class MeowPage extends StatelessWidget {
           ),
           Expanded(
             child: AppEntrance(
-              delay: const Duration(milliseconds: 55),
+              delay: Duration(
+                milliseconds: ui == AppUiStyle.absolutely ? 180 : 55,
+              ),
               child: bodyBox(child),
             ),
           ),
@@ -390,19 +413,32 @@ class MeowRule extends StatelessWidget {
         child: Container(height: AppTokens.hairline, color: cs.outlineVariant),
       );
     }
+    final reduce = !AppMotion.enabled(context);
+    // The rule is ruled in once, left to right, when the page opens.
     return Padding(
       padding: EdgeInsets.only(left: indent),
-      child: Row(
-        children: [
-          Container(width: 64, height: 2, color: cs.onSurface),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Container(
-              height: AppTokens.hairline,
-              color: cs.outlineVariant,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: reduce ? 1 : 0, end: 1),
+        duration: reduce ? Duration.zero : AppTokens.durationDraw,
+        curve: AppTokens.curveEmphasis,
+        builder: (context, t, _) => Row(
+          children: [
+            Container(width: 64 * t, height: 2, color: cs.onSurface),
+            SizedBox(width: 8 * t),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: FractionallySizedBox(
+                  widthFactor: ((t - .2) / .8).clamp(0.0, 1.0),
+                  child: Container(
+                    height: AppTokens.hairline,
+                    color: cs.outlineVariant,
+                  ),
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -815,6 +851,7 @@ class MeowEmpty extends StatelessWidget {
     this.action,
     this.mark = '◌',
     this.compact = false,
+    this.illustration,
   });
 
   final String title;
@@ -822,6 +859,10 @@ class MeowEmpty extends StatelessWidget {
   final Widget? action;
   final String mark;
   final bool compact;
+
+  /// Absolutely only: the pen-and-wash scene shown above the title. Defaults
+  /// to [SketchArt.library]; other styles keep their icon / text mark.
+  final SketchArt? illustration;
 
   @override
   Widget build(BuildContext context) {
@@ -833,6 +874,14 @@ class MeowEmpty extends StatelessWidget {
     final absolutely = ui == AppUiStyle.absolutely;
     // Monochrome: the empty state is the secondary ink level, never an accent.
     // Absolutely's hero grammar inverts that: the thin-line icon sits at full ink.
+    // Absolutely: the drawing goes down first, then the words settle in
+    // under it one line at a time.
+    Widget afterArt(int step, Widget child) => absolutely
+        ? AppEntrance(
+            delay: Duration(milliseconds: 260 + 90 * step),
+            child: child,
+          )
+        : child;
     final tone = absolutely
         ? cs.onSurface
         : ui == AppUiStyle.classic
@@ -847,6 +896,13 @@ class MeowEmpty extends StatelessWidget {
             Text(
               mark,
               style: theme.textTheme.displaySmall?.copyWith(color: tone),
+            )
+          else if (absolutely)
+            SketchIllustration(
+              illustration ?? SketchArt.library,
+              width: compact ? 80 : 104,
+              semanticLabel: title,
+              idle: true,
             )
           else
             AppIcon(
@@ -863,16 +919,19 @@ class MeowEmpty extends StatelessWidget {
                 ? AppTokens.space20
                 : AppTokens.space16,
           ),
-          Text(
-            mono ? '[ $title ]' : title,
-            // Absolutely: display serif, never bold — the official error /
-            // capabilities page hero.
-            style: compact
-                ? theme.textTheme.titleLarge
-                : absolutely
-                ? theme.textTheme.displaySmall
-                : theme.textTheme.titleLarge,
-            textAlign: TextAlign.center,
+          afterArt(
+            1,
+            Text(
+              mono ? '[ $title ]' : title,
+              // Absolutely: display serif, never bold — the official error /
+              // capabilities page hero.
+              style: compact
+                  ? theme.textTheme.titleLarge
+                  : absolutely
+                  ? theme.textTheme.displaySmall
+                  : theme.textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
           ),
           SizedBox(
             height: compact
@@ -881,17 +940,20 @@ class MeowEmpty extends StatelessWidget {
                 ? AppTokens.space12
                 : AppTokens.space8,
           ),
-          ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: compact ? 560 : 420),
-            child: Text(
-              body,
-              textAlign: TextAlign.center,
-              // Absolutely: the subtitle is serif too — muted and airy.
-              style: absolutely
-                  ? AppTheme.absolutelySubtitle(theme)
-                  : theme.textTheme.bodyMedium?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+          afterArt(
+            2,
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: compact ? 560 : 420),
+              child: Text(
+                body,
+                textAlign: TextAlign.center,
+                // Absolutely: the subtitle is serif too — muted and airy.
+                style: absolutely
+                    ? AppTheme.absolutelySubtitle(theme)
+                    : theme.textTheme.bodyMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+              ),
             ),
           ),
           if (action != null) ...[
@@ -902,7 +964,7 @@ class MeowEmpty extends StatelessWidget {
                   ? AppTokens.space24
                   : AppTokens.space20,
             ),
-            action!,
+            afterArt(3, action!),
           ],
         ],
       ),
@@ -1033,14 +1095,17 @@ class MeowLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mono =
-        Theme.of(context).extension<AppStyleExtension>()?.mono ?? false;
+    final ext = Theme.of(context).extension<AppStyleExtension>();
+    final mono = ext?.mono ?? false;
+    final absolutely = ext?.style == AppUiStyle.absolutely;
     return AppEntrance(
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (mono)
+            if (absolutely)
+              const SketchLoader(size: 40)
+            else if (mono)
               const SizedBox(
                 width: 22,
                 height: 22,
@@ -1052,7 +1117,9 @@ class MeowLoading extends StatelessWidget {
               const SizedBox(height: AppTokens.space12),
               Text(
                 mono ? '> ${label!}' : label!,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: absolutely
+                    ? AppTheme.absolutelySubtitle(Theme.of(context))
+                    : Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           ],
@@ -1072,7 +1139,9 @@ class MeowError extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final mono = theme.extension<AppStyleExtension>()?.mono ?? false;
+    final ext = theme.extension<AppStyleExtension>();
+    final mono = ext?.mono ?? false;
+    final absolutely = ext?.style == AppUiStyle.absolutely;
     return AppEntrance(
       child: Center(
         child: ConstrainedBox(
@@ -1080,7 +1149,9 @@ class MeowError extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (mono)
+              if (absolutely)
+                SketchIllustration(SketchArt.offline, width: 88, idle: true)
+              else if (mono)
                 Text(
                   '!',
                   style: theme.textTheme.displaySmall?.copyWith(
@@ -1089,8 +1160,14 @@ class MeowError extends StatelessWidget {
                 )
               else
                 AppIcon(AppIcons.error, size: mono ? 44 : 48, color: cs.error),
-              const SizedBox(height: AppTokens.space12),
-              Text(message, textAlign: TextAlign.center),
+              SizedBox(
+                height: absolutely ? AppTokens.space16 : AppTokens.space12,
+              ),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: absolutely ? AppTheme.absolutelySubtitle(theme) : null,
+              ),
               if (onRetry != null) ...[
                 const SizedBox(height: AppTokens.space16),
                 FilledButton(onPressed: onRetry, child: const Text('重试')),
@@ -1105,8 +1182,32 @@ class MeowError extends StatelessWidget {
 
 class MeowToast {
   static void show(BuildContext context, String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    final absolutely =
+        Theme.of(context).extension<AppStyleExtension>()?.style ==
+        AppUiStyle.absolutely;
+    if (!absolutely) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+      return;
+    }
+    // Absolutely: the theme already makes the toast an ink pill; hug the
+    // message and let the text rise in like a slip of paper.
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        width: _toastWidth(context, message),
+        content: AppEntrance(
+          offset: const Offset(0, .4),
+          child: Text(message, textAlign: TextAlign.center),
+        ),
+      ),
+    );
+  }
+
+  /// Hug short messages; cap long ones at the reading column.
+  static double? _toastWidth(BuildContext context, String message) {
+    final screen = MediaQuery.sizeOf(context).width;
+    if (screen < 480) return null;
+    return (message.characters.length * 15.0 + 64).clamp(180.0, 460.0);
   }
 }

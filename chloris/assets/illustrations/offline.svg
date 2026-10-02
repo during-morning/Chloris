@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#191919" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 出错 / 离线: a cloud, struck through. -->
+  <path d="M15 34.5 C10.6 34.5 7.5 31.4 7.5 27.4 C7.5 23.6 10.4 20.6 14.1 20.4 C15.4 14.6 20.2 10.5 26 10.5 C32.2 10.5 37.2 15.2 37.6 21.3 C40.7 22.2 42.5 24.8 42.5 27.9 C42.5 31.6 39.6 34.5 35.8 34.5 L15.6 34.5"/>
+  <path d="M12.5 9.5 L37.5 40"/>
+</svg>

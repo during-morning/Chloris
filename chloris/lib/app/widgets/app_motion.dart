@@ -2,7 +2,23 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
+
+/// Single source of truth for "may this widget animate?". The app already
+/// folds the in-app reduce-motion setting into [MediaQuery.disableAnimations]
+/// (see `app.dart`), so every motion widget only needs to ask here.
+abstract final class AppMotion {
+  static bool enabled(BuildContext context) =>
+      !MediaQuery.disableAnimationsOf(context);
+
+  /// Whether the Absolutely expressive layer (draw-on strokes, hover lift,
+  /// staggered entrances) applies. Classic and terminal keep their motion.
+  static bool expressive(BuildContext context) =>
+      enabled(context) &&
+      Theme.of(context).extension<AppStyleExtension>()?.style ==
+          AppUiStyle.absolutely;
+}
 
 /// A small, composable entrance animation used by page chrome and empty states.
 /// It automatically becomes a no-op for accessibility and e-ink modes.
@@ -13,12 +29,14 @@ class AppEntrance extends StatefulWidget {
     this.delay = Duration.zero,
     this.duration = AppTokens.durationMed,
     this.offset = const Offset(0, .035),
+    this.curve = AppTokens.curveIn,
   });
 
   final Widget child;
   final Duration delay;
   final Duration duration;
   final Offset offset;
+  final Curve curve;
 
   @override
   State<AppEntrance> createState() => _AppEntranceState();
@@ -39,7 +57,7 @@ class _AppEntranceState extends State<AppEntrance>
       duration: widget.duration,
       value: 0,
     );
-    _curve = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+    _curve = CurvedAnimation(parent: _controller, curve: widget.curve);
   }
 
   @override
@@ -86,6 +104,33 @@ class _AppEntranceState extends State<AppEntrance>
   }
 }
 
+/// Staggered entrance for list and grid items: item [index] enters
+/// [AppTokens.durationStagger] after the previous one. Only the Absolutely
+/// style staggers; other styles enter at once, as before. Only the first
+/// [AppTokens.staggerMaxItems] items animate, so rows built later by
+/// scrolling a lazy list appear immediately instead of fading in late.
+class AppStagger extends StatelessWidget {
+  const AppStagger({super.key, required this.index, required this.child});
+
+  final int index;
+  final Widget child;
+
+  static Duration delayFor(int index) =>
+      AppTokens.durationStagger * index.clamp(0, AppTokens.staggerMaxItems);
+
+  @override
+  Widget build(BuildContext context) {
+    if (index >= AppTokens.staggerMaxItems || !AppMotion.expressive(context)) {
+      return child;
+    }
+    return AppEntrance(
+      delay: delayFor(index),
+      offset: const Offset(0, .06),
+      child: child,
+    );
+  }
+}
+
 /// Subtle scale feedback for prominent actions, without changing semantics.
 class AppPressable extends StatefulWidget {
   const AppPressable({
@@ -93,11 +138,15 @@ class AppPressable extends StatefulWidget {
     required this.child,
     this.onTap,
     this.enabled = true,
+    this.lift = 1.5,
   });
 
   final Widget child;
   final VoidCallback? onTap;
   final bool enabled;
+
+  /// Hover lift in logical pixels (Absolutely only).
+  final double lift;
 
   @override
   State<AppPressable> createState() => _AppPressableState();
@@ -105,11 +154,16 @@ class AppPressable extends StatefulWidget {
 
 class _AppPressableState extends State<AppPressable> {
   bool _pressed = false;
+  bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
     final disabled = !widget.enabled;
-    final reduce = MediaQuery.disableAnimationsOf(context);
+    final reduce = !AppMotion.enabled(context);
+    // Absolutely: a pointer hover lifts the control by a hair — the paper
+    // card nudged by a finger. No shadow; the lift is positional only.
+    final lift =
+        !disabled && _hovered && !_pressed && AppMotion.expressive(context);
     final feedback = Listener(
       onPointerDown: disabled || reduce
           ? null
@@ -123,15 +177,28 @@ class _AppPressableState extends State<AppPressable> {
       child: AnimatedScale(
         scale: _pressed ? .975 : 1,
         duration: reduce ? Duration.zero : AppTokens.durationFast,
-        curve: Curves.easeOutCubic,
-        child: widget.child,
+        curve: AppTokens.curveIn,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(end: lift ? -widget.lift : 0),
+          duration: reduce ? Duration.zero : AppTokens.durationFast,
+          curve: AppTokens.curveIn,
+          builder: (context, dy, child) => dy == 0
+              ? child!
+              : Transform.translate(offset: Offset(0, dy), child: child),
+          child: widget.child,
+        ),
       ),
     );
+    final hoverable = MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: feedback,
+    );
     return widget.onTap == null
-        ? feedback
+        ? hoverable
         : GestureDetector(
             onTap: disabled ? null : widget.onTap,
-            child: feedback,
+            child: hoverable,
           );
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/persist/kv_settings.dart';
 
+import '../../app/illustration/sketch.dart';
 import '../../app/l10n/app_strings.dart';
 import '../../app/l10n/locale_provider.dart';
 import '../../app/theme/app_icons.dart';
@@ -15,16 +16,16 @@ class HomeShell extends ConsumerWidget {
 
   final StatefulNavigationShell navigationShell;
 
-  /// 书库 / 寻找 / 探索 / 音乐 / 我的。
+  /// 书库 / 寻找 / 探索 / 我的。
   ///
-  /// 书源与 RSS 仍保留独立路由和页面状态，但从「我的」进入，避免
-  /// 主导航被管理型页面占满。
-  static const _branch = <int>[0, 1, 2, 6, 5];
+  /// 书源、RSS 与音频播放器仍保留独立路由和页面状态，但从「我的」进入，
+  /// 避免主导航被管理型页面占满。
+  static const _branch = <int>[0, 1, 2, 5];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = AppStrings.of(ref.watch(localeProvider));
-    final labels = [s.library, s.search, s.explore, '音乐', s.settings];
+    final labels = [s.library, s.search, s.explore, s.settings];
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final ext = theme.extension<AppStyleExtension>();
@@ -38,13 +39,30 @@ class HomeShell extends ConsumerWidget {
         final reduce = MediaQuery.disableAnimationsOf(context);
         // Keep a single shell mounted: AnimatedSwitcher would duplicate the
         // branch Navigator global keys while outgoing and incoming shells overlap.
+        // Absolutely turns the tab like a page: a deeper fade plus a short
+        // rise. Other styles keep the light cross-fade.
+        final absolutely = ui == AppUiStyle.absolutely;
         final body = TweenAnimationBuilder<double>(
           key: ValueKey('transition-${navigationShell.currentIndex}'),
-          tween: Tween(begin: reduce ? 1 : .75, end: 1),
-          duration: reduce ? Duration.zero : AppTokens.durationMed,
-          curve: Curves.easeOutCubic,
-          builder: (context, value, child) =>
-              Opacity(opacity: value, child: child),
+          tween: Tween(begin: reduce ? 1 : (absolutely ? 0 : .75), end: 1),
+          duration: reduce
+              ? Duration.zero
+              : absolutely
+              ? AppTokens.durationSlow
+              : AppTokens.durationMed,
+          curve: AppTokens.curveIn,
+          builder: (context, value, child) {
+            final faded = Opacity(
+              opacity: absolutely ? .55 + .45 * value : value,
+              child: child,
+            );
+            // Always keep the Transform in the tree so the shell subtree is
+            // never reparented mid-animation.
+            return Transform.translate(
+              offset: Offset(0, absolutely ? 10 * (1 - value) : 0),
+              child: faded,
+            );
+          },
           child: navigationShell,
         );
         void go(int tabIndex) {
@@ -55,13 +73,7 @@ class HomeShell extends ConsumerWidget {
           KvSettings.ready().then(
             (p) => p.setString(
               'homeDestination',
-              const [
-                '/library',
-                '/search',
-                '/explore',
-                '/music',
-                '/settings',
-              ][tabIndex],
+              const ['/library', '/search', '/explore', '/settings'][tabIndex],
             ),
           );
         }
@@ -108,13 +120,15 @@ class HomeShell extends ConsumerWidget {
                   destinations: [
                     for (var i = 0; i < labels.length; i++)
                       NavigationRailDestination(
-                        icon: AppIcons.navPairs[i].styledAt(
+                        icon: _navIcon(
                           ext,
+                          i,
                           active: false,
                           color: cs.onSurfaceVariant,
                         ),
-                        selectedIcon: AppIcons.navPairs[i].styledAt(
+                        selectedIcon: _navIcon(
                           ext,
+                          i,
                           active: true,
                           color: cs.onSurface,
                         ),
@@ -147,11 +161,8 @@ class HomeShell extends ConsumerWidget {
                 destinations: [
                   for (var i = 0; i < labels.length; i++)
                     NavigationDestination(
-                      icon: AppIcons.navPairs[i].styledAt(ext, active: false),
-                      selectedIcon: AppIcons.navPairs[i].styledAt(
-                        ext,
-                        active: true,
-                      ),
+                      icon: _navIcon(ext, i, active: false),
+                      selectedIcon: _navIcon(ext, i, active: true),
                       label: labels[i],
                     ),
                 ],
@@ -163,9 +174,29 @@ class HomeShell extends ConsumerWidget {
     );
   }
 
+  /// Absolutely inks its navigation by hand: the selected glyph is written
+  /// in when its tab is chosen. Other styles keep the icon-font pairs.
+  static Widget _navIcon(
+    AppStyleExtension? ext,
+    int i, {
+    required bool active,
+    Color? color,
+  }) {
+    if (ext?.style == AppUiStyle.absolutely) {
+      return SketchIcon(
+        SketchArt.nav[i],
+        size: ext!.iconSize,
+        color: color,
+        animate: active,
+      );
+    }
+    return AppIcons.navPairs[i].styledAt(ext, active: active, color: color);
+  }
+
   int _tabIndex(int branch) {
     final i = _branch.indexOf(branch);
-    return i < 0 ? 4 : i;
+    // Branches without a tab (sources, RSS, audio) are reached from「我的」.
+    return i < 0 ? _branch.length - 1 : i;
   }
 }
 

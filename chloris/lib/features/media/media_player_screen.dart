@@ -10,7 +10,7 @@ import 'video_engine/video_engine_factory.dart';
 
 export 'media_resource.dart' show playableUrlFromContent;
 
-/// 章节音频与独立音乐页共用同一前台/系统媒体会话。
+/// 章节音频与独立音频页共用同一前台/系统媒体会话。
 class MediaPlayerView extends StatefulWidget {
   const MediaPlayerView({
     super.key,
@@ -259,7 +259,7 @@ class MusicPlayerPanel extends StatelessWidget {
                     spacing: narrow ? 0 : 8,
                     children: [
                       IconButton(
-                        tooltip: '上一首',
+                        tooltip: '上一集',
                         onPressed: controller.hasPrevious
                             ? controller.previous
                             : null,
@@ -289,7 +289,7 @@ class MusicPlayerPanel extends StatelessWidget {
                         icon: const AppIcon(AppIcons.forward10),
                       ),
                       IconButton(
-                        tooltip: '下一首',
+                        tooltip: '下一集',
                         onPressed: controller.hasNext ? controller.next : null,
                         icon: const AppIcon(AppIcons.skipNext),
                       ),

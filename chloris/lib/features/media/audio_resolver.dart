@@ -10,7 +10,7 @@ class AudioSelectionRequired implements Exception {
   const AudioSelectionRequired(this.choices);
   final List<String> choices;
   @override
-  String toString() => '请选择曲目、连续分段或音质';
+  String toString() => '请选择音轨、连续分段或音质';
 }
 
 /// A chapter string array is one continuous track. An arbitrary array requires
@@ -73,7 +73,7 @@ ResolvedAudio parseAudio(
     final tracks = nestedTracks(json);
     if (tracks is List) {
       final choices = [for (final t in tracks) jsonEncode(t)];
-      if (choices.isEmpty) throw const FormatException('音频曲目列表为空');
+      if (choices.isEmpty) throw const FormatException('音轨列表为空');
       throw AudioSelectionRequired(choices);
     }
     final extra = mergeMediaHeaders(headers, _map(json['headers']));
@@ -254,7 +254,7 @@ class AudioResolver {
         BookChapter? chapter;
         if (ref.origin == TrackOrigin.source) {
           source = await findSource(ref.sourceId ?? '');
-          if (source == null) throw const FormatException('音乐书源已删除，请重新导入书源');
+          if (source == null) throw const FormatException('音频书源已删除，请重新导入书源');
           book = Book.fromJson(ref.book!);
           chapter = BookChapter.fromJson(ref.chapter!);
           operation.onCancel(() => port.cancelSession(operation.id));

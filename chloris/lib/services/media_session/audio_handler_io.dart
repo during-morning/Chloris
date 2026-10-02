@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../features/media/music_controller.dart';
 
-/// 锁屏、通知栏与应用内界面操作同一个音乐控制器。
+/// 锁屏、通知栏与应用内界面操作同一个音频控制器。
 class CholrisAudioHandler extends BaseAudioHandler {
   CholrisAudioHandler({MusicController? controller})
     : _controller = controller ?? sharedMusicController() {
@@ -159,7 +159,7 @@ Future<void> initMediaSession() async {
       builder: () => candidate = CholrisAudioHandler(),
       config: const AudioServiceConfig(
         androidNotificationChannelId: 'com.during.chloris.channel',
-        androidNotificationChannelName: '音乐播放',
+        androidNotificationChannelName: '音频播放',
         androidNotificationOngoing: true,
       ),
     );

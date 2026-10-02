@@ -30,33 +30,36 @@ class _BookCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            children: [
-              MeowCover(
-                title: book.name,
-                imageUrl: book.coverUrl,
-                height: 180,
-                source: source,
-                book: book,
-              ),
-              if (selectMode)
-                Positioned(
-                  top: 7,
-                  right: 7,
-                  child: Container(
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: selected ? c.accentPale : c.panel,
-                      border: Border.all(
-                        color: selected ? c.accent : c.lineStrong,
-                        width: 2,
+          AppPressable(
+            lift: 4,
+            child: Stack(
+              children: [
+                MeowCover(
+                  title: book.name,
+                  imageUrl: book.coverUrl,
+                  height: 180,
+                  source: source,
+                  book: book,
+                ),
+                if (selectMode)
+                  Positioned(
+                    top: 7,
+                    right: 7,
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: selected ? c.accentPale : c.panel,
+                        border: Border.all(
+                          color: selected ? c.accent : c.lineStrong,
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 10),
           Text(

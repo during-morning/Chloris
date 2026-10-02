@@ -135,6 +135,7 @@ class _ChlorisAppState extends ConsumerState<ChlorisApp> {
         builder: (context, child) {
           final scale = ref.watch(uiTextScaleProvider).clamp(0.85, 1.4);
           final reduce = ref.watch(reduceMotionProvider);
+          final force = ref.watch(forceMotionProvider);
           final bold = ref.watch(boldTextProvider);
           final mq = MediaQuery.of(context);
           // Preserve the operating-system scale and multiply the app's
@@ -144,7 +145,7 @@ class _ChlorisAppState extends ConsumerState<ChlorisApp> {
           return MediaQuery(
             data: mq.copyWith(
               textScaler: TextScaler.linear(systemScale * scale),
-              disableAnimations: reduce || mq.disableAnimations,
+              disableAnimations: reduce || (!force && mq.disableAnimations),
               highContrast: hc || mq.highContrast,
               boldText: bold || mq.boldText,
             ),

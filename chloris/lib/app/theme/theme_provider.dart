@@ -45,6 +45,11 @@ final uiStyleProvider = StateProvider<AppUiStyle>(
 /// 界面文字缩放（无障碍）。阅读正文仍用阅读设置字号。
 final uiTextScaleProvider = StateProvider<double>((ref) => 1.0);
 final reduceMotionProvider = StateProvider<bool>((ref) => false);
+
+/// Plays motion even when the operating system asks for reduced motion
+/// (e.g. Windows「显示动画」off, which browsers report as
+/// `prefers-reduced-motion`). [reduceMotionProvider] still wins.
+final forceMotionProvider = StateProvider<bool>((ref) => false);
 final highContrastProvider = StateProvider<bool>((ref) => false);
 final boldTextProvider = StateProvider<bool>((ref) => false);
 final debugVerboseProvider = StateProvider<bool>((ref) => false);

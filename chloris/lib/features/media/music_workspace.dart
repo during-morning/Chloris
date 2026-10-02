@@ -303,14 +303,14 @@ class _MusicLandingState extends State<MusicLanding> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            subtitle: Text('${playlist.count} 首 · 播放歌单'),
+                            subtitle: Text('${playlist.count} 集 · 播放列表'),
                             onTap: () => musicAction(context, () async {
                               final tracks = await services.repository.tracks(
                                 playlist: playlist.id,
                                 limit: 10000,
                               );
                               if (tracks.isEmpty) {
-                                throw const FormatException('歌单暂无曲目，请先添加音乐');
+                                throw const FormatException('播放列表为空，请先添加音频');
                               }
                               await services.play(tracks);
                             }),
@@ -456,7 +456,7 @@ class _MusicLibraryState extends State<MusicLibrary> {
     final selected = await showDialog<String>(
       context: context,
       builder: (c) => SimpleDialog(
-        title: Text(artist ? '歌手' : '专辑'),
+        title: Text(artist ? '主播' : '专辑'),
         children: [
           SimpleDialogOption(
             onPressed: () => Navigator.pop(c, ''),
@@ -490,7 +490,7 @@ class _MusicLibraryState extends State<MusicLibrary> {
           controller: _search,
           decoration: const InputDecoration(
             prefixIcon: AppIcon(AppIcons.search),
-            labelText: '搜索曲名、歌手、专辑',
+            labelText: '搜索标题、主播、专辑',
           ),
           onChanged: (_) {
             _debounce?.cancel();
@@ -526,7 +526,7 @@ class _MusicLibraryState extends State<MusicLibrary> {
               },
               itemBuilder: (_) => const [
                 PopupMenuItem(value: 'title', child: Text('按名称')),
-                PopupMenuItem(value: 'artist', child: Text('按歌手')),
+                PopupMenuItem(value: 'artist', child: Text('按主播')),
                 PopupMenuItem(value: 'album', child: Text('按专辑')),
                 PopupMenuItem(value: 'recent', child: Text('最近添加')),
               ],
@@ -534,7 +534,7 @@ class _MusicLibraryState extends State<MusicLibrary> {
             ),
             TextButton(
               onPressed: () => _group(true),
-              child: Text(_artist ?? '歌手'),
+              child: Text(_artist ?? '主播'),
             ),
             TextButton(
               onPressed: () => _group(false),
@@ -546,7 +546,7 @@ class _MusicLibraryState extends State<MusicLibrary> {
                 itemBuilder: (_) => const [
                   PopupMenuItem(value: 'play', child: Text('播放所选')),
                   PopupMenuItem(value: 'queue', child: Text('加入队列')),
-                  PopupMenuItem(value: 'playlist', child: Text('加入歌单')),
+                  PopupMenuItem(value: 'playlist', child: Text('加入播放列表')),
                   PopupMenuItem(value: 'download', child: Text('下载所选')),
                   PopupMenuItem(value: 'delete', child: Text('移除所选')),
                 ],
@@ -561,7 +561,7 @@ class _MusicLibraryState extends State<MusicLibrary> {
       if (_error != null) Text(_error!),
       Expanded(
         child: _tracks.isEmpty && !_busy
-            ? const Center(child: Text('曲库为空，请导入音频或从音乐书源添加'))
+            ? const Center(child: Text('音频库为空，请导入音频或从音频书源添加'))
             : ListView.builder(
                 controller: _scroll,
                 itemCount: _tracks.length + (_busy ? 1 : 0),
@@ -651,7 +651,7 @@ Future<void> choosePlaylist(
   final id = await showDialog<String>(
     context: context,
     builder: (c) => SimpleDialog(
-      title: const Text('加入歌单'),
+      title: const Text('加入播放列表'),
       children: [
         for (final p in lists)
           SimpleDialogOption(
@@ -660,7 +660,7 @@ Future<void> choosePlaylist(
           ),
         SimpleDialogOption(
           onPressed: () => Navigator.pop(c, 'new'),
-          child: const Text('新建歌单'),
+          child: const Text('新建播放列表'),
         ),
       ],
     ),
@@ -668,7 +668,7 @@ Future<void> choosePlaylist(
   if (id == null || !context.mounted) return;
   var target = id;
   if (id == 'new') {
-    final name = await musicInput(context, '新建歌单');
+    final name = await musicInput(context, '新建播放列表');
     if (name == null) return;
     target = await services.repository.createPlaylist(name);
   }
@@ -687,7 +687,7 @@ class MusicTrackMenu extends StatelessWidget {
   final String? playlist;
   @override
   Widget build(BuildContext context) => PopupMenuButton<String>(
-    tooltip: '曲目操作',
+    tooltip: '音频操作',
     onSelected: (a) => musicAction(context, () async {
       switch (a) {
         case 'next':
@@ -721,16 +721,16 @@ class MusicTrackMenu extends StatelessWidget {
       }
     }),
     itemBuilder: (_) => [
-      const PopupMenuItem(value: 'next', child: Text('下一首播放')),
+      const PopupMenuItem(value: 'next', child: Text('下一集播放')),
       const PopupMenuItem(value: 'queue', child: Text('加入队列')),
       const PopupMenuItem(value: 'favorite', child: Text('收藏／取消收藏')),
-      const PopupMenuItem(value: 'playlist', child: Text('加入歌单')),
+      const PopupMenuItem(value: 'playlist', child: Text('加入播放列表')),
       const PopupMenuItem(value: 'download', child: Text('离线下载')),
       if (track.ref?.localKey != null)
         const PopupMenuItem(value: 'export', child: Text('导出音频')),
       PopupMenuItem(
         value: 'delete',
-        child: Text(playlist == null ? '移出曲库' : '移出歌单'),
+        child: Text(playlist == null ? '移出音频库' : '移出播放列表'),
       ),
     ],
   );
@@ -771,11 +771,11 @@ class _MusicPlaylistsState extends State<MusicPlaylists> {
         padding: const EdgeInsets.all(16),
         child: FilledButton.icon(
           onPressed: () => musicAction(context, () async {
-            final n = await musicInput(context, '新建歌单');
+            final n = await musicInput(context, '新建播放列表');
             if (n != null) await widget.services.repository.createPlaylist(n);
           }),
           icon: const Icon(Icons.add),
-          label: const Text('新建歌单'),
+          label: const Text('新建播放列表'),
         ),
       ),
       Expanded(
@@ -787,7 +787,7 @@ class _MusicPlaylistsState extends State<MusicPlaylists> {
               return const Center(child: CircularProgressIndicator());
             }
             if (s.data!.isEmpty) {
-              return const Center(child: Text('暂无歌单，创建歌单后可添加曲目'));
+              return const Center(child: Text('暂无播放列表，创建后可添加音频'));
             }
             return ListView.builder(
               itemCount: s.data!.length,
@@ -796,7 +796,7 @@ class _MusicPlaylistsState extends State<MusicPlaylists> {
                 return ListTile(
                   leading: MusicArtwork(url: p.cover),
                   title: Text(p.name),
-                  subtitle: Text('${p.count} 首'),
+                  subtitle: Text('${p.count} 集'),
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -868,11 +868,11 @@ class _MusicPlaylistsState extends State<MusicPlaylists> {
                       }
                     }),
                     itemBuilder: (_) => const [
-                      PopupMenuItem(value: 'reorder', child: Text('曲目排序')),
+                      PopupMenuItem(value: 'reorder', child: Text('调整顺序')),
                       PopupMenuItem(value: 'rename', child: Text('重命名')),
                       PopupMenuItem(value: 'cover', child: Text('编辑封面')),
-                      PopupMenuItem(value: 'export', child: Text('导出歌单')),
-                      PopupMenuItem(value: 'delete', child: Text('删除歌单')),
+                      PopupMenuItem(value: 'export', child: Text('导出播放列表')),
+                      PopupMenuItem(value: 'delete', child: Text('删除播放列表')),
                     ],
                   ),
                 );
@@ -892,7 +892,7 @@ class MusicDownloads extends StatelessWidget {
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: services.downloads,
     builder: (c, _) => services.downloads.tasks.isEmpty
-        ? const Center(child: Text('暂无下载，在曲目菜单中选择“离线下载”'))
+        ? const Center(child: Text('暂无下载，在音频菜单中选择“离线下载”'))
         : ListView.builder(
             itemCount: services.downloads.tasks.length,
             itemBuilder: (c, i) {
@@ -1037,7 +1037,7 @@ class MusicMiniPlayer extends ConsumerWidget {
                                         ? '播放失败，点击重试'
                                         : c.loading
                                         ? '解析／加载中…'
-                                        : c.current!.artist ?? '音乐',
+                                        : c.current!.artist ?? '音频',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -1054,7 +1054,7 @@ class MusicMiniPlayer extends ConsumerWidget {
                           ),
                         ),
                         IconButton(
-                          tooltip: '下一首',
+                          tooltip: '下一集',
                           onPressed: c.hasNext ? c.next : null,
                           icon: const AppIcon(AppIcons.skipNext),
                         ),
@@ -1092,7 +1092,7 @@ class MusicQueue extends StatelessWidget {
     builder: (context, _) => Column(
       children: [
         ListTile(
-          title: Text('播放队列 · ${controller.queue.length} 首'),
+          title: Text('播放队列 · ${controller.queue.length} 集'),
           trailing: TextButton(
             onPressed: controller.clearQueue,
             child: const Text('停止并清空'),
@@ -1255,7 +1255,7 @@ class _MusicFullPlayerState extends ConsumerState<MusicFullPlayer> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '这首音频还没有歌词',
+                '这段音频还没有字幕',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Colors.white.withValues(alpha: .88),
@@ -1264,7 +1264,7 @@ class _MusicFullPlayerState extends ConsumerState<MusicFullPlayer> {
               ),
               const SizedBox(height: 7),
               Text(
-                '歌词会在这里随播放进度滚动',
+                '字幕会在这里随播放进度滚动',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.white.withValues(alpha: .56),
@@ -1274,7 +1274,7 @@ class _MusicFullPlayerState extends ConsumerState<MusicFullPlayer> {
               TextButton.icon(
                 onPressed: () => _lyrics(services),
                 icon: const AppIcon(AppIcons.file, size: 18),
-                label: const Text('导入歌词'),
+                label: const Text('导入字幕'),
                 style: TextButton.styleFrom(foregroundColor: Colors.white),
               ),
             ],
@@ -1479,7 +1479,7 @@ class _MusicFullPlayerState extends ConsumerState<MusicFullPlayer> {
                   onPressed: canSeek ? () => c.skip(-15) : null,
                 ),
               iconButton(
-                label: '上一首',
+                label: '上一集',
                 icon: AppIcons.skipPrevious,
                 onPressed: c.hasPrevious ? c.previous : null,
               ),
@@ -1503,7 +1503,7 @@ class _MusicFullPlayerState extends ConsumerState<MusicFullPlayer> {
                 ),
               ),
               iconButton(
-                label: '下一首',
+                label: '下一集',
                 icon: AppIcons.skipNext,
                 onPressed: c.hasNext ? c.next : null,
               ),
@@ -1573,7 +1573,7 @@ class _MusicFullPlayerState extends ConsumerState<MusicFullPlayer> {
                     tooltip: switch (c.repeat) {
                       MusicRepeat.off => '顺序播放',
                       MusicRepeat.all => '列表循环',
-                      MusicRepeat.one => '单曲循环',
+                      MusicRepeat.one => '单集循环',
                     },
                     onPressed: c.cycleRepeat,
                     color: c.repeat == MusicRepeat.off
@@ -1646,7 +1646,7 @@ class _MusicFullPlayerState extends ConsumerState<MusicFullPlayer> {
         case 'offset':
           final value = await musicInput(
             context,
-            '歌词偏移（毫秒，正数延后）',
+            '字幕偏移（毫秒，正数延后）',
             value: '${c.lyricOffset}',
           );
           if (value != null) await s.offset(int.parse(value));
@@ -1698,7 +1698,7 @@ class _MusicFullPlayerState extends ConsumerState<MusicFullPlayer> {
             context,
             MaterialPageRoute(
               builder: (_) => Scaffold(
-                appBar: AppBar(title: const Text('歌词')),
+                appBar: AppBar(title: const Text('字幕')),
                 body: _lyricView(c),
               ),
             ),
@@ -1731,7 +1731,7 @@ class _MusicFullPlayerState extends ConsumerState<MusicFullPlayer> {
         case 'endTimer':
           c.stopAtEnd = true;
           c.setSleepTimer(null);
-          musicMessage(context, '当前曲目结束后停止');
+          musicMessage(context, '当前一集播完后停止');
         case 'info':
           if (!mounted) return;
           await showDialog<void>(
@@ -1861,19 +1861,19 @@ class _MusicFullPlayerState extends ConsumerState<MusicFullPlayer> {
                   onSelected: (a) => _menu(a, s),
                   itemBuilder: (_) => const [
                     PopupMenuItem(value: 'favorite', child: Text('收藏／取消收藏')),
-                    PopupMenuItem(value: 'playlist', child: Text('加入歌单')),
+                    PopupMenuItem(value: 'playlist', child: Text('加入播放列表')),
                     PopupMenuItem(value: 'download', child: Text('离线下载')),
-                    PopupMenuItem(value: 'lyrics', child: Text('导入歌词')),
-                    PopupMenuItem(value: 'offset', child: Text('歌词偏移')),
+                    PopupMenuItem(value: 'lyrics', child: Text('导入字幕')),
+                    PopupMenuItem(value: 'offset', child: Text('字幕偏移')),
                     PopupMenuItem(
                       value: 'bookSettings',
                       child: Text('音频书片头／片尾'),
                     ),
-                    PopupMenuItem(value: 'lyricStyle', child: Text('歌词显示设置')),
-                    PopupMenuItem(value: 'fullLyrics', child: Text('全屏歌词')),
-                    PopupMenuItem(value: 'exportLyrics', child: Text('导出歌词')),
+                    PopupMenuItem(value: 'lyricStyle', child: Text('字幕显示设置')),
+                    PopupMenuItem(value: 'fullLyrics', child: Text('全屏字幕')),
+                    PopupMenuItem(value: 'exportLyrics', child: Text('导出字幕')),
                     PopupMenuItem(value: 'customTimer', child: Text('自定义定时停止')),
-                    PopupMenuItem(value: 'endTimer', child: Text('当前曲目结束后停止')),
+                    PopupMenuItem(value: 'endTimer', child: Text('当前一集播完后停止')),
                     PopupMenuItem(value: 'retry', child: Text('重新解析')),
                     PopupMenuItem(value: 'info', child: Text('资源详情')),
                   ],
@@ -1959,12 +1959,12 @@ class _MusicFullPlayerState extends ConsumerState<MusicFullPlayer> {
         const SizedBox(height: 14),
         const Text('播放队列还是空的', style: TextStyle(color: Colors.white)),
         const SizedBox(height: 6),
-        const Text('从曲库、书源或本地文件选择音频'),
+        const Text('从音频库、书源或本地文件选择音频'),
         const SizedBox(height: 12),
         TextButton.icon(
           onPressed: () => Navigator.maybePop(context),
           icon: const AppIcon(AppIcons.back, size: 18),
-          label: const Text('返回音乐库'),
+          label: const Text('返回音频库'),
           style: TextButton.styleFrom(foregroundColor: Colors.white),
         ),
       ],
@@ -2174,7 +2174,7 @@ class _MusicResolveState extends ConsumerState<MusicResolveScreen> {
               SimpleDialogOption(
                 onPressed: () => Navigator.pop(c, selection.choices[i]),
                 child: Text(
-                  '曲目 ${i + 1}：${selection.choices[i]}',
+                  '音轨 ${i + 1}：${selection.choices[i]}',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -2268,7 +2268,7 @@ class _MusicResolveState extends ConsumerState<MusicResolveScreen> {
             ],
             onChanged: (i) => setState(() => _variant = i ?? 0),
           ),
-          Text(_resolved!.lyric == null ? '暂无歌词' : '已解析歌词'),
+          Text(_resolved!.lyric == null ? '暂无字幕' : '已解析字幕'),
           Wrap(
             spacing: 12,
             children: [
@@ -2294,7 +2294,7 @@ class MusicSettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(musicServicesProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('音乐设置')),
+      appBar: AppBar(title: const Text('音频设置')),
       body: AnimatedBuilder(
         animation: s.controller,
         builder: (c, _) => ListView(

@@ -8,6 +8,7 @@ import '../../core/persist/kv_settings.dart';
 
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/app_icons.dart';
+import '../../app/illustration/sketch.dart';
 import '../../app/widgets/meow.dart';
 import '../book_detail/open_book.dart';
 import 'explore_controller.dart';
@@ -153,7 +154,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
           error: (e, _) => Center(child: Text(_exploreError(e))),
           data: (list) {
             if (list.isEmpty) {
-              return const MeowEmpty(
+              return MeowEmpty(
+                illustration: SketchArt.explore,
                 title: '没有可发现的书源',
                 body: '在「书源」里启用带发现地址的书源。',
               );
@@ -268,6 +270,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                       ? const Center(child: CircularProgressIndicator())
                       : _books.isEmpty
                       ? MeowEmpty(
+                          illustration: SketchArt.explore,
                           title: '选择分类开始浏览',
                           body: '点上方书源和分类加载书籍（Web 经同源代理）。',
                           action: MeowPrimaryButton(

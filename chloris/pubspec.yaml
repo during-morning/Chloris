@@ -80,6 +80,7 @@ flutter:
     - assets/sources/default_rss_sources.json
     - assets/sources/default_txt_toc_rules.json
     - assets/brand/icon.png
+    - assets/illustrations/
 
   # Bundled so the Claude and terminal styles render their real typography
   # everywhere — including Flutter Web/CanvasKit, which keeps its own font
